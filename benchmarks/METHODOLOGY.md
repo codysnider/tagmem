@@ -22,7 +22,7 @@ Benchmark sets:
 
 - All runs executed inside `docker/docker-compose.yml`
 - GPU exposed via NVIDIA container runtime
-- Persistent XDG and dataset directories mounted from `/data/tagmem`
+- Persistent XDG and dataset directories mounted from `TAGMEM_DATA_ROOT` on the host.
 - Commands invoked through `just` wrappers and scripts in `scripts/cmd/`
 
 ## Commands Used
@@ -30,7 +30,7 @@ Benchmark sets:
 ### Prepare datasets
 
 ```bash
-cd /home/cody/tiered-memory
+cd /path/to/tagmem
 just datasets
 ```
 
@@ -82,7 +82,7 @@ TIERED_MEMORY_EMBED_MODEL=bge-base-en-v1.5 just bench-longmemeval
 - Source dataset:
   - HuggingFace `Salesforce/ConvoMem`
 - Retrieval during run:
-  - downloaded and cached automatically to `/data/tagmem/datasets/convomem_cache`
+  - downloaded and cached automatically to `${TAGMEM_DATA_ROOT}/datasets/convomem_cache`
 
 ## Embedded Runtime Details
 
@@ -90,7 +90,7 @@ TIERED_MEMORY_EMBED_MODEL=bge-base-en-v1.5 just bench-longmemeval
 - Default GPU model after evaluation: `bge-small-en-v1.5`
 - Execution provider: `CUDA`
 - Runtime library path pattern:
-  - `/data/tagmem/xdg/data/tagmem/models/<model>/runtime-cuda/libonnxruntime.so.1.24.1`
+  - `${TAGMEM_DATA_ROOT}/xdg/data/tagmem/models/<model>/runtime-cuda/libonnxruntime.so.1.24.1`
 
 ## Notes on Repeatability
 

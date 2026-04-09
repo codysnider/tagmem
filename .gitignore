@@ -1,7 +1,7 @@
 dist/
 coverage.out
-tagmem
-tiered-memory
+/tagmem
+/tiered-memory
 *~
 .idea/
 bench-results-comparison/

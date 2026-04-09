@@ -4,146 +4,69 @@
 
 # tagmem
 
-`tagmem` is a local Go binary for tagged, depth-aware memory storage and retrieval for LLM agents.
+`tagmem` is local memory storage and retrieval for LLM agents.
 
-## Reproduce Benchmarks
+It is built around a simple model:
 
-Run the full Docker/GPU benchmark suite with the recommended default model:
+- `entries` store verbatim text
+- `tags` are the primary way to organize and filter memory
+- `depth` indicates how close a memory should stay to the surface
+- `facts` store structured knowledge
+- `diary` stores agent-specific notes
 
-```bash
-cd /home/cody/tiered-memory && just datasets && just bench-suite
-```
+The system is local-first, retrieval-oriented, and designed to be usable through:
 
-Results are written to:
-
-```bash
-/data/tagmem/bench-results/
-```
-
-Publishable benchmark docs and copied raw JSON outputs live in:
-
-```bash
-benchmarks/
-```
-
-The model is intentionally plain:
-
-- `depth 0` for always-load identity, operating context, and critical facts
-- `depth 1..n` for progressively deeper background and archive material
-- one local data store per user, resolved through XDG directories
-- a terminal UI for browsing, filtering, and inspecting entries quickly
-
-## Current shape
-
-This first cut focuses on a solid local foundation instead of feature parity with MemPalace:
-
-- single binary
-- persistent local storage in `~/.local/share/tagmem/store.json`
-- persistent embedded vector index in `~/.local/share/tagmem/vector/`
-- config and cache roots resolved through standard XDG directories
-- CLI for `init`, `ingest`, `split`, `add`, `list`, `search`, `context`, `status`, `show`, `depths`, `paths`, `doctor`, `repair`, `mcp`, `bench`, and `tui`
-- TUI with depth and tag navigation, search, entry management, and detail inspection
-
-The system is verbatim-first:
-
-- entries are stored as raw text chunks
-- semantic search runs over the original text
-- there is no lossy shorthand or compression dialect in the storage path
-
-Search is semantic through an embedded local vector index powered by `chromem-go`.
-
-Embedding backend is configurable via environment variables, so you can switch between the built-in local provider and any OpenAI-compatible embeddings endpoint without changing commands.
+- CLI
+- MCP
+- TUI
 
 ## Install
 
-```bash
-go install github.com/codysnider/tagmem/cmd/tagmem@latest
-```
+### Recommended: Docker
 
-## Docker Workflow
+The recommended way to run `tagmem` is in Docker.
 
-All build, doctor, and benchmark commands can run in Docker with persistent caches under `/data/tagmem`.
-
-Build the dev image:
+Build the development image:
 
 ```bash
 just build
 ```
 
-Prepare datasets under `/data/tagmem/datasets`:
+Open a shell in the container:
 
 ```bash
-just datasets
+just shell
 ```
 
-Run doctor in Docker:
+Run the embedded model health check in Docker:
 
 ```bash
 just doctor
 ```
 
-Run LongMemEval in Docker:
+### Build from source
+
+If you want to build locally from source:
 
 ```bash
-TIERED_MEMORY_EMBED_MODEL=bge-small-en-v1.5 just bench-longmemeval
+go build ./cmd/tagmem
 ```
 
-Run the full suite in Docker:
+This creates the `tagmem` binary in the current directory.
+
+### Install with Go
+
+If you want a direct Go-based install:
 
 ```bash
-TIERED_MEMORY_EMBED_MODEL=bge-small-en-v1.5 just bench-suite
+go install github.com/codysnider/tagmem/cmd/tagmem@latest
 ```
 
-Run a Docker end-to-end smoke flow for ingest, context, and doctor:
+This is best used once a release/tag workflow is in place. Docker is still the preferred runtime path.
 
-```bash
-just e2e-smoke
-```
+## Quick Start
 
-## Principles
-
-- local-first
-- CPU-only by default
-- original text stays intact
-- no lossy memory dialect
-- simple user-facing concepts: depths, tags, facts, diary
-
-## Usage
-
-## Embedding Backends
-
-Default embedded local mode:
-
-```bash
-export TIERED_MEMORY_EMBED_PROVIDER=embedded
-export TIERED_MEMORY_EMBED_MODEL=bge-small-en-v1.5
-```
-
-OpenAI-compatible mode:
-
-```bash
-export TIERED_MEMORY_EMBED_PROVIDER=openai
-export TIERED_MEMORY_OPENAI_MODEL=nomic-embed-text
-export TIERED_MEMORY_OPENAI_BASE_URL=http://localhost:11434/v1
-export TIERED_MEMORY_OPENAI_API_KEY=
-```
-
-Short aliases are also supported:
-
-```bash
-export TM_EMBED_PROVIDER=openai
-export TM_OPENAI_MODEL=nomic-embed-text
-export TM_OPENAI_BASE_URL=http://localhost:11434/v1
-export TM_OPENAI_API_KEY=
-```
-
-Standard `OPENAI_BASE_URL` and `OPENAI_API_KEY` are also accepted as fallbacks. `OLLAMA_HOST` is accepted as a convenience fallback and is normalized to `/v1`.
-
-Each backend gets its own persistent vector index under `~/.local/share/tiered-memory/vector/`, so switching providers or models does not mix embeddings from different endpoints.
-
-If `tagmem doctor` reports that the endpoint is reachable but no embeddings were returned, the server is usually exposing a chat model instead of an embeddings model.
-
-Initialize local storage:
+Initialize storage:
 
 ```bash
 tagmem init
@@ -155,68 +78,12 @@ Add an entry:
 tagmem add --depth 0 --title "Working identity" --body "You are helping ship a local-first memory system."
 ```
 
-Ingest a project or notes directory:
-
-```bash
-tagmem ingest --mode files --depth 1 ~/projects/my_app
-```
-
-Respect `.gitignore` by default, or include selected ignored paths:
-
-```bash
-tagmem ingest --mode files --include-ignored data/schema.sql,docs/archive.md ~/projects/my_app
-```
-
-Ingest conversation exports:
-
-```bash
-tagmem ingest --mode conversations --depth 2 ~/chats
-```
-
-Use a more general extraction strategy for conversations:
-
-```bash
-tagmem ingest --mode conversations --extract general ~/chats
-```
-
-Split transcript mega-files before ingesting:
-
-```bash
-tagmem split ~/chats
-```
-
-List entries:
-
-```bash
-tagmem list
-tagmem list --depth 0
-```
-
 Search:
 
 ```bash
 tagmem search "identity"
 tagmem search --depth 2 "auth migration"
-```
-
-Show one entry:
-
-```bash
-tagmem show 1
-```
-
-Render compact context for startup:
-
-```bash
-tagmem context
-tagmem context --depth 0
-tagmem context --tag auth
-```
-
-Show storage status:
-
-```bash
-tagmem status
+tagmem search --tag auth "token refresh"
 ```
 
 Browse with the TUI:
@@ -225,19 +92,106 @@ Browse with the TUI:
 tagmem tui
 ```
 
-If no command is provided, the binary opens the TUI.
+If no command is provided, the TUI opens.
 
-Validate the current embedding backend:
+## Docker Workflow
 
-```bash
-tagmem doctor
-```
+The Docker workflow keeps model files, cache, and benchmark artifacts outside the repo in mounted volumes.
 
-Rebuild the vector index from stored entries:
+Default Docker data root:
 
 ```bash
-tagmem repair
+$HOME/.local/share/tagmem
 ```
+
+Override it if you want Docker state elsewhere:
+
+```bash
+export TAGMEM_DATA_ROOT=/path/to/tagmem-data
+```
+
+Prepare datasets:
+
+```bash
+just datasets
+```
+
+Run the benchmark suite:
+
+```bash
+just bench-suite
+```
+
+Run an end-to-end smoke flow:
+
+```bash
+just e2e-smoke
+```
+
+## Commands
+
+Core commands:
+
+- `tagmem init`
+- `tagmem ingest`
+- `tagmem split`
+- `tagmem add`
+- `tagmem list`
+- `tagmem search`
+- `tagmem show`
+- `tagmem status`
+- `tagmem context`
+- `tagmem depths`
+- `tagmem paths`
+- `tagmem doctor`
+- `tagmem repair`
+- `tagmem mcp`
+- `tagmem bench`
+- `tagmem tui`
+
+Examples:
+
+```bash
+tagmem ingest --mode files --depth 1 ~/projects/my_app
+tagmem ingest --mode conversations --depth 2 ~/chats
+tagmem ingest --mode conversations --extract general ~/chats
+tagmem split ~/chats
+tagmem status
+tagmem context --depth 0
+tagmem context --tag auth
+tagmem show 1
+```
+
+## TUI
+
+The TUI is intended to be the main operator interface.
+
+Navigation:
+
+- `Left` / `Right`: move between `Tags`, `Depths`, and `Entries`
+- `Up` / `Down`: navigate lists and forms
+- `/`: focus search
+- `H`: help overlay
+
+Actions:
+
+- `A`: add entry
+- `E`: edit selected entry
+- `X`: delete selected entry
+- `I`: import from path
+- `C`: import from clipboard
+- `S`: status
+- `D`: doctor
+- `R`: reload
+- `Q`: quit
+
+Forms:
+
+- `Tab`, `Up`, `Down`: move fields
+- `Ctrl+S`: save or submit
+- `Esc`: cancel
+
+## MCP
 
 Run the MCP server over stdio:
 
@@ -270,101 +224,111 @@ Current MCP tools:
 - `tiered_memory_diary_read`
 - `tiered_memory_doctor`
 
-Run local performance benchmarks:
+## Embedding Backends
+
+### Embedded
+
+The embedded backend runs locally.
+
+Default embedded configuration:
 
 ```bash
-tagmem bench perf
+export TIERED_MEMORY_EMBED_PROVIDER=embedded
+export TIERED_MEMORY_EMBED_MODEL=bge-small-en-v1.5
+export TIERED_MEMORY_EMBED_ACCEL=auto
 ```
 
-Run a fuller local performance benchmark with JSON output:
-
-```bash
-tagmem bench perf --entries 500 --searches 100 --out ./perf.json
-```
-
-Run LongMemEval retrieval benchmark:
-
-```bash
-tagmem bench longmemeval /path/to/longmemeval_s_cleaned.json
-```
-
-Run LoCoMo retrieval benchmark:
-
-```bash
-tagmem bench locomo /path/to/locomo10.json
-```
-
-Run ConvoMem retrieval benchmark:
-
-```bash
-tagmem bench convomem --limit 25 --category all --cache-dir /tmp/convomem_cache
-```
-
-Run a benchmark suite:
-
-```bash
-tagmem bench suite \
-  --longmemeval /tmp/longmemeval-data/longmemeval_s_cleaned.json \
-  --locomo /tmp/locomo/data/locomo10.json \
-  --convomem-limit 25 \
-  --out-dir ./bench-results
-```
-
-## vLLM Embeddings Example
-
-`examples/vllm-embeddings-compose.yml` contains a minimal dedicated embeddings service using `BAAI/bge-small-en-v1.5`.
-
-Example environment:
+### OpenAI-compatible
 
 ```bash
 export TIERED_MEMORY_EMBED_PROVIDER=openai
-export TIERED_MEMORY_OPENAI_BASE_URL=http://10.20.0.2:7870/v1
-export TIERED_MEMORY_OPENAI_MODEL=BAAI/bge-small-en-v1.5
+export TIERED_MEMORY_OPENAI_MODEL=nomic-embed-text
+export TIERED_MEMORY_OPENAI_BASE_URL=http://localhost:11434/v1
 export TIERED_MEMORY_OPENAI_API_KEY=
 ```
 
-Then verify it with:
+Short aliases are also supported:
 
 ```bash
-tagmem doctor
+export TM_EMBED_PROVIDER=openai
+export TM_OPENAI_MODEL=nomic-embed-text
+export TM_OPENAI_BASE_URL=http://localhost:11434/v1
+export TM_OPENAI_API_KEY=
 ```
 
-## Benchmark Datasets
+## Environment Variables
 
-LongMemEval data:
+| Variable | Default | Purpose |
+|---|---|---|
+| `TIERED_MEMORY_EMBED_PROVIDER` | `embedded` | Selects the embedding backend: `embedded`, `openai`, or `embedded-hash`. |
+| `TM_EMBED_PROVIDER` | unset | Short alias for `TIERED_MEMORY_EMBED_PROVIDER`. |
+| `TIERED_MEMORY_EMBED_MODEL` | `bge-small-en-v1.5` | Selects the embedded local model. Supported values currently include `all-MiniLM-L6-v2`, `bge-small-en-v1.5`, and `bge-base-en-v1.5`. |
+| `TM_EMBED_MODEL` | unset | Short alias for `TIERED_MEMORY_EMBED_MODEL`. |
+| `TIERED_MEMORY_EMBED_ACCEL` | `auto` | Embedded acceleration mode: `auto`, `cuda`, or `cpu`. |
+| `TM_EMBED_ACCEL` | unset | Short alias for `TIERED_MEMORY_EMBED_ACCEL`. |
+| `TIERED_MEMORY_OPENAI_MODEL` | `nomic-embed-text` | Model name for OpenAI-compatible embeddings. |
+| `TM_OPENAI_MODEL` | unset | Short alias for `TIERED_MEMORY_OPENAI_MODEL`. |
+| `OPENAI_MODEL` | unset | Fallback model name for OpenAI-compatible mode. |
+| `TIERED_MEMORY_OPENAI_BASE_URL` | unset | Base URL for an OpenAI-compatible embeddings endpoint. If no path is provided, `/v1` is assumed. |
+| `TM_OPENAI_BASE_URL` | unset | Short alias for `TIERED_MEMORY_OPENAI_BASE_URL`. |
+| `OPENAI_BASE_URL` | unset | Fallback base URL for OpenAI-compatible mode. |
+| `OLLAMA_HOST` | unset | Convenience fallback base URL, normalized to `/v1` if used. |
+| `TIERED_MEMORY_OPENAI_API_KEY` | unset | API key for an OpenAI-compatible endpoint. |
+| `TM_OPENAI_API_KEY` | unset | Short alias for `TIERED_MEMORY_OPENAI_API_KEY`. |
+| `OPENAI_API_KEY` | unset | Fallback API key for OpenAI-compatible mode. |
+| `TAGMEM_DATA_ROOT` | `$HOME/.local/share/tagmem` | Host-side root directory for Docker state, including XDG data, model caches, datasets, and benchmark results. |
+| `TIERED_MEMORY_BENCH_ROOT` | Docker-only | Root path for benchmark outputs in the Docker workflow. |
+| `TIERED_MEMORY_DATASET_ROOT` | Docker-only | Root path for benchmark datasets in the Docker workflow. |
+| `XDG_CONFIG_HOME` | platform default | XDG config root used for config and identity files. |
+| `XDG_DATA_HOME` | platform default | XDG data root used for storage, vectors, knowledge graph, diaries, and models. |
+| `XDG_CACHE_HOME` | platform default | XDG cache root. |
 
-```bash
-mkdir -p /tmp/longmemeval-data
-curl -fsSL -o /tmp/longmemeval-data/longmemeval_s_cleaned.json \
-  https://huggingface.co/datasets/xiaowu0162/longmemeval-cleaned/resolve/main/longmemeval_s_cleaned.json
-```
-
-LoCoMo data:
-
-```bash
-git clone https://github.com/snap-research/locomo.git /tmp/locomo
-```
-
-ConvoMem data is downloaded automatically on first run and cached under `--cache-dir`.
-
-## TUI keys
-
-- `Left` / `Right`: move between `Tags`, `Depths`, and `Entries`
-- `Up` / `Down`: navigate lists and forms
-- `/`: focus the search box
-- `H`: help overlay
-- `A` / `E` / `X`: add, edit, delete
-- `I` / `C`: import from path or clipboard
-- `S` / `D` / `R`: status, doctor, reload
-- `Q`: quit
-
-## Storage layout
+## Storage Layout
 
 - data: `~/.local/share/tagmem/store.json`
 - vector index: `~/.local/share/tagmem/vector/`
 - knowledge graph: `~/.local/share/tagmem/knowledge.json`
 - diaries: `~/.local/share/tagmem/diaries/`
+- models: `~/.local/share/tagmem/models/`
 - config: `~/.config/tagmem/`
 - cache: `~/.cache/tagmem/`
 
-On non-Linux systems, the same code uses the platform-specific directories returned by Go's `os.UserConfigDir`, `os.UserDataDir`, and `os.UserCacheDir`.
+## Principles
+
+- local-first
+- original text stays intact
+- no lossy memory dialect
+- tags are primary, depth is secondary
+- simple user-facing concepts: depths, tags, facts, diary
+
+## Benchmarks
+
+Benchmarks are documented under `benchmarks/`.
+
+That folder includes:
+
+- methodology
+- machine specs
+- charts
+- raw benchmark outputs
+- comparison notes against published external baselines
+
+Run the benchmark suite in Docker:
+
+```bash
+just bench-suite
+```
+
+Or run a specific benchmark directly:
+
+```bash
+tagmem bench perf
+tagmem bench longmemeval /path/to/longmemeval_s_cleaned.json
+tagmem bench locomo /path/to/locomo10.json
+tagmem bench convomem --limit 25 --category all --cache-dir /tmp/convomem_cache
+tagmem bench suite \
+  --longmemeval /path/to/longmemeval_s_cleaned.json \
+  --locomo /path/to/locomo10.json \
+  --convomem-limit 25 \
+  --out-dir ./bench-results
+```
