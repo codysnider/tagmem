@@ -1,0 +1,22 @@
+{
+  "entries": [
+    {
+      "title": "Auth migration",
+      "body": "We migrated authentication from cookies to bearer tokens.",
+      "depth": 1,
+      "tags": ["auth", "security", "api"]
+    },
+    {
+      "title": "Incident review",
+      "body": "The incident review focused on auth failures and finance reconciliations.",
+      "depth": 2,
+      "tags": ["auth", "finance", "incident"]
+    },
+    {
+      "title": "Reporting",
+      "body": "Weekly reporting covers finance and forecasts.",
+      "depth": 2,
+      "tags": ["finance", "reporting"]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+services:
+  dev:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    image: tagmem-dev:latest
+    working_dir: /workspace
+    volumes:
+      - ..:/workspace
+      - /data/tagmem/xdg/config:/data/tagmem/xdg/config
+      - /data/tagmem/xdg/data:/data/tagmem/xdg/data
+      - /data/tagmem/xdg/cache:/data/tagmem/xdg/cache
+      - /data/tagmem/bench-results:/data/tagmem/bench-results
+      - /data/tagmem/datasets:/data/tagmem/datasets
+    environment:
+      XDG_CONFIG_HOME: /data/tagmem/xdg/config
+      XDG_DATA_HOME: /data/tagmem/xdg/data
+      XDG_CACHE_HOME: /data/tagmem/xdg/cache
+      TIERED_MEMORY_BENCH_ROOT: /data/tagmem/bench-results
+      TIERED_MEMORY_DATASET_ROOT: /data/tagmem/datasets
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+    runtime: nvidia
+    stdin_open: true
+    tty: true

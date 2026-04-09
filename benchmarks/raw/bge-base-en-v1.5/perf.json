@@ -1,0 +1,27 @@
+{
+  "entries": 1000,
+  "searches": 200,
+  "store_size_bytes": 327929,
+  "index_size_bytes": 3857943,
+  "init_ms": 0.580434,
+  "add_latency": {
+    "count": 1000,
+    "avg_ms": 2.369127869,
+    "p50_ms": 0.59595047,
+    "p95_ms": 18.1299831,
+    "p99_ms": 18.1299831,
+    "min_ms": 0.57135855,
+    "max_ms": 18.1299831
+  },
+  "search_latency": {
+    "count": 200,
+    "avg_ms": 0.634510795,
+    "p50_ms": 0.564714,
+    "p95_ms": 0.9032209999999999,
+    "p99_ms": 1.2484110000000002,
+    "min_ms": 0.423658,
+    "max_ms": 7.666529
+  },
+  "add_throughput_per_sec": 421.9950561692468,
+  "search_throughput_per_sec": 1575.0910315986257
+}

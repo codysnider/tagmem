@@ -1,0 +1,35 @@
+{
+  "entries": [
+    {
+      "title": "Degree history",
+      "body": "I graduated with a degree in Business Administration, which has definitely helped me in my new role.",
+      "depth": 1,
+      "tags": ["benchmark", "education", "longmemeval"],
+      "source": "longmemeval/answer_280352e9"
+    },
+    {
+      "title": "Support group memory",
+      "body": "I went to a LGBTQ support group yesterday and it was so powerful.",
+      "depth": 1,
+      "tags": ["benchmark", "community", "locomo"],
+      "source": "locomo/D1:3"
+    },
+    {
+      "title": "Boot care note",
+      "body": "I've been wearing my new boots almost daily since January 15th and I want to make sure they last long.",
+      "depth": 2,
+      "tags": ["benchmark", "shopping", "boots"],
+      "source": "longmemeval/distractor_boots"
+    }
+  ],
+  "queries": [
+    {
+      "query": "What degree did I graduate with?",
+      "expect_title": "Degree history"
+    },
+    {
+      "query": "When did Caroline go to the LGBTQ support group?",
+      "expect_title": "Support group memory"
+    }
+  ]
+}
