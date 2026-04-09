@@ -90,16 +90,25 @@ func (s *Server) Run(ctx context.Context) error {
 
 func (s *Server) handle(ctx context.Context, req request) *response {
 	id := decodeID(req.ID)
+	isNotification := len(req.ID) == 0
 
 	switch req.Method {
 	case "initialize":
 		return &response{JSONRPC: "2.0", ID: id, Result: map[string]any{
 			"protocolVersion": protocolVersion,
-			"capabilities":    map[string]any{"tools": map[string]any{}},
-			"serverInfo":      map[string]any{"name": "tagmem", "version": "0.1.0"},
+			"capabilities": map[string]any{
+				"tools":     map[string]any{"listChanged": false},
+				"resources": map[string]any{"subscribe": false, "listChanged": false},
+				"prompts":   map[string]any{"listChanged": false},
+			},
+			"serverInfo": map[string]any{"name": "tagmem", "version": "0.1.0"},
 		}}
 	case "notifications/initialized":
 		return nil
+	case "resources/list":
+		return &response{JSONRPC: "2.0", ID: id, Result: map[string]any{"resources": []map[string]any{}}}
+	case "prompts/list":
+		return &response{JSONRPC: "2.0", ID: id, Result: map[string]any{"prompts": []map[string]any{}}}
 	case "ping":
 		return &response{JSONRPC: "2.0", ID: id, Result: map[string]any{}}
 	case "tools/list":
@@ -111,6 +120,9 @@ func (s *Server) handle(ctx context.Context, req request) *response {
 		}
 		return &response{JSONRPC: "2.0", ID: id, Result: toolSuccessResult(result)}
 	default:
+		if isNotification {
+			return nil
+		}
 		return &response{JSONRPC: "2.0", ID: id, Error: &rpcError{Code: -32601, Message: "method not found"}}
 	}
 }

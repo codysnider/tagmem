@@ -215,6 +215,51 @@ func TestMCPKnowledgeGraphAndDiaryFlow(t *testing.T) {
 	}
 }
 
+func TestMCPStartupSequence(t *testing.T) {
+	t.Parallel()
+
+	server := newTestServer(t)
+
+	var initResult map[string]any
+	callToolRPC(t, server, "initialize", map[string]any{
+		"protocolVersion": "2024-11-05",
+		"capabilities":    map[string]any{},
+		"clientInfo":      map[string]any{"name": "test", "version": "0"},
+	}, &initResult)
+	if initResult["protocolVersion"] != "2024-11-05" {
+		t.Fatalf("protocolVersion = %v, want 2024-11-05", initResult["protocolVersion"])
+	}
+
+	resp := server.handle(context.Background(), request{JSONRPC: "2.0", Method: "notifications/initialized", Params: json.RawMessage(`{}`)})
+	if resp != nil {
+		t.Fatalf("initialized notification returned response, want nil")
+	}
+
+	var tools struct {
+		Tools []map[string]any `json:"tools"`
+	}
+	callToolRPC(t, server, "tools/list", map[string]any{}, &tools)
+	if len(tools.Tools) == 0 {
+		t.Fatal("expected at least one tool")
+	}
+
+	var resources struct {
+		Resources []map[string]any `json:"resources"`
+	}
+	callToolRPC(t, server, "resources/list", map[string]any{}, &resources)
+	if len(resources.Resources) != 0 {
+		t.Fatalf("expected no resources, got %d", len(resources.Resources))
+	}
+
+	var prompts struct {
+		Prompts []map[string]any `json:"prompts"`
+	}
+	callToolRPC(t, server, "prompts/list", map[string]any{}, &prompts)
+	if len(prompts.Prompts) != 0 {
+		t.Fatalf("expected no prompts, got %d", len(prompts.Prompts))
+	}
+}
+
 func TestMCPGraphAndDuplicateEdgeCases(t *testing.T) {
 	t.Parallel()
 
