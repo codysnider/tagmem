@@ -4,7 +4,6 @@ Captured on 2026-04-08.
 
 ## Host OS
 
-- Kernel: `Linux office 6.8.0-106-generic`
 - Architecture: `x86_64`
 
 ## CPU
@@ -12,14 +11,10 @@ Captured on 2026-04-08.
 - Model: `AMD Ryzen 9 5900X 12-Core Processor`
 - Physical cores: `12`
 - Threads: `24`
-- Max frequency: `4951.5332 MHz`
-- L3 cache: `64 MiB`
 
 ## Memory
 
 - Total RAM: `62 GiB`
-- Available during capture: `40 GiB`
-- Swap: `2.0 GiB`
 
 ## GPU
 
