@@ -86,7 +86,7 @@ func RunLongMemEval(ctx context.Context, dataFile string, limit int, provider ve
 	items := make([]LongMemEvalItemResult, len(entries))
 	cache := newLMEEmbeddingCache()
 	var precomputed map[string]*lmeSessionData
-	if len(entries) >= 200 && os.Getenv("TIERED_MEMORY_LME_PRECOMPUTE") == "1" {
+	if len(entries) >= 200 && os.Getenv("TAGMEM_LME_PRECOMPUTE") == "1" {
 		precomputeStarted := time.Now()
 		fmt.Printf("  [LongMemEval] precomputing reusable session embeddings...\n")
 		precomputed, err = precomputeLongMemEvalSessions(ctx, provider, entries, cache)

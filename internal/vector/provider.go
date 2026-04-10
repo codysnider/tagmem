@@ -52,19 +52,19 @@ type DoctorReport struct {
 }
 
 func ProviderFromEnv(paths xdg.Paths) (Provider, error) {
-	providerName := strings.ToLower(strings.TrimSpace(envOrDefault("TAGMEM_EMBED_PROVIDER", "TAGMEM_EMBED_PROVIDER_SHORT", ProviderEmbedded)))
+	providerName := strings.ToLower(strings.TrimSpace(envOrDefault("TAGMEM_EMBED_PROVIDER", "", ProviderEmbedded)))
 
 	switch providerName {
 	case "", ProviderEmbedded, "local", "builtin":
-		model := strings.TrimSpace(envOrDefault("TAGMEM_EMBED_MODEL", "TAGMEM_EMBED_MODEL_SHORT", defaultEmbeddedModel))
-		accel := strings.TrimSpace(envOrDefault("TAGMEM_EMBED_ACCEL", "TAGMEM_EMBED_ACCEL_SHORT", "auto"))
+		model := strings.TrimSpace(envOrDefault("TAGMEM_EMBED_MODEL", "", defaultEmbeddedModel))
+		accel := strings.TrimSpace(envOrDefault("TAGMEM_EMBED_ACCEL", "", "auto"))
 		return EmbeddedProvider(paths, model, accel)
 	case ProviderEmbeddedHash, "hash":
 		return EmbeddedHashProvider(), nil
 	case ProviderOpenAI, "openai-compatible", "compat", "ollama":
-		model := strings.TrimSpace(envOrDefault("TAGMEM_OPENAI_MODEL", "TAGMEM_OPENAI_MODEL_SHORT", envOrDefault("OPENAI_MODEL", "", defaultOpenAIModel)))
-		baseURL := strings.TrimSpace(envOrDefault("TAGMEM_OPENAI_BASE_URL", "TAGMEM_OPENAI_BASE_URL_SHORT", envOrDefault("OPENAI_BASE_URL", "", envOrDefault("OLLAMA_HOST", "", ""))))
-		apiKey := strings.TrimSpace(envOrDefault("TAGMEM_OPENAI_API_KEY", "TAGMEM_OPENAI_API_KEY_SHORT", envOrDefault("OPENAI_API_KEY", "", "")))
+		model := strings.TrimSpace(envOrDefault("TAGMEM_OPENAI_MODEL", "", envOrDefault("OPENAI_MODEL", "", defaultOpenAIModel)))
+		baseURL := strings.TrimSpace(envOrDefault("TAGMEM_OPENAI_BASE_URL", "", envOrDefault("OPENAI_BASE_URL", "", envOrDefault("OLLAMA_HOST", "", ""))))
+		apiKey := strings.TrimSpace(envOrDefault("TAGMEM_OPENAI_API_KEY", "", envOrDefault("OPENAI_API_KEY", "", "")))
 		return OpenAICompatibleProvider(model, baseURL, apiKey), nil
 	default:
 		return Provider{}, fmt.Errorf("unsupported embedding provider %q", providerName)

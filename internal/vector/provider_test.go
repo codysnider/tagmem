@@ -13,7 +13,6 @@ func testPaths() xdg.Paths {
 
 func TestProviderFromEnvDefaultsToEmbedded(t *testing.T) {
 	t.Setenv("TAGMEM_EMBED_PROVIDER", "")
-	t.Setenv("TAGMEM_EMBED_PROVIDER_SHORT", "")
 
 	provider, err := ProviderFromEnv(testPaths())
 	if err != nil {
@@ -57,7 +56,6 @@ func TestProviderFromEnvRejectsUnknownProvider(t *testing.T) {
 func TestProviderFromEnvFallsBackToOllamaHost(t *testing.T) {
 	t.Setenv("TAGMEM_EMBED_PROVIDER", "openai")
 	t.Setenv("TAGMEM_OPENAI_BASE_URL", "")
-	t.Setenv("TAGMEM_OPENAI_BASE_URL_SHORT", "")
 	t.Setenv("OLLAMA_HOST", "http://10.20.0.2:11434")
 
 	provider, err := ProviderFromEnv(testPaths())

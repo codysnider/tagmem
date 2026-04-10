@@ -192,34 +192,19 @@ export TAGMEM_OPENAI_BASE_URL=http://localhost:11434/v1
 export TAGMEM_OPENAI_API_KEY=
 ```
 
-Short aliases are also supported:
-
-```bash
-export TAGMEM_EMBED_PROVIDER_SHORT=openai
-export TAGMEM_OPENAI_MODEL_SHORT=nomic-embed-text
-export TAGMEM_OPENAI_BASE_URL_SHORT=http://localhost:11434/v1
-export TAGMEM_OPENAI_API_KEY_SHORT=
-```
-
 ## Environment Variables
 
 | Variable | Default | Purpose |
 |---|---|---|
 | `TAGMEM_EMBED_PROVIDER` | `embedded` | Selects the embedding backend: `embedded`, `openai`, or `embedded-hash`. |
-| `TAGMEM_EMBED_PROVIDER_SHORT` | unset | Short alias for `TAGMEM_EMBED_PROVIDER`. |
 | `TAGMEM_EMBED_MODEL` | `bge-small-en-v1.5` | Selects the embedded local model. Supported values currently include `all-MiniLM-L6-v2`, `bge-small-en-v1.5`, and `bge-base-en-v1.5`. |
-| `TAGMEM_EMBED_MODEL_SHORT` | unset | Short alias for `TAGMEM_EMBED_MODEL`. |
 | `TAGMEM_EMBED_ACCEL` | `auto` | Embedded acceleration mode: `auto`, `cuda`, or `cpu`. |
-| `TAGMEM_EMBED_ACCEL_SHORT` | unset | Short alias for `TAGMEM_EMBED_ACCEL`. |
 | `TAGMEM_OPENAI_MODEL` | `nomic-embed-text` | Model name for OpenAI-compatible embeddings. |
-| `TAGMEM_OPENAI_MODEL_SHORT` | unset | Short alias for `TAGMEM_OPENAI_MODEL`. |
 | `OPENAI_MODEL` | unset | Fallback model name for OpenAI-compatible mode. |
 | `TAGMEM_OPENAI_BASE_URL` | unset | Base URL for an OpenAI-compatible embeddings endpoint. If no path is provided, `/v1` is assumed. |
-| `TAGMEM_OPENAI_BASE_URL_SHORT` | unset | Short alias for `TAGMEM_OPENAI_BASE_URL`. |
 | `OPENAI_BASE_URL` | unset | Fallback base URL for OpenAI-compatible mode. |
 | `OLLAMA_HOST` | unset | Convenience fallback base URL, normalized to `/v1` if used. |
 | `TAGMEM_OPENAI_API_KEY` | unset | API key for an OpenAI-compatible endpoint. |
-| `TAGMEM_OPENAI_API_KEY_SHORT` | unset | Short alias for `TAGMEM_OPENAI_API_KEY`. |
 | `OPENAI_API_KEY` | unset | Fallback API key for OpenAI-compatible mode. |
 | `TAGMEM_DATA_ROOT` | `$HOME/.local/share/tagmem` | Host-side root directory for Docker state, including XDG data, model caches, datasets, and benchmark results. |
 | `TAGMEM_BENCH_ROOT` | Docker-only | Root path for benchmark outputs in the Docker workflow. |
