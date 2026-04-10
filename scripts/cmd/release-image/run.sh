@@ -13,7 +13,7 @@ PLATFORMS="${TAGMEM_IMAGE_PLATFORMS:-linux/amd64}"
 log_status "Building and pushing ${IMAGE_REPO}:${VERSION_TAG}"
 docker buildx build \
   --platform "$PLATFORMS" \
-  -f "$REPO_ROOT/docker/Dockerfile.opencode" \
+  -f "$REPO_ROOT/docker/Dockerfile.runtime" \
   -t "$IMAGE_REPO:$VERSION_TAG" \
   -t "$IMAGE_REPO:latest" \
   --push \
