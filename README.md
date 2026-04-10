@@ -227,32 +227,33 @@ export TAGMEM_OPENAI_API_KEY=
 
 ## Benchmarks
 
-Benchmarks are documented under `benchmarks/`.
+The current published benchmark default is GPU-backed `bge-small-en-v1.5`.
 
-That folder includes:
+### LongMemEval Comparison
 
-- methodology
-- machine specs
-- charts
-- raw benchmark outputs
-- comparison notes against published external baselines
+The table below compares `tagmem` against MemPalace's published LongMemEval baseline and the other systems MemPalace cites in its own comparison material. External scores below are included as reported by MemPalace's benchmark documentation.
 
-Run the benchmark suite in Docker:
+| System | Recall@5 | LLM required | Notes |
+|---|---:|---|---|
+| `tagmem` (`bge-small-en-v1.5`, GPU) | **0.990** | No | Current published `tagmem` default |
+| `tagmem` (`bge-base-en-v1.5`, GPU) | **0.992** | No | Highest current `tagmem` LongMemEval score |
+| MemPalace raw | 0.966 | No | Published raw baseline |
+| Mastra | 0.9487 | Yes | Reported by MemPalace |
+| Hindsight | 0.914 | Yes | Reported by MemPalace |
+| Stella | ~0.85 | No | Reported by MemPalace |
+| Contriever | ~0.78 | No | Reported by MemPalace |
+| BM25 | ~0.70 | No | Reported by MemPalace |
 
-```bash
-just bench-suite
-```
+### Current GPU Model Snapshot
 
-Or run a specific benchmark directly:
+| Model | LongMemEval R@5 | LongMemEval Time | LoCoMo Avg Recall | MemBench R@5 | ConvoMem Avg Recall |
+|---|---:|---:|---:|---:|---:|
+| `all-MiniLM-L6-v2` | 0.982 | 14.4s | 0.915 | 0.778 | 0.931 |
+| `bge-small-en-v1.5` | 0.990 | 22.4s | 0.941 | 0.804 | 0.898 |
+| `bge-base-en-v1.5` | 0.992 | 44.1s | 0.949 | 0.802 | 0.920 |
 
-```bash
-tagmem bench perf
-tagmem bench longmemeval /path/to/longmemeval_s_cleaned.json
-tagmem bench locomo /path/to/locomo10.json
-tagmem bench convomem --limit 25 --category all --cache-dir /tmp/convomem_cache
-tagmem bench suite \
-  --longmemeval /path/to/longmemeval_s_cleaned.json \
-  --locomo /path/to/locomo10.json \
-  --convomem-limit 25 \
-  --out-dir ./bench-results
-```
+For methodology, machine specs, charts, and raw JSON outputs, see:
+
+- [`benchmarks/README.md`](benchmarks/README.md)
+- [`benchmarks/REPORT.md`](benchmarks/REPORT.md)
+- [`benchmarks/METHODOLOGY.md`](benchmarks/METHODOLOGY.md)
