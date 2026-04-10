@@ -52,19 +52,19 @@ type DoctorReport struct {
 }
 
 func ProviderFromEnv(paths xdg.Paths) (Provider, error) {
-	providerName := strings.ToLower(strings.TrimSpace(envOrDefault("TIERED_MEMORY_EMBED_PROVIDER", "TM_EMBED_PROVIDER", ProviderEmbedded)))
+	providerName := strings.ToLower(strings.TrimSpace(envOrDefault("TAGMEM_EMBED_PROVIDER", "TAGMEM_EMBED_PROVIDER_SHORT", ProviderEmbedded)))
 
 	switch providerName {
 	case "", ProviderEmbedded, "local", "builtin":
-		model := strings.TrimSpace(envOrDefault("TIERED_MEMORY_EMBED_MODEL", "TM_EMBED_MODEL", defaultEmbeddedModel))
-		accel := strings.TrimSpace(envOrDefault("TIERED_MEMORY_EMBED_ACCEL", "TM_EMBED_ACCEL", "auto"))
+		model := strings.TrimSpace(envOrDefault("TAGMEM_EMBED_MODEL", "TAGMEM_EMBED_MODEL_SHORT", defaultEmbeddedModel))
+		accel := strings.TrimSpace(envOrDefault("TAGMEM_EMBED_ACCEL", "TAGMEM_EMBED_ACCEL_SHORT", "auto"))
 		return EmbeddedProvider(paths, model, accel)
 	case ProviderEmbeddedHash, "hash":
 		return EmbeddedHashProvider(), nil
 	case ProviderOpenAI, "openai-compatible", "compat", "ollama":
-		model := strings.TrimSpace(envOrDefault("TIERED_MEMORY_OPENAI_MODEL", "TM_OPENAI_MODEL", envOrDefault("OPENAI_MODEL", "", defaultOpenAIModel)))
-		baseURL := strings.TrimSpace(envOrDefault("TIERED_MEMORY_OPENAI_BASE_URL", "TM_OPENAI_BASE_URL", envOrDefault("OPENAI_BASE_URL", "", envOrDefault("OLLAMA_HOST", "", ""))))
-		apiKey := strings.TrimSpace(envOrDefault("TIERED_MEMORY_OPENAI_API_KEY", "TM_OPENAI_API_KEY", envOrDefault("OPENAI_API_KEY", "", "")))
+		model := strings.TrimSpace(envOrDefault("TAGMEM_OPENAI_MODEL", "TAGMEM_OPENAI_MODEL_SHORT", envOrDefault("OPENAI_MODEL", "", defaultOpenAIModel)))
+		baseURL := strings.TrimSpace(envOrDefault("TAGMEM_OPENAI_BASE_URL", "TAGMEM_OPENAI_BASE_URL_SHORT", envOrDefault("OPENAI_BASE_URL", "", envOrDefault("OLLAMA_HOST", "", ""))))
+		apiKey := strings.TrimSpace(envOrDefault("TAGMEM_OPENAI_API_KEY", "TAGMEM_OPENAI_API_KEY_SHORT", envOrDefault("OPENAI_API_KEY", "", "")))
 		return OpenAICompatibleProvider(model, baseURL, apiKey), nil
 	default:
 		return Provider{}, fmt.Errorf("unsupported embedding provider %q", providerName)
@@ -216,11 +216,11 @@ func diagnoseDoctorError(provider Provider, raw string) (string, string) {
 
 	switch {
 	case strings.Contains(errorText, "no embeddings found in the response"):
-		return "endpoint is reachable, but the configured model is not returning embeddings", "Serve a dedicated embeddings model on this endpoint, such as BAAI/bge-small-en-v1.5, then point TIERED_MEMORY_OPENAI_MODEL at that model."
+		return "endpoint is reachable, but the configured model is not returning embeddings", "Serve a dedicated embeddings model on this endpoint, such as BAAI/bge-small-en-v1.5, then point TAGMEM_OPENAI_MODEL at that model."
 	case strings.Contains(errorText, "connection refused"), strings.Contains(errorText, "no such host"), strings.Contains(errorText, "i/o timeout"), strings.Contains(errorText, "context deadline exceeded"):
 		return "embedding endpoint is unreachable", "Confirm the host, port, and network path, and ensure the service is listening on a non-localhost interface."
 	case strings.Contains(errorText, "401"), strings.Contains(errorText, "403"), strings.Contains(errorText, "unauthorized"), strings.Contains(errorText, "forbidden"):
-		return "embedding endpoint rejected authentication", "Set TIERED_MEMORY_OPENAI_API_KEY or OPENAI_API_KEY to a valid token for the endpoint."
+		return "embedding endpoint rejected authentication", "Set TAGMEM_OPENAI_API_KEY or OPENAI_API_KEY to a valid token for the endpoint."
 	case provider.Name == ProviderOpenAI:
 		return "openai-compatible embedding request failed", "Verify the endpoint supports POST /v1/embeddings for the configured model and returns OpenAI-style embedding payloads."
 	default:

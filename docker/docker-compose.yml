@@ -16,8 +16,8 @@ services:
       XDG_CONFIG_HOME: ${TAGMEM_DATA_ROOT}/xdg/config
       XDG_DATA_HOME: ${TAGMEM_DATA_ROOT}/xdg/data
       XDG_CACHE_HOME: ${TAGMEM_DATA_ROOT}/xdg/cache
-      TIERED_MEMORY_BENCH_ROOT: ${TAGMEM_DATA_ROOT}/bench-results
-      TIERED_MEMORY_DATASET_ROOT: ${TAGMEM_DATA_ROOT}/datasets
+      TAGMEM_BENCH_ROOT: ${TAGMEM_DATA_ROOT}/bench-results
+      TAGMEM_DATASET_ROOT: ${TAGMEM_DATA_ROOT}/datasets
       NVIDIA_VISIBLE_DEVICES: all
       NVIDIA_DRIVER_CAPABILITIES: compute,utility
     runtime: nvidia

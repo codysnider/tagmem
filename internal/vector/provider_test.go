@@ -12,8 +12,8 @@ func testPaths() xdg.Paths {
 }
 
 func TestProviderFromEnvDefaultsToEmbedded(t *testing.T) {
-	t.Setenv("TIERED_MEMORY_EMBED_PROVIDER", "")
-	t.Setenv("TM_EMBED_PROVIDER", "")
+	t.Setenv("TAGMEM_EMBED_PROVIDER", "")
+	t.Setenv("TAGMEM_EMBED_PROVIDER_SHORT", "")
 
 	provider, err := ProviderFromEnv(testPaths())
 	if err != nil {
@@ -25,10 +25,10 @@ func TestProviderFromEnvDefaultsToEmbedded(t *testing.T) {
 }
 
 func TestProviderFromEnvReadsOllamaConfig(t *testing.T) {
-	t.Setenv("TIERED_MEMORY_EMBED_PROVIDER", "openai")
-	t.Setenv("TIERED_MEMORY_OPENAI_MODEL", "bge-m3")
-	t.Setenv("TIERED_MEMORY_OPENAI_BASE_URL", "http://localhost:11434/v1")
-	t.Setenv("TIERED_MEMORY_OPENAI_API_KEY", "secret")
+	t.Setenv("TAGMEM_EMBED_PROVIDER", "openai")
+	t.Setenv("TAGMEM_OPENAI_MODEL", "bge-m3")
+	t.Setenv("TAGMEM_OPENAI_BASE_URL", "http://localhost:11434/v1")
+	t.Setenv("TAGMEM_OPENAI_API_KEY", "secret")
 
 	provider, err := ProviderFromEnv(testPaths())
 	if err != nil {
@@ -46,7 +46,7 @@ func TestProviderFromEnvReadsOllamaConfig(t *testing.T) {
 }
 
 func TestProviderFromEnvRejectsUnknownProvider(t *testing.T) {
-	t.Setenv("TIERED_MEMORY_EMBED_PROVIDER", "mystery")
+	t.Setenv("TAGMEM_EMBED_PROVIDER", "mystery")
 
 	_, err := ProviderFromEnv(testPaths())
 	if err == nil {
@@ -55,9 +55,9 @@ func TestProviderFromEnvRejectsUnknownProvider(t *testing.T) {
 }
 
 func TestProviderFromEnvFallsBackToOllamaHost(t *testing.T) {
-	t.Setenv("TIERED_MEMORY_EMBED_PROVIDER", "openai")
-	t.Setenv("TIERED_MEMORY_OPENAI_BASE_URL", "")
-	t.Setenv("TM_OPENAI_BASE_URL", "")
+	t.Setenv("TAGMEM_EMBED_PROVIDER", "openai")
+	t.Setenv("TAGMEM_OPENAI_BASE_URL", "")
+	t.Setenv("TAGMEM_OPENAI_BASE_URL_SHORT", "")
 	t.Setenv("OLLAMA_HOST", "http://10.20.0.2:11434")
 
 	provider, err := ProviderFromEnv(testPaths())

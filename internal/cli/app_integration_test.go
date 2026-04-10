@@ -29,7 +29,7 @@ func TestAppIngestStatusAndContextFlow(t *testing.T) {
 		"XDG_CONFIG_HOME=" + xdgConfig,
 		"XDG_DATA_HOME=" + xdgData,
 		"XDG_CACHE_HOME=" + xdgCache,
-		"TIERED_MEMORY_EMBED_PROVIDER=embedded-hash",
+		"TAGMEM_EMBED_PROVIDER=embedded-hash",
 	}
 
 	stdout, stderr, code := runApp(t, env, "ingest", "--mode", "files", "--depth", "1", filepath.Join(projectDir, "notes"))

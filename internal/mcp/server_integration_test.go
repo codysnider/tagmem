@@ -78,14 +78,14 @@ func TestMCPMemoryFlowWithBenchmarkFixtures(t *testing.T) {
 				Title string `json:"title"`
 			} `json:"entry"`
 		}
-		callTool(t, session, "tiered_memory_add_entry", map[string]any{"depth": entry.Depth, "title": entry.Title, "body": entry.Body, "tags": entry.Tags, "source": entry.Source}, &added)
+		callTool(t, session, "tagmem_add_entry", map[string]any{"depth": entry.Depth, "title": entry.Title, "body": entry.Body, "tags": entry.Tags, "source": entry.Source}, &added)
 		if added.Entry.Title != entry.Title {
 			t.Fatalf("added title = %q, want %q", added.Entry.Title, entry.Title)
 		}
 	}
 
 	var status map[string]any
-	callTool(t, session, "tiered_memory_status", map[string]any{}, &status)
+	callTool(t, session, "tagmem_status", map[string]any{}, &status)
 	if int(status["total_entries"].(float64)) != len(fixtures.Entries) {
 		t.Fatalf("total_entries = %v, want %d", status["total_entries"], len(fixtures.Entries))
 	}
@@ -96,7 +96,7 @@ func TestMCPMemoryFlowWithBenchmarkFixtures(t *testing.T) {
 				Title string `json:"title"`
 			} `json:"entries"`
 		}
-		callTool(t, session, "tiered_memory_search", map[string]any{"query": query.Query, "limit": 5}, &results)
+		callTool(t, session, "tagmem_search", map[string]any{"query": query.Query, "limit": 5}, &results)
 		if len(results.Entries) == 0 || results.Entries[0].Title != query.ExpectTitle {
 			t.Fatalf("search %q first=%v want %q", query.Query, results, query.ExpectTitle)
 		}
@@ -113,7 +113,7 @@ func TestMCPKnowledgeGraphAndDiaryFlow(t *testing.T) {
 			Object  string `json:"object"`
 		} `json:"fact"`
 	}
-	callTool(t, session, "tiered_memory_kg_add", map[string]any{"subject": "caroline", "predicate": "attended", "object": "lgbtq support group", "valid_from": "2023-05-07"}, &fact)
+	callTool(t, session, "tagmem_kg_add", map[string]any{"subject": "caroline", "predicate": "attended", "object": "lgbtq support group", "valid_from": "2023-05-07"}, &fact)
 	if fact.Fact.Subject != "caroline" {
 		t.Fatalf("fact subject = %q, want caroline", fact.Fact.Subject)
 	}
@@ -124,7 +124,7 @@ func TestMCPKnowledgeGraphAndDiaryFlow(t *testing.T) {
 			Object string `json:"object"`
 		} `json:"facts"`
 	}
-	callTool(t, session, "tiered_memory_kg_query", map[string]any{"entity": "caroline"}, &query)
+	callTool(t, session, "tagmem_kg_query", map[string]any{"entity": "caroline"}, &query)
 	if int(query.Count) != 1 || query.Facts[0].Object != "lgbtq support group" {
 		t.Fatalf("kg query = %+v", query)
 	}
@@ -135,8 +135,8 @@ func TestMCPKnowledgeGraphAndDiaryFlow(t *testing.T) {
 			Topic string `json:"topic"`
 		} `json:"entries"`
 	}
-	callTool(t, session, "tiered_memory_diary_write", map[string]any{"agent_name": "researcher", "entry": "Validated benchmark-derived MCP integration flow.", "topic": "integration"}, nil)
-	callTool(t, session, "tiered_memory_diary_read", map[string]any{"agent_name": "researcher", "last_n": 5}, &diaryRead)
+	callTool(t, session, "tagmem_diary_write", map[string]any{"agent_name": "researcher", "entry": "Validated benchmark-derived MCP integration flow.", "topic": "integration"}, nil)
+	callTool(t, session, "tagmem_diary_read", map[string]any{"agent_name": "researcher", "last_n": 5}, &diaryRead)
 	if int(diaryRead.Showing) != 1 || diaryRead.Entries[0].Topic != "integration" {
 		t.Fatalf("diary read = %+v", diaryRead)
 	}
@@ -147,23 +147,23 @@ func TestMCPGraphAndDuplicateEdgeCases(t *testing.T) {
 	fixtures := loadGraphFixtures(t)
 	_, session := newTestSession(t)
 	for _, entry := range fixtures.Entries {
-		callTool(t, session, "tiered_memory_add_entry", map[string]any{"depth": entry.Depth, "title": entry.Title, "body": entry.Body, "tags": entry.Tags}, nil)
+		callTool(t, session, "tagmem_add_entry", map[string]any{"depth": entry.Depth, "title": entry.Title, "body": entry.Body, "tags": entry.Tags}, nil)
 	}
 	var traverse struct {
 		Edges []map[string]any `json:"edges"`
 	}
-	callTool(t, session, "tiered_memory_graph_traverse", map[string]any{"start_tag": "auth", "max_hops": 2}, &traverse)
+	callTool(t, session, "tagmem_graph_traverse", map[string]any{"start_tag": "auth", "max_hops": 2}, &traverse)
 	assertTraverseEdge(t, traverse.Edges, "auth", "security")
 	assertTraverseEdge(t, traverse.Edges, "auth", "finance")
 
 	var bridges struct {
 		Bridges []map[string]any `json:"bridges"`
 	}
-	callTool(t, session, "tiered_memory_find_bridges", map[string]any{"depth_a": 1, "depth_b": 2}, &bridges)
+	callTool(t, session, "tagmem_find_bridges", map[string]any{"depth_a": 1, "depth_b": 2}, &bridges)
 	assertBridgeTag(t, bridges.Bridges, "auth")
 
 	var stats map[string]any
-	callTool(t, session, "tiered_memory_graph_stats", map[string]any{}, &stats)
+	callTool(t, session, "tagmem_graph_stats", map[string]any{}, &stats)
 	if int(stats["tags"].(float64)) < 4 {
 		t.Fatalf("graph tags = %v, want at least 4", stats["tags"])
 	}

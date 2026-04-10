@@ -25,36 +25,22 @@ The system is local-first, retrieval-oriented, and designed to be usable through
 
 The recommended way to run `tagmem` is in Docker.
 
-If a published image is available, use that rather than building locally.
-
-Build the development image:
-
-```bash
-just build
-```
-
-Publish the Docker image to GitHub Container Registry:
-
-```bash
-just release-image
-```
-
-By default this publishes:
+Published image:
 
 ```bash
 ghcr.io/codysnider/tagmem
 ```
 
-Open a shell in the container:
+Run the CLI from the published image:
 
 ```bash
-just shell
+docker run --rm ghcr.io/codysnider/tagmem:latest help
 ```
 
-Run the embedded model health check in Docker:
+Run the MCP server from the published image:
 
 ```bash
-just doctor
+docker run -i --rm ghcr.io/codysnider/tagmem:latest mcp
 ```
 
 ### Build from source
@@ -115,23 +101,7 @@ Override it if you want Docker state elsewhere:
 export TAGMEM_DATA_ROOT=/path/to/tagmem-data
 ```
 
-Prepare datasets:
-
-```bash
-just datasets
-```
-
-Run the benchmark suite:
-
-```bash
-just bench-suite
-```
-
-Run an end-to-end smoke flow:
-
-```bash
-just e2e-smoke
-```
+The helper `just` commands are primarily for development and benchmarking. Most users only need the published image or the `go install` path.
 
 ## Commands
 
@@ -176,28 +146,28 @@ tagmem mcp
 
 Current MCP tools:
 
-- `tiered_memory_status`
-- `tiered_memory_paths`
-- `tiered_memory_list_depths`
-- `tiered_memory_list_tags`
-- `tiered_memory_get_tag_map`
-- `tiered_memory_list_entries`
-- `tiered_memory_search`
-- `tiered_memory_show_entry`
-- `tiered_memory_check_duplicate`
-- `tiered_memory_add_entry`
-- `tiered_memory_delete_entry`
-- `tiered_memory_kg_query`
-- `tiered_memory_kg_add`
-- `tiered_memory_kg_invalidate`
-- `tiered_memory_kg_timeline`
-- `tiered_memory_kg_stats`
-- `tiered_memory_graph_traverse`
-- `tiered_memory_find_bridges`
-- `tiered_memory_graph_stats`
-- `tiered_memory_diary_write`
-- `tiered_memory_diary_read`
-- `tiered_memory_doctor`
+- `tagmem_status`
+- `tagmem_paths`
+- `tagmem_list_depths`
+- `tagmem_list_tags`
+- `tagmem_get_tag_map`
+- `tagmem_list_entries`
+- `tagmem_search`
+- `tagmem_show_entry`
+- `tagmem_check_duplicate`
+- `tagmem_add_entry`
+- `tagmem_delete_entry`
+- `tagmem_kg_query`
+- `tagmem_kg_add`
+- `tagmem_kg_invalidate`
+- `tagmem_kg_timeline`
+- `tagmem_kg_stats`
+- `tagmem_graph_traverse`
+- `tagmem_find_bridges`
+- `tagmem_graph_stats`
+- `tagmem_diary_write`
+- `tagmem_diary_read`
+- `tagmem_doctor`
 
 ## Embedding Backends
 
@@ -208,52 +178,52 @@ The embedded backend runs locally.
 Default embedded configuration:
 
 ```bash
-export TIERED_MEMORY_EMBED_PROVIDER=embedded
-export TIERED_MEMORY_EMBED_MODEL=bge-small-en-v1.5
-export TIERED_MEMORY_EMBED_ACCEL=auto
+export TAGMEM_EMBED_PROVIDER=embedded
+export TAGMEM_EMBED_MODEL=bge-small-en-v1.5
+export TAGMEM_EMBED_ACCEL=auto
 ```
 
 ### OpenAI-compatible
 
 ```bash
-export TIERED_MEMORY_EMBED_PROVIDER=openai
-export TIERED_MEMORY_OPENAI_MODEL=nomic-embed-text
-export TIERED_MEMORY_OPENAI_BASE_URL=http://localhost:11434/v1
-export TIERED_MEMORY_OPENAI_API_KEY=
+export TAGMEM_EMBED_PROVIDER=openai
+export TAGMEM_OPENAI_MODEL=nomic-embed-text
+export TAGMEM_OPENAI_BASE_URL=http://localhost:11434/v1
+export TAGMEM_OPENAI_API_KEY=
 ```
 
 Short aliases are also supported:
 
 ```bash
-export TM_EMBED_PROVIDER=openai
-export TM_OPENAI_MODEL=nomic-embed-text
-export TM_OPENAI_BASE_URL=http://localhost:11434/v1
-export TM_OPENAI_API_KEY=
+export TAGMEM_EMBED_PROVIDER_SHORT=openai
+export TAGMEM_OPENAI_MODEL_SHORT=nomic-embed-text
+export TAGMEM_OPENAI_BASE_URL_SHORT=http://localhost:11434/v1
+export TAGMEM_OPENAI_API_KEY_SHORT=
 ```
 
 ## Environment Variables
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `TIERED_MEMORY_EMBED_PROVIDER` | `embedded` | Selects the embedding backend: `embedded`, `openai`, or `embedded-hash`. |
-| `TM_EMBED_PROVIDER` | unset | Short alias for `TIERED_MEMORY_EMBED_PROVIDER`. |
-| `TIERED_MEMORY_EMBED_MODEL` | `bge-small-en-v1.5` | Selects the embedded local model. Supported values currently include `all-MiniLM-L6-v2`, `bge-small-en-v1.5`, and `bge-base-en-v1.5`. |
-| `TM_EMBED_MODEL` | unset | Short alias for `TIERED_MEMORY_EMBED_MODEL`. |
-| `TIERED_MEMORY_EMBED_ACCEL` | `auto` | Embedded acceleration mode: `auto`, `cuda`, or `cpu`. |
-| `TM_EMBED_ACCEL` | unset | Short alias for `TIERED_MEMORY_EMBED_ACCEL`. |
-| `TIERED_MEMORY_OPENAI_MODEL` | `nomic-embed-text` | Model name for OpenAI-compatible embeddings. |
-| `TM_OPENAI_MODEL` | unset | Short alias for `TIERED_MEMORY_OPENAI_MODEL`. |
+| `TAGMEM_EMBED_PROVIDER` | `embedded` | Selects the embedding backend: `embedded`, `openai`, or `embedded-hash`. |
+| `TAGMEM_EMBED_PROVIDER_SHORT` | unset | Short alias for `TAGMEM_EMBED_PROVIDER`. |
+| `TAGMEM_EMBED_MODEL` | `bge-small-en-v1.5` | Selects the embedded local model. Supported values currently include `all-MiniLM-L6-v2`, `bge-small-en-v1.5`, and `bge-base-en-v1.5`. |
+| `TAGMEM_EMBED_MODEL_SHORT` | unset | Short alias for `TAGMEM_EMBED_MODEL`. |
+| `TAGMEM_EMBED_ACCEL` | `auto` | Embedded acceleration mode: `auto`, `cuda`, or `cpu`. |
+| `TAGMEM_EMBED_ACCEL_SHORT` | unset | Short alias for `TAGMEM_EMBED_ACCEL`. |
+| `TAGMEM_OPENAI_MODEL` | `nomic-embed-text` | Model name for OpenAI-compatible embeddings. |
+| `TAGMEM_OPENAI_MODEL_SHORT` | unset | Short alias for `TAGMEM_OPENAI_MODEL`. |
 | `OPENAI_MODEL` | unset | Fallback model name for OpenAI-compatible mode. |
-| `TIERED_MEMORY_OPENAI_BASE_URL` | unset | Base URL for an OpenAI-compatible embeddings endpoint. If no path is provided, `/v1` is assumed. |
-| `TM_OPENAI_BASE_URL` | unset | Short alias for `TIERED_MEMORY_OPENAI_BASE_URL`. |
+| `TAGMEM_OPENAI_BASE_URL` | unset | Base URL for an OpenAI-compatible embeddings endpoint. If no path is provided, `/v1` is assumed. |
+| `TAGMEM_OPENAI_BASE_URL_SHORT` | unset | Short alias for `TAGMEM_OPENAI_BASE_URL`. |
 | `OPENAI_BASE_URL` | unset | Fallback base URL for OpenAI-compatible mode. |
 | `OLLAMA_HOST` | unset | Convenience fallback base URL, normalized to `/v1` if used. |
-| `TIERED_MEMORY_OPENAI_API_KEY` | unset | API key for an OpenAI-compatible endpoint. |
-| `TM_OPENAI_API_KEY` | unset | Short alias for `TIERED_MEMORY_OPENAI_API_KEY`. |
+| `TAGMEM_OPENAI_API_KEY` | unset | API key for an OpenAI-compatible endpoint. |
+| `TAGMEM_OPENAI_API_KEY_SHORT` | unset | Short alias for `TAGMEM_OPENAI_API_KEY`. |
 | `OPENAI_API_KEY` | unset | Fallback API key for OpenAI-compatible mode. |
 | `TAGMEM_DATA_ROOT` | `$HOME/.local/share/tagmem` | Host-side root directory for Docker state, including XDG data, model caches, datasets, and benchmark results. |
-| `TIERED_MEMORY_BENCH_ROOT` | Docker-only | Root path for benchmark outputs in the Docker workflow. |
-| `TIERED_MEMORY_DATASET_ROOT` | Docker-only | Root path for benchmark datasets in the Docker workflow. |
+| `TAGMEM_BENCH_ROOT` | Docker-only | Root path for benchmark outputs in the Docker workflow. |
+| `TAGMEM_DATASET_ROOT` | Docker-only | Root path for benchmark datasets in the Docker workflow. |
 | `XDG_CONFIG_HOME` | platform default | XDG config root used for config and identity files. |
 | `XDG_DATA_HOME` | platform default | XDG data root used for storage, vectors, knowledge graph, diaries, and models. |
 | `XDG_CACHE_HOME` | platform default | XDG cache root. |
@@ -268,13 +238,7 @@ export TM_OPENAI_API_KEY=
 - config: `~/.config/tagmem/`
 - cache: `~/.cache/tagmem/`
 
-## Principles
-
-- local-first
-- original text stays intact
-- no lossy memory dialect
-- tags are primary, depth is secondary
-- simple user-facing concepts: depths, tags, facts, diary
+`tagmem` is local-first, keeps original text intact, avoids lossy memory dialects, and uses simple user-facing concepts: entries, tags, depth, facts, and diary.
 
 ## Benchmarks
 

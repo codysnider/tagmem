@@ -37,17 +37,17 @@ just datasets
 ### Full suite per model
 
 ```bash
-TIERED_MEMORY_EMBED_MODEL=all-MiniLM-L6-v2 just bench-suite
-TIERED_MEMORY_EMBED_MODEL=bge-small-en-v1.5 just bench-suite
-TIERED_MEMORY_EMBED_MODEL=bge-base-en-v1.5 just bench-suite
+TAGMEM_EMBED_MODEL=all-MiniLM-L6-v2 just bench-suite
+TAGMEM_EMBED_MODEL=bge-small-en-v1.5 just bench-suite
+TAGMEM_EMBED_MODEL=bge-base-en-v1.5 just bench-suite
 ```
 
 ### LongMemEval only per model
 
 ```bash
-TIERED_MEMORY_EMBED_MODEL=all-MiniLM-L6-v2 just bench-longmemeval
-TIERED_MEMORY_EMBED_MODEL=bge-small-en-v1.5 just bench-longmemeval
-TIERED_MEMORY_EMBED_MODEL=bge-base-en-v1.5 just bench-longmemeval
+TAGMEM_EMBED_MODEL=all-MiniLM-L6-v2 just bench-longmemeval
+TAGMEM_EMBED_MODEL=bge-small-en-v1.5 just bench-longmemeval
+TAGMEM_EMBED_MODEL=bge-base-en-v1.5 just bench-longmemeval
 ```
 
 ## Dataset Sources
