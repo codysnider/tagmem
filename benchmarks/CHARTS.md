@@ -19,7 +19,7 @@ xychart-beta
     title "LongMemEval Time (seconds)"
     x-axis ["MiniLM", "bge-small", "bge-base"]
     y-axis "Seconds" 0 --> 60
-    bar [14.4, 22.4, 44.1]
+    bar [14.4, 23.0, 44.1]
 ```
 
 ## LoCoMo Average Recall
@@ -39,7 +39,7 @@ xychart-beta
     title "LoCoMo Time (seconds)"
     x-axis ["MiniLM", "bge-small", "bge-base"]
     y-axis "Seconds" 0 --> 1800
-    bar [896.1, 1642.8, 1696.2]
+    bar [896.1, 1633.6, 1696.2]
 ```
 
 ## MemBench Recall@5
@@ -69,7 +69,7 @@ xychart-beta
     title "Perf Add Throughput (ops/sec)"
     x-axis ["MiniLM", "bge-small", "bge-base"]
     y-axis "Ops/sec" 0 --> 900
-    bar [870.67, 860.57, 422.00]
+    bar [870.67, 888.45, 422.00]
 ```
 
 ## Search Throughput
@@ -79,5 +79,25 @@ xychart-beta
     title "Perf Search Throughput (ops/sec)"
     x-axis ["MiniLM", "bge-small", "bge-base"]
     y-axis "Ops/sec" 0 --> 1700
-    bar [1616.44, 1715.20, 1575.09]
+    bar [1616.44, 451.36, 1575.09]
+
+## Adversarial Recall@1
+
+```mermaid
+xychart-beta
+    title "Adversarial Recall@1"
+    x-axis ["tagmem", "MemPalace raw"]
+    y-axis "Recall@1" 0.60 --> 0.90
+    bar [0.8860, 0.6600]
+```
+
+## Adversarial MRR
+
+```mermaid
+xychart-beta
+    title "Adversarial MRR"
+    x-axis ["tagmem", "MemPalace raw"]
+    y-axis "MRR" 0.75 --> 0.95
+    bar [0.9430, 0.8193]
+```
 ```

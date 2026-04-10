@@ -5,7 +5,7 @@
   "recall_at_10": 0.996,
   "mrr": 0.955200980392157,
   "ndcg_at_10": 0.9509480667273997,
-  "elapsed_seconds": 22.439008862,
+  "elapsed_seconds": 22.96593832,
   "per_question_type": {
     "knowledge-update": 1,
     "multi-session": 1,

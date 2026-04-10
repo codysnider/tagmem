@@ -1,7 +1,7 @@
 {
   "items": 250,
   "average_recall": 0.898,
-  "elapsed_seconds": 18.858747742,
+  "elapsed_seconds": 18.137897794,
   "per_category": {
     "abstention_evidence": 0.91,
     "assistant_facts_evidence": 1,

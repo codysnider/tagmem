@@ -23,7 +23,7 @@ Main conclusion:
 | Model | LongMemEval R@5 | LongMemEval Time | LoCoMo Avg Recall | LoCoMo Time | MemBench R@5 | MemBench Time | ConvoMem Avg Recall | ConvoMem Time | Add Avg ms | Search Avg ms |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | `all-MiniLM-L6-v2` | 0.982 | 14.4s | 0.915 | 896.1s | 0.778 | 995.8s | 0.931 | 10.2s | 1.148 | 0.618 |
-| `bge-small-en-v1.5` | 0.990 | 22.4s | 0.941 | 1642.8s | 0.804 | 1816.9s | 0.898 | 18.9s | 1.161 | 0.583 |
+| `bge-small-en-v1.5` | 0.990 | 23.0s | 0.941 | 1633.6s | 0.804 | 1775.2s | 0.898 | 18.1s | 1.120 | 2.220 |
 | `bge-base-en-v1.5` | 0.992 | 44.1s | 0.949 | 1696.2s | 0.802 | 1877.9s | 0.920 | 19.3s | 2.369 | 0.635 |
 
 ## Best Model By Benchmark
@@ -65,6 +65,21 @@ The publicly cited MemPalace raw baseline on LongMemEval is:
 
 All three `tagmem` GPU runs beat that quality baseline comfortably.
 
+## Adversarial Comparison
+
+`tagmem` was also compared against a standalone adversarial distractor benchmark designed to stress ranking under conflicting or near-miss memories.
+
+| System | Cases | Recall@1 | Recall@5 | MRR |
+|---|---:|---:|---:|---:|
+| `tagmem` | 500 | 0.8860 | 1.0000 | 0.9430 |
+| MemPalace raw-style | 500 | 0.6600 | 1.0000 | 0.8193 |
+
+Interpretation:
+
+- Both systems now saturate top-5 recall on the current adversarial dataset.
+- `tagmem` maintains a large advantage on top-1 ranking quality and mean reciprocal rank.
+- For agent memory, this indicates `tagmem` is more likely to surface the right answer near the top even when distractors are semantically close.
+
 ## Raw Data
 
 Raw benchmark JSON outputs are included under:
@@ -72,6 +87,7 @@ Raw benchmark JSON outputs are included under:
 - `raw/all-MiniLM-L6-v2/`
 - `raw/bge-small-en-v1.5/`
 - `raw/bge-base-en-v1.5/`
+- `raw/adversarial/`
 
 See also:
 

@@ -244,12 +244,19 @@ The table below compares `tagmem` against MemPalace's published LongMemEval base
 | Contriever | ~0.78 | No | Reported by MemPalace |
 | BM25 | ~0.70 | No | Reported by MemPalace |
 
+### Adversarial Retrieval Snapshot
+
+| System | Cases | Recall@1 | Recall@5 | MRR |
+|---|---:|---:|---:|---:|
+| `tagmem` | 500 | **0.8860** | **1.0000** | **0.9430** |
+| MemPalace raw-style | 500 | 0.6600 | **1.0000** | 0.8193 |
+
 ### Current GPU Model Snapshot
 
 | Model | LongMemEval R@5 | LongMemEval Time | LoCoMo Avg Recall | MemBench R@5 | ConvoMem Avg Recall |
 |---|---:|---:|---:|---:|---:|
 | `all-MiniLM-L6-v2` | 0.982 | 14.4s | 0.915 | 0.778 | 0.931 |
-| `bge-small-en-v1.5` | 0.990 | 22.4s | 0.941 | 0.804 | 0.898 |
+| `bge-small-en-v1.5` | 0.990 | 23.0s | 0.941 | 0.804 | 0.898 |
 | `bge-base-en-v1.5` | 0.992 | 44.1s | 0.949 | 0.802 | 0.920 |
 
 For methodology, machine specs, charts, and raw JSON outputs, see:
@@ -257,3 +264,4 @@ For methodology, machine specs, charts, and raw JSON outputs, see:
 - [`benchmarks/README.md`](benchmarks/README.md)
 - [`benchmarks/REPORT.md`](benchmarks/REPORT.md)
 - [`benchmarks/METHODOLOGY.md`](benchmarks/METHODOLOGY.md)
+- [`benchmarks/MEMPALACE-COMPARISON.md`](benchmarks/MEMPALACE-COMPARISON.md)

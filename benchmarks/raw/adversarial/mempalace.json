@@ -1,0 +1,9002 @@
+{
+  "cases": 500,
+  "recall_at_1": 0.66,
+  "recall_at_5": 1.0,
+  "mrr": 0.8193333333333332,
+  "per_category": {
+    "environment_swap": 1.0,
+    "entity_swap": 1.0,
+    "time_swap": 1.0,
+    "state_update": 1.0,
+    "speaker_swap": 1.0,
+    "near_duplicate_paraphrase": 1.0
+  },
+  "results": [
+    {
+      "id": "env-001",
+      "adversary_type": "environment_swap",
+      "query": "What database does staging use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e5",
+        "e2",
+        "e6",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-002",
+      "adversary_type": "environment_swap",
+      "query": "What database does production use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e5",
+        "e6",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-003",
+      "adversary_type": "environment_swap",
+      "query": "What database does development use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-004",
+      "adversary_type": "environment_swap",
+      "query": "What redis cache does staging use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-005",
+      "adversary_type": "environment_swap",
+      "query": "What redis cache does production use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-006",
+      "adversary_type": "environment_swap",
+      "query": "What redis cache does development use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-007",
+      "adversary_type": "environment_swap",
+      "query": "What object storage bucket does staging use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-008",
+      "adversary_type": "environment_swap",
+      "query": "What object storage bucket does production use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-009",
+      "adversary_type": "environment_swap",
+      "query": "What object storage bucket does development use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-010",
+      "adversary_type": "environment_swap",
+      "query": "What email sender does staging use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e5",
+        "e4",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-011",
+      "adversary_type": "environment_swap",
+      "query": "What email sender does production use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e5",
+        "e1",
+        "e3",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "env-012",
+      "adversary_type": "environment_swap",
+      "query": "What email sender does development use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e5",
+        "e1",
+        "e4",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "env-013",
+      "adversary_type": "environment_swap",
+      "query": "What nats cluster does staging use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-014",
+      "adversary_type": "environment_swap",
+      "query": "What nats cluster does production use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-015",
+      "adversary_type": "environment_swap",
+      "query": "What nats cluster does development use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-016",
+      "adversary_type": "environment_swap",
+      "query": "What API base URL does staging use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-017",
+      "adversary_type": "environment_swap",
+      "query": "What API base URL does production use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e3",
+        "e2",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-018",
+      "adversary_type": "environment_swap",
+      "query": "What API base URL does development use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-019",
+      "adversary_type": "environment_swap",
+      "query": "What metrics backend does staging use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-020",
+      "adversary_type": "environment_swap",
+      "query": "What metrics backend does production use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e3",
+        "e2",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-021",
+      "adversary_type": "environment_swap",
+      "query": "What metrics backend does development use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-022",
+      "adversary_type": "environment_swap",
+      "query": "What auth issuer does staging use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-023",
+      "adversary_type": "environment_swap",
+      "query": "What auth issuer does production use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e3",
+        "e2",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-024",
+      "adversary_type": "environment_swap",
+      "query": "What auth issuer does development use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-025",
+      "adversary_type": "environment_swap",
+      "query": "What artifact bucket does staging use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-026",
+      "adversary_type": "environment_swap",
+      "query": "What artifact bucket does production use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-027",
+      "adversary_type": "environment_swap",
+      "query": "What artifact bucket does development use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-028",
+      "adversary_type": "environment_swap",
+      "query": "What search index does staging use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-029",
+      "adversary_type": "environment_swap",
+      "query": "What search index does production use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-030",
+      "adversary_type": "environment_swap",
+      "query": "What search index does development use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "envx-001",
+      "adversary_type": "environment_swap",
+      "query": "What feature flag service does staging use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e6",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "envx-002",
+      "adversary_type": "environment_swap",
+      "query": "What feature flag service does production use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e6",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "envx-003",
+      "adversary_type": "environment_swap",
+      "query": "What artifact registry does staging use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e5",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "envx-004",
+      "adversary_type": "environment_swap",
+      "query": "What artifact registry does production use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e5",
+        "e6",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "envx-005",
+      "adversary_type": "environment_swap",
+      "query": "What artifact registry does development use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "envx-006",
+      "adversary_type": "environment_swap",
+      "query": "What workflow queue does staging use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "envx-007",
+      "adversary_type": "environment_swap",
+      "query": "What workflow queue does production use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "envx-008",
+      "adversary_type": "environment_swap",
+      "query": "What workflow queue does development use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "envx-009",
+      "adversary_type": "environment_swap",
+      "query": "What analytics endpoint does staging use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "envx-010",
+      "adversary_type": "environment_swap",
+      "query": "What analytics endpoint does production use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "envx-011",
+      "adversary_type": "environment_swap",
+      "query": "What analytics endpoint does development use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "envx-012",
+      "adversary_type": "environment_swap",
+      "query": "What auth callback domain does staging use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "envx-013",
+      "adversary_type": "environment_swap",
+      "query": "What auth callback domain does production use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "envx-014",
+      "adversary_type": "environment_swap",
+      "query": "What auth callback domain does development use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "envx-015",
+      "adversary_type": "environment_swap",
+      "query": "What payments webhook host does staging use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "envx-016",
+      "adversary_type": "environment_swap",
+      "query": "What payments webhook host does production use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "envx-017",
+      "adversary_type": "environment_swap",
+      "query": "What payments webhook host does development use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "envx-018",
+      "adversary_type": "environment_swap",
+      "query": "What logs bucket does staging use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "envx-019",
+      "adversary_type": "environment_swap",
+      "query": "What logs bucket does production use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "envx-020",
+      "adversary_type": "environment_swap",
+      "query": "What logs bucket does development use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-001",
+      "adversary_type": "entity_swap",
+      "query": "What milk does Caroline prefer during release checklist mornings?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e6",
+        "e5",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-002",
+      "adversary_type": "entity_swap",
+      "query": "What desk setup does Jordan prefer during incident review weeks?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4",
+        "e6",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-003",
+      "adversary_type": "entity_swap",
+      "query": "What database does Alicia prefer during schema repair sessions?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e6",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-004",
+      "adversary_type": "entity_swap",
+      "query": "What editor does Mika prefer during terminal-only incident shifts?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e6",
+        "e4",
+        "e2",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-005",
+      "adversary_type": "entity_swap",
+      "query": "What theme does Darren prefer during overnight monitoring weeks?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e6",
+        "e3",
+        "e2",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-006",
+      "adversary_type": "entity_swap",
+      "query": "What API style does Riley prefer during frontend integration weeks?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e6",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-007",
+      "adversary_type": "entity_swap",
+      "query": "What check-in rhythm does Marina prefer during launch weeks?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e6",
+        "e2",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-008",
+      "adversary_type": "entity_swap",
+      "query": "What build setup does Talia prefer during service bootstrap work?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e6",
+        "e5",
+        "e4",
+        "e2"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-009",
+      "adversary_type": "entity_swap",
+      "query": "What does Nolan prefer?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e1",
+        "e5",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "entity-010",
+      "adversary_type": "entity_swap",
+      "query": "What does Elena prefer?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e1",
+        "e2",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "entity-011",
+      "adversary_type": "entity_swap",
+      "query": "What does Sonia prefer?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e1",
+        "e5",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "entity-012",
+      "adversary_type": "entity_swap",
+      "query": "What does Maren prefer?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e5",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entityx-001",
+      "adversary_type": "entity_swap",
+      "query": "What lunch does Colin prefer during migration retro days?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e5",
+        "e4",
+        "e3",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entityx-002",
+      "adversary_type": "entity_swap",
+      "query": "What tracker does Amira prefer during release coordination weeks?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e6",
+        "e2",
+        "e5",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entityx-003",
+      "adversary_type": "entity_swap",
+      "query": "What does Devon prefer?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entityx-004",
+      "adversary_type": "entity_swap",
+      "query": "What does Selena prefer?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e1",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "entityx-005",
+      "adversary_type": "entity_swap",
+      "query": "What does Tristan prefer?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entityx-006",
+      "adversary_type": "entity_swap",
+      "query": "What does Nadia prefer?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entityx-007",
+      "adversary_type": "entity_swap",
+      "query": "What does Harper prefer?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entityx-008",
+      "adversary_type": "entity_swap",
+      "query": "What does Leona prefer?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e1",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "entityx-009",
+      "adversary_type": "entity_swap",
+      "query": "What does Mason prefer?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entityx-010",
+      "adversary_type": "entity_swap",
+      "query": "What does Tessa prefer?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entityx-011",
+      "adversary_type": "entity_swap",
+      "query": "What does Gideon prefer?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entityx-012",
+      "adversary_type": "entity_swap",
+      "query": "What does Priya prefer?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entityx-013",
+      "adversary_type": "entity_swap",
+      "query": "What does Evan prefer?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e1",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "entityx-014",
+      "adversary_type": "entity_swap",
+      "query": "What does Lena prefer?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entityx-015",
+      "adversary_type": "entity_swap",
+      "query": "What does Marco prefer?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entityx-016",
+      "adversary_type": "entity_swap",
+      "query": "What does Keira prefer?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entityx-017",
+      "adversary_type": "entity_swap",
+      "query": "What does Brennan prefer?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entityx-018",
+      "adversary_type": "entity_swap",
+      "query": "What does Farah prefer?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e1",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "entityx-019",
+      "adversary_type": "entity_swap",
+      "query": "What does Noelle prefer?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e1",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "entityx-020",
+      "adversary_type": "entity_swap",
+      "query": "What does Soren prefer?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-001",
+      "adversary_type": "time_swap",
+      "query": "When did we migrate auth to bearer tokens?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-002",
+      "adversary_type": "time_swap",
+      "query": "When did we split staging and production domains?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-003",
+      "adversary_type": "time_swap",
+      "query": "When did we move Redis into a private subnet?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-004",
+      "adversary_type": "time_swap",
+      "query": "When did we ship the reporting dashboard?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-005",
+      "adversary_type": "time_swap",
+      "query": "When did we enable GPU inference in Docker?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-006",
+      "adversary_type": "time_swap",
+      "query": "When did we rotate the SES credentials?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-007",
+      "adversary_type": "time_swap",
+      "query": "When did we switch the default embedded model to bge-small?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-008",
+      "adversary_type": "time_swap",
+      "query": "When did we publish the public GHCR image?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-009",
+      "adversary_type": "time_swap",
+      "query": "When did we replace the handwritten MCP server?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-010",
+      "adversary_type": "time_swap",
+      "query": "When did we introduce depth-aware ranking?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-011",
+      "adversary_type": "time_swap",
+      "query": "When did we remove the TUI surface?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-012",
+      "adversary_type": "time_swap",
+      "query": "When did we generalize the tagger pipeline?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "timex-001",
+      "adversary_type": "time_swap",
+      "query": "When did we publish the first public image?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "timex-002",
+      "adversary_type": "time_swap",
+      "query": "When did we rename the graph package to taggraph?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "timex-003",
+      "adversary_type": "time_swap",
+      "query": "When did we switch OpenCode to the official MCP SDK?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "timex-004",
+      "adversary_type": "time_swap",
+      "query": "When did we remove the terminal UI?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "timex-005",
+      "adversary_type": "time_swap",
+      "query": "When did we set bge-small as the default embedded model?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "timex-006",
+      "adversary_type": "time_swap",
+      "query": "When did we introduce proper-noun tag extraction?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e1",
+        "e2"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "timex-007",
+      "adversary_type": "time_swap",
+      "query": "When did we generalize the Docker runtime image?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "timex-008",
+      "adversary_type": "time_swap",
+      "query": "When did we fix anonymous GHCR pulls?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e1",
+        "e2"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "timex-009",
+      "adversary_type": "time_swap",
+      "query": "When did we drop tier terminology from the interface?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "timex-010",
+      "adversary_type": "time_swap",
+      "query": "When did we move from topicgraph to taggraph?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "timex-011",
+      "adversary_type": "time_swap",
+      "query": "When did we add benchmark charts?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "timex-012",
+      "adversary_type": "time_swap",
+      "query": "When did we publish the adversarial benchmark skeleton?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "timex-013",
+      "adversary_type": "time_swap",
+      "query": "When did we introduce depth-aware ranking bias?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "timex-014",
+      "adversary_type": "time_swap",
+      "query": "When did we refocus the README benchmark section?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "timex-015",
+      "adversary_type": "time_swap",
+      "query": "When did we switch the package image name to generic tagmem?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "timex-016",
+      "adversary_type": "time_swap",
+      "query": "When did we replace the shell-wrapper MCP path?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "timex-017",
+      "adversary_type": "time_swap",
+      "query": "When did we add scripted ingest integration tests?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "timex-018",
+      "adversary_type": "time_swap",
+      "query": "When did we add benchmark raw artifact publishing?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "timex-019",
+      "adversary_type": "time_swap",
+      "query": "When did we make the public repo visible?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e1",
+        "e2"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "timex-020",
+      "adversary_type": "time_swap",
+      "query": "When did we publish the refreshed runtime image?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "state-001",
+      "adversary_type": "state_update",
+      "query": "What is the current production domain?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-002",
+      "adversary_type": "state_update",
+      "query": "What is the default embed model?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-003",
+      "adversary_type": "state_update",
+      "query": "What is the current staging database?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-004",
+      "adversary_type": "state_update",
+      "query": "What is the current metrics backend?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-005",
+      "adversary_type": "state_update",
+      "query": "What is the current mail sender?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "state-006",
+      "adversary_type": "state_update",
+      "query": "What is the current OpenCode MCP name?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-007",
+      "adversary_type": "state_update",
+      "query": "What is the current published image?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-008",
+      "adversary_type": "state_update",
+      "query": "What is the current local data root?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "state-009",
+      "adversary_type": "state_update",
+      "query": "What is the current vector backend?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "state-010",
+      "adversary_type": "state_update",
+      "query": "What is the current graph package name?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "statex-001",
+      "adversary_type": "state_update",
+      "query": "What is the current benchmark default model?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "statex-002",
+      "adversary_type": "state_update",
+      "query": "What is the current OpenCode MCP name?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "statex-003",
+      "adversary_type": "state_update",
+      "query": "What is the current Dockerfile name?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "statex-004",
+      "adversary_type": "state_update",
+      "query": "What is the current GHCR image?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "statex-005",
+      "adversary_type": "state_update",
+      "query": "What is the current benchmark data root?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "statex-006",
+      "adversary_type": "state_update",
+      "query": "What is the current public MCP prefix?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "statex-007",
+      "adversary_type": "state_update",
+      "query": "What is the current graph package name?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "statex-008",
+      "adversary_type": "state_update",
+      "query": "What is the current default acceleration mode?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "statex-009",
+      "adversary_type": "state_update",
+      "query": "What is the current install preference?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "statex-010",
+      "adversary_type": "state_update",
+      "query": "What is the current CLI primary surface?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "statex-011",
+      "adversary_type": "state_update",
+      "query": "What is the current default runtime image?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "statex-012",
+      "adversary_type": "state_update",
+      "query": "What is the current published benchmark file path?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "statex-013",
+      "adversary_type": "state_update",
+      "query": "What is the current package host?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "statex-014",
+      "adversary_type": "state_update",
+      "query": "What is the current repo owner?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "statex-015",
+      "adversary_type": "state_update",
+      "query": "What is the current benchmark category count?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "statex-016",
+      "adversary_type": "state_update",
+      "query": "What is the current benchmark default device?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "statex-017",
+      "adversary_type": "state_update",
+      "query": "What is the current memory grouping model?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "statex-018",
+      "adversary_type": "state_update",
+      "query": "What is the current benchmark standalone project?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "statex-019",
+      "adversary_type": "state_update",
+      "query": "What is the current install wrapper root?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "statex-020",
+      "adversary_type": "state_update",
+      "query": "What is the current doctor image behavior?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-001",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for Terraform environments?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "speaker-002",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for tagging pipeline?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e4",
+        "e2",
+        "e1"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.25
+    },
+    {
+      "id": "speaker-003",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for OpenCode integration?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e4",
+        "e2",
+        "e1"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.25
+    },
+    {
+      "id": "speaker-004",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for release packaging?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e4",
+        "e3",
+        "e2",
+        "e1"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.25
+    },
+    {
+      "id": "speaker-005",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for depth model?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e4",
+        "e1",
+        "e2"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "speaker-006",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for README benchmarks?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e4",
+        "e3",
+        "e1",
+        "e2"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "speaker-007",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for Docker data root?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e4",
+        "e2",
+        "e1"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.25
+    },
+    {
+      "id": "speaker-008",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for MCP compatibility?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e4",
+        "e3",
+        "e1",
+        "e2"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "speaker-009",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for adversarial benchmark repo?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e4",
+        "e2",
+        "e1"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.25
+    },
+    {
+      "id": "speaker-010",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for OpenCode command naming?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e4",
+        "e3",
+        "e1",
+        "e2"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "speakerx-001",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for adversarial benchmark design?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e4",
+        "e5",
+        "e1",
+        "e3",
+        "e2"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "speakerx-002",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for Docker image naming?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e4",
+        "e2",
+        "e1",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speakerx-003",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for OpenCode commands?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e4",
+        "e1",
+        "e5",
+        "e2"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speakerx-004",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for tagging pipeline?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e3",
+        "e5",
+        "e1",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "speakerx-005",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for README benchmarks?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speakerx-006",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for public package visibility?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e3",
+        "e1",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "speakerx-007",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for OpenCode MCP implementation?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e4",
+        "e1",
+        "e2",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "speakerx-008",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for TUI removal?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e2",
+        "e1"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "speakerx-009",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for depth model?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e1",
+        "e2"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "speakerx-010",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for GPU support?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e1",
+        "e2"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "speakerx-011",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for docs cleanup?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e1",
+        "e2"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "speakerx-012",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for fresh install testing?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e1",
+        "e2"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "speakerx-013",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for image publish process?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e2",
+        "e1"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "speakerx-014",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for memory terminology?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e2",
+        "e1"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "speakerx-015",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for public benchmark reporting?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e1",
+        "e2"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "speakerx-016",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for OpenAI-compatible support?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e2",
+        "e1"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "speakerx-017",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for CLI install docs?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e2",
+        "e1"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "speakerx-018",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for graph naming?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e1",
+        "e2"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "speakerx-019",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for CPU fallback verification?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e1",
+        "e2"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "speakerx-020",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for benchmark expansion?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e2",
+        "e1"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "paraphrase-001",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What timeout do API calls use?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e6",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-002",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "How long do production cookies last?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e6",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-003",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the upload limit?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e6",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-004",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "How often does auth refresh run?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-005",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "When does the reporting batch run?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-006",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What port does the public API use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-007",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the Docker data root default?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-008",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What prefix do the MCP tools use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-009",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the default GPU model?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-010",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the runtime image name?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-011",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "How is the MCP server implemented?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-012",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the graph package name?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrasex-001",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the benchmark data root default?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e4",
+        "e3",
+        "e5",
+        "e6"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrasex-002",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What happens when CUDA is unavailable?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrasex-003",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "How does the MCP server communicate?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrasex-004",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What does the install wrapper do first?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrasex-005",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "How is the benchmark section presented in the README?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e3",
+        "e1"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "paraphrasex-006",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "How should OpenCode launch the image?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrasex-007",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What should the graph browser use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrasex-008",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "Where should the public image be published?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrasex-009",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What happens when tagmem runs without a command?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrasex-010",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "Where should the adversarial benchmark live?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrasex-011",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "How does the improved tagger work?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e1",
+        "e2"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrasex-012",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "Why is bge-small the default GPU model?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrasex-013",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What MCP tool prefix does the project use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrasex-014",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "How do you override the Docker data root?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrasex-015",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What should the doctor command report?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrasex-016",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What belongs in the benchmark package?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrasex-017",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the correct import command name?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrasex-018",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "How do depth and tags relate?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrasex-019",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "Why is the image generic?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrasex-020",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "How should install validation be done?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "env-hard-001",
+      "adversary_type": "environment_swap",
+      "query": "What document OCR endpoint does preview use?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-002",
+      "adversary_type": "environment_swap",
+      "query": "What Kafka bootstrap server does failover use for billing events?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-001",
+      "adversary_type": "entity_swap",
+      "query": "What editor does Maris prefer for schema reviews?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e6",
+        "e4",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-002",
+      "adversary_type": "entity_swap",
+      "query": "What breakfast does Jonelle bring to incident review mornings?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e6",
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-hard-001",
+      "adversary_type": "time_swap",
+      "query": "When did we move benchmark raw artifacts to immutable paths?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-hard-002",
+      "adversary_type": "time_swap",
+      "query": "When did we stop publishing the preview embedding index?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-001",
+      "adversary_type": "state_update",
+      "query": "What is the current default reranker in evaluation mode?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "state-hard-002",
+      "adversary_type": "state_update",
+      "query": "What is the current retention window for benchmark raw JSON artifacts?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "speaker-hard-001",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for handling contradictory memories during retrieval?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e5",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "speaker-hard-002",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for benchmark expansion without making it synthetic?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-001",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the quarantine period before a deleted memory can be purged?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e5",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-hard-002",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "How many exact tag matches are enough to skip embedding reranking?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e1",
+        "e2",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-003",
+      "adversary_type": "environment_swap",
+      "query": "What vector store host does canary use for semantic search?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e6",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-004",
+      "adversary_type": "environment_swap",
+      "query": "What callback domain does sandbox use for partner SSO?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e6",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-005",
+      "adversary_type": "environment_swap",
+      "query": "What object prefix does disaster recovery use for nightly replay archives?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e5",
+        "e3",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-003",
+      "adversary_type": "entity_swap",
+      "query": "What notebook does Riona use for partner call notes?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e6",
+        "e5",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-004",
+      "adversary_type": "entity_swap",
+      "query": "What tea does Kamilah drink during release freeze days?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e5",
+        "e2",
+        "e1",
+        "e3",
+        "e6",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "entity-hard-005",
+      "adversary_type": "entity_swap",
+      "query": "What bike route does Daren take on office archive days?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e6",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-hard-003",
+      "adversary_type": "time_swap",
+      "query": "When did we rename the replay exporter to the archive publisher?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-hard-004",
+      "adversary_type": "time_swap",
+      "query": "When did we start requiring explicit schema versions in import bundles?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-hard-005",
+      "adversary_type": "time_swap",
+      "query": "When did we stop using the shadow index during nightly evaluation?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-003",
+      "adversary_type": "state_update",
+      "query": "What is the current default deduplication window for diary ingestion?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-004",
+      "adversary_type": "state_update",
+      "query": "What is the current canonical field name for source provenance?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-005",
+      "adversary_type": "state_update",
+      "query": "What is the current maximum candidate pool before reranking?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "speaker-hard-003",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for evaluating retrieval errors instead of just reporting a headline score?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e5",
+        "e4",
+        "e3",
+        "e1"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.25
+    },
+    {
+      "id": "speaker-hard-004",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for keeping renamed fields manageable in the dataset?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e3",
+        "e2",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-005",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for using historical notes without letting them outrank current operations?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-003",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What confidence score is required before a guessed speaker tag is accepted?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-004",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "How often is the contradiction scan run on active memories?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-hard-005",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the minimum span before two diary entries are considered a duplicate cluster?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-006",
+      "adversary_type": "environment_swap",
+      "query": "What Redis sentinel host does warm standby use for session failover?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-007",
+      "adversary_type": "environment_swap",
+      "query": "What upload bucket does partner preview use for signed document intake?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e5",
+        "e3",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-008",
+      "adversary_type": "environment_swap",
+      "query": "What metrics pushgateway does lab use for embedding bake-offs?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e6",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-006",
+      "adversary_type": "entity_swap",
+      "query": "What mug does Sorelle use during benchmark triage?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e6",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-007",
+      "adversary_type": "entity_swap",
+      "query": "What snack does Imani bring to late schema review sessions?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e5",
+        "e2",
+        "e6",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-008",
+      "adversary_type": "entity_swap",
+      "query": "What train does Niko take home after overnight incident duty?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e4",
+        "e5",
+        "e2",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-hard-006",
+      "adversary_type": "time_swap",
+      "query": "When did we make contradiction flags visible in the review UI?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-hard-007",
+      "adversary_type": "time_swap",
+      "query": "When did we stop indexing assistant signatures into search?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-hard-008",
+      "adversary_type": "time_swap",
+      "query": "When did we require explicit speaker attribution on imported transcripts?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "state-hard-006",
+      "adversary_type": "state_update",
+      "query": "What is the current maximum age for 'current' facts before they require review?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-007",
+      "adversary_type": "state_update",
+      "query": "What is the current canonical tag for manually verified contradictions?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e5",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "state-hard-008",
+      "adversary_type": "state_update",
+      "query": "What is the current default sort order for audit timelines?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-006",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for handling reverted experiments in benchmark memories?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-007",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for making entity confusion feel realistic instead of toy-like?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e4",
+        "e1",
+        "e5",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "speaker-hard-008",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for keeping contradiction cases inspectable by humans?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e5",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-006",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What score is needed before an alias match is treated as exact?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-007",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "How many contradictory entries trigger a manual review queue?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-hard-008",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the default cooldown before a retracted fact can be reintroduced?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "env-hard-009",
+      "adversary_type": "environment_swap",
+      "query": "What billing ledger host does finance-sandbox use for invoice rehearsal?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e3",
+        "e5",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-010",
+      "adversary_type": "environment_swap",
+      "query": "What document store does legal-review use for redline packets?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e3",
+        "e6",
+        "e2",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-011",
+      "adversary_type": "environment_swap",
+      "query": "What mail relay does support-training use for simulated escalations?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-012",
+      "adversary_type": "environment_swap",
+      "query": "What warehouse queue does returns-lab use for barcode replay?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e6",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-009",
+      "adversary_type": "entity_swap",
+      "query": "What pen does Leorin use for vendor security questionnaires?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e6",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-010",
+      "adversary_type": "entity_swap",
+      "query": "What breakfast does Tamsin pack for payroll close mornings?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e5",
+        "e4",
+        "e3",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-011",
+      "adversary_type": "entity_swap",
+      "query": "What notebook does Darien carry to site audit walk-throughs?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e6",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-012",
+      "adversary_type": "entity_swap",
+      "query": "What drink does Mireya bring to overnight migration cutovers?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e5",
+        "e3",
+        "e6",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-hard-009",
+      "adversary_type": "time_swap",
+      "query": "When did we require receipts on travel reimbursements over $75?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-hard-010",
+      "adversary_type": "time_swap",
+      "query": "When did we rename the vendor checklist to the supplier trust packet?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-hard-011",
+      "adversary_type": "time_swap",
+      "query": "When did we stop auto-approving low-risk contract redlines?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-hard-012",
+      "adversary_type": "time_swap",
+      "query": "When did we enforce manager sign-off on onboarding equipment requests?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-009",
+      "adversary_type": "state_update",
+      "query": "What is the current auto-escalation threshold for unassigned support tickets?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-010",
+      "adversary_type": "state_update",
+      "query": "What is the current canonical field name for traveler cost center?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e5",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-011",
+      "adversary_type": "state_update",
+      "query": "What is the current review window for unsigned supplier questionnaires?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-012",
+      "adversary_type": "state_update",
+      "query": "What is the current default reminder cadence for overdue audit findings?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e5",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-009",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for making support memories realistic without turning them into ticket spam?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e4",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "speaker-hard-010",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for travel and reimbursement memories?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e3",
+        "e5",
+        "e2"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-011",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for adding diversity without losing the benchmark's identity?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e4",
+        "e1",
+        "e3",
+        "e2",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "speaker-hard-012",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for realistic state-update cases?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e4",
+        "e5",
+        "e2",
+        "e3",
+        "e1"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.25
+    },
+    {
+      "id": "paraphrase-hard-009",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the minimum approval count before a supplier exception can be fast-tracked?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-010",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "How long is the cooling-off period before a terminated vendor can be re-invited?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-011",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What confidence is required before a receipt is auto-classified as lodging?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e3",
+        "e1",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-012",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the default reminder delay before an unsigned onboarding form is nudged?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e1",
+        "e2",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-013",
+      "adversary_type": "environment_swap",
+      "query": "What patient messaging gateway does clinic-training use for mock appointment reminders?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e6",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-014",
+      "adversary_type": "environment_swap",
+      "query": "What grading queue does district-sandbox use for standardized essay rescoring?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e5",
+        "e3",
+        "e4",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-015",
+      "adversary_type": "environment_swap",
+      "query": "What freezer sensor endpoint does store-lab use for overnight spoilage drills?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-016",
+      "adversary_type": "environment_swap",
+      "query": "What badge printer host does facilities-drill use for evacuation practice?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e6",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-013",
+      "adversary_type": "entity_swap",
+      "query": "What tea does Anjali drink during patient intake audits?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e6",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-014",
+      "adversary_type": "entity_swap",
+      "query": "What bag does Corin carry to substitute teacher orientation?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e5",
+        "e4",
+        "e6",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-015",
+      "adversary_type": "entity_swap",
+      "query": "What snack does Paloma bring to overnight inventory resets?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e5",
+        "e2",
+        "e6",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-016",
+      "adversary_type": "entity_swap",
+      "query": "What notebook does Joriel use for lease walk-throughs?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e6",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-hard-013",
+      "adversary_type": "time_swap",
+      "query": "When did we require supervisor review on disputed clinic copay waivers?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-hard-014",
+      "adversary_type": "time_swap",
+      "query": "When did we stop auto-posting district attendance corrections?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-hard-015",
+      "adversary_type": "time_swap",
+      "query": "When did we require dual sign-off on overnight cash drops?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-hard-016",
+      "adversary_type": "time_swap",
+      "query": "When did we rename the incident binder to the building event log?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "state-hard-013",
+      "adversary_type": "state_update",
+      "query": "What is the current timeout before an unanswered patient portal message escalates?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-014",
+      "adversary_type": "state_update",
+      "query": "What is the current canonical field name for student guardian language preference?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e5",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-015",
+      "adversary_type": "state_update",
+      "query": "What is the current default recount window for overnight shelf audits?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-016",
+      "adversary_type": "state_update",
+      "query": "What is the current reminder cadence for open elevator inspection findings?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e5",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-013",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for making healthcare admin memories realistic?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e3",
+        "e2",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-014",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for education and training memories?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e3",
+        "e2",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-015",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for retail and facilities memories?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-016",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for compliance and investigations memories?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-hard-013",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What score is required before a clinic message is auto-routed to billing?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-014",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "How many missing forms trigger a substitute onboarding escalation?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-hard-015",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the default hold time before a spoilage alert is escalated to a manager?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-016",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the default waiting period before a lease inspection is marked missed?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-017",
+      "adversary_type": "environment_swap",
+      "query": "What claims image store does adjuster-training use for hail damage mock reviews?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e6",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-018",
+      "adversary_type": "environment_swap",
+      "query": "What room booking host does event-rehearsal use for banquet seating tests?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e6",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-019",
+      "adversary_type": "environment_swap",
+      "query": "What calibration queue does plant-sandbox use for torque wrench verification?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e5",
+        "e3",
+        "e4",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-020",
+      "adversary_type": "environment_swap",
+      "query": "What permit archive host does zoning-preview use for resubmission packets?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e6",
+        "e2",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-017",
+      "adversary_type": "entity_swap",
+      "query": "What snack does Sabria bring to workers' comp intake reviews?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e5",
+        "e3",
+        "e6",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-018",
+      "adversary_type": "entity_swap",
+      "query": "What shoes does Elowen wear during ballroom setup inspections?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-019",
+      "adversary_type": "entity_swap",
+      "query": "What mug does Tarek carry during final line quality reviews?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-020",
+      "adversary_type": "entity_swap",
+      "query": "What folder does Narelle bring to zoning appeal hearings?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e6",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-hard-017",
+      "adversary_type": "time_swap",
+      "query": "When did we require manager concurrence on employee relations note closures?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-hard-018",
+      "adversary_type": "time_swap",
+      "query": "When did we rename the guest issue log to the stay resolution ledger?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e4",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-hard-019",
+      "adversary_type": "time_swap",
+      "query": "When did we stop auto-closing torque variance findings?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-hard-020",
+      "adversary_type": "time_swap",
+      "query": "When did we require secondary reviewer sign-off on expedited permit denials?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-017",
+      "adversary_type": "state_update",
+      "query": "What is the current default reserve review window for suspicious auto claims?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e5",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-018",
+      "adversary_type": "state_update",
+      "query": "What is the current canonical field name for banquet guarantee cutoff?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-019",
+      "adversary_type": "state_update",
+      "query": "What is the current cooldown before a failed calibration batch is requeued?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e5",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-020",
+      "adversary_type": "state_update",
+      "query": "What is the current reminder cadence for unresolved employee relations follow-ups?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "speaker-hard-017",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for insurance and claims memories?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-018",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for hospitality and events memories?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-019",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for manufacturing and quality control memories?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-020",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for public sector and HR memories?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e4",
+        "e1",
+        "e2",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-017",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What confidence is required before a hail damage photo is auto-tagged as windshield-only?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-018",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "How many unresolved guest complaints trigger a banquet operations review?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-019",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the default delay before a failed calibration alert is sent to the shift lead?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-hard-020",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the default hold period before an unsigned disciplinary notice is escalated?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-021",
+      "adversary_type": "environment_swap",
+      "query": "What ledger replica host does treasury-sandbox use for settlement rehearsals?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e6",
+        "e4",
+        "e2",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-022",
+      "adversary_type": "environment_swap",
+      "query": "What routing queue does depot-training use for cold-chain exception drills?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e6",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-023",
+      "adversary_type": "environment_swap",
+      "query": "What CMS asset host does editorial-preview use for embargoed homepage packages?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e6",
+        "e4",
+        "e2",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-024",
+      "adversary_type": "environment_swap",
+      "query": "What grant portal host does donor-sandbox use for renewal packet tests?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e6",
+        "e2",
+        "e4",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-021",
+      "adversary_type": "entity_swap",
+      "query": "What tea does Liora drink during wire exception reconciliation?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e4",
+        "e5",
+        "e2",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-022",
+      "adversary_type": "entity_swap",
+      "query": "What snack does Marisol bring to overnight route audits?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-023",
+      "adversary_type": "entity_swap",
+      "query": "What notebook does Iven use for fact-check huddles?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-024",
+      "adversary_type": "entity_swap",
+      "query": "What drink does Saanvi bring to grant scoring panels?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e5",
+        "e3",
+        "e2",
+        "e6",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-hard-021",
+      "adversary_type": "time_swap",
+      "query": "When did we require dual review on high-value escrow releases?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-hard-022",
+      "adversary_type": "time_swap",
+      "query": "When did we stop auto-clearing delayed cold-chain exceptions?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-hard-023",
+      "adversary_type": "time_swap",
+      "query": "When did we rename the correction desk to the standards desk?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-hard-024",
+      "adversary_type": "time_swap",
+      "query": "When did we require lab director sign-off on specimen relabel requests?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "state-hard-021",
+      "adversary_type": "state_update",
+      "query": "What is the current timeout before an unconfirmed wire callback escalates?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-022",
+      "adversary_type": "state_update",
+      "query": "What is the current default review window for frozen shipment incident notes?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e5",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "state-hard-023",
+      "adversary_type": "state_update",
+      "query": "What is the current canonical field name for homepage embargo lift time?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e5",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-024",
+      "adversary_type": "state_update",
+      "query": "What is the current reminder cadence for unsigned grant award letters?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-021",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for banking and lending memories?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-022",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for logistics and shipping memories?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-023",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for media and publishing memories?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-024",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for nonprofit and laboratory administration memories?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e4",
+        "e1",
+        "e2",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-021",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What confidence is required before a wire note is auto-tagged as callback-complete?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-022",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "How many late depot scans trigger a cold-chain route review?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-023",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the default delay before an unsigned grant rubric is escalated?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-024",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the default hold time before a specimen pickup failure is escalated?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-025",
+      "adversary_type": "environment_swap",
+      "query": "What outage queue does noc-training use for fiber cut simulations?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e6",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-026",
+      "adversary_type": "environment_swap",
+      "query": "What dispatch host does gate-sandbox use for deicing turnaround drills?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e6",
+        "e2",
+        "e5",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-027",
+      "adversary_type": "environment_swap",
+      "query": "What telemetry broker does grid-lab use for transformer overload drills?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e6",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-028",
+      "adversary_type": "environment_swap",
+      "query": "What intake archive host does clinic-rights-preview use for eviction defense packets?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e6",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-025",
+      "adversary_type": "entity_swap",
+      "query": "What tea does Nayeli drink during outage bridge moderation?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4",
+        "e5",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-026",
+      "adversary_type": "entity_swap",
+      "query": "What shoes does Mirel wear during runway lighting inspections?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e6",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-027",
+      "adversary_type": "entity_swap",
+      "query": "What notebook does Tovah use for outage restoration briefings?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e6",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-028",
+      "adversary_type": "entity_swap",
+      "query": "What drink does Roshni bring to protocol deviation board reviews?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e5",
+        "e6",
+        "e2",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-hard-025",
+      "adversary_type": "time_swap",
+      "query": "When did we require supervisor confirmation on customer-owned modem swaps?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-hard-026",
+      "adversary_type": "time_swap",
+      "query": "When did we stop auto-clearing gate tug checklist exceptions?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-hard-027",
+      "adversary_type": "time_swap",
+      "query": "When did we rename the outage council to the restoration board?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-hard-028",
+      "adversary_type": "time_swap",
+      "query": "When did we require ethics chair sign-off on expedited consent amendments?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "state-hard-025",
+      "adversary_type": "state_update",
+      "query": "What is the current timeout before an unacknowledged tower alarm escalates?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-026",
+      "adversary_type": "state_update",
+      "query": "What is the current default review window for runway light outage notes?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-027",
+      "adversary_type": "state_update",
+      "query": "What is the current canonical field name for emergency load shed trigger time?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-028",
+      "adversary_type": "state_update",
+      "query": "What is the current reminder cadence for unsigned participant reconsent forms?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-025",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for telecom and network operations memories?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-026",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for aviation and airport operations memories?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-027",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for energy and utilities memories?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e5",
+        "e3",
+        "e2"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-028",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for legal aid and research ethics memories?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e4",
+        "e1",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "paraphrase-hard-025",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What confidence is required before a fiber outage note is auto-tagged as customer-visible?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-hard-026",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "How many feeder alarms trigger a restoration board review?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e2",
+        "e1",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-hard-027",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the default delay before an unsigned runway checklist is escalated?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-hard-028",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the default hold period before an unsigned protocol deviation memo is escalated?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-029",
+      "adversary_type": "environment_swap",
+      "query": "What permit queue does streets-sandbox use for curb closure rehearsals?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e5",
+        "e6",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-030",
+      "adversary_type": "environment_swap",
+      "query": "What assay results host does pharma-preview use for batch release drills?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e6",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-031",
+      "adversary_type": "environment_swap",
+      "query": "What blueprint host does site-lab use for crane path rehearsals?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e5",
+        "e6",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-032",
+      "adversary_type": "environment_swap",
+      "query": "What catalog host does archive-preview use for traveling exhibit mock installs?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e5",
+        "e6",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-029",
+      "adversary_type": "entity_swap",
+      "query": "What drink does Kalina bring to permit counter reconciliations?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e1",
+        "e5",
+        "e6",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "entity-hard-030",
+      "adversary_type": "entity_swap",
+      "query": "What notebook does Devika use during batch disposition reviews?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e3",
+        "e6",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-031",
+      "adversary_type": "entity_swap",
+      "query": "What snack does Orin bring to crane safety briefings?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e6",
+        "e5",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-032",
+      "adversary_type": "entity_swap",
+      "query": "What bag does Sarela carry during object movement reviews?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e5",
+        "e6",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-hard-029",
+      "adversary_type": "time_swap",
+      "query": "When did we require second reviewer approval on curb access waivers?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-hard-030",
+      "adversary_type": "time_swap",
+      "query": "When did we stop auto-clearing minor assay drift notes?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e5",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-hard-031",
+      "adversary_type": "time_swap",
+      "query": "When did we rename the lift meeting to the crane readiness review?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-hard-032",
+      "adversary_type": "time_swap",
+      "query": "When did we require conservator sign-off on emergency crate swaps?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "state-hard-029",
+      "adversary_type": "state_update",
+      "query": "What is the current timeout before an unassigned curb closure request escalates?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-030",
+      "adversary_type": "state_update",
+      "query": "What is the current default review window for batch release exception notes?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e5",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-031",
+      "adversary_type": "state_update",
+      "query": "What is the current canonical field name for crane path approval time?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e5",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-032",
+      "adversary_type": "state_update",
+      "query": "What is the current reminder cadence for unsigned outbound loan agreements?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-029",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for municipal and permitting memories?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-030",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for pharma and regulated manufacturing memories?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e5",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-031",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for construction and physical operations memories?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e5",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-032",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for collections and cultural institution memories?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-hard-029",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What confidence is required before a curb waiver note is auto-tagged as accessibility-related?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-030",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "How many assay anomalies trigger a batch disposition review?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-hard-031",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the default delay before an unsigned crane path review is escalated?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-hard-032",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the default hold period before an unsigned outbound object report is escalated?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-033",
+      "adversary_type": "environment_swap",
+      "query": "What review API host does benefits-preview use for dependent eligibility audits?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e6",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-034",
+      "adversary_type": "environment_swap",
+      "query": "What dispute queue does card-lab use for chargeback rehearsal packets?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e5",
+        "e6",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-035",
+      "adversary_type": "environment_swap",
+      "query": "What archive host does donor-appeals-preview use for reconsideration packets?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e6",
+        "e2",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-036",
+      "adversary_type": "environment_swap",
+      "query": "What specimen queue does pathology-drill use for relabel incident rehearsals?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e6",
+        "e5",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-033",
+      "adversary_type": "entity_swap",
+      "query": "What snack does Mireen bring to dependent audit escalations?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e5",
+        "e4",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-034",
+      "adversary_type": "entity_swap",
+      "query": "What notebook does Karsten use during chargeback war-room reviews?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4",
+        "e5",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-035",
+      "adversary_type": "entity_swap",
+      "query": "What drink does Eleni bring to reconsideration board packets?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e5",
+        "e1",
+        "e3",
+        "e2",
+        "e6",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "entity-hard-036",
+      "adversary_type": "entity_swap",
+      "query": "What mug does Soraya carry during relabel incident boards?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e1",
+        "e6",
+        "e4",
+        "e2",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-hard-033",
+      "adversary_type": "time_swap",
+      "query": "When did we require second analyst confirmation on dependent override approvals?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-hard-034",
+      "adversary_type": "time_swap",
+      "query": "When did we stop auto-closing low-value chargeback evidence gaps?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-hard-035",
+      "adversary_type": "time_swap",
+      "query": "When did we rename the appeals packet review to the reconsideration board?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-hard-036",
+      "adversary_type": "time_swap",
+      "query": "When did we require pathology director approval on chain-of-custody corrections?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-033",
+      "adversary_type": "state_update",
+      "query": "What is the current timeout before an unreviewed dependent discrepancy escalates?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-034",
+      "adversary_type": "state_update",
+      "query": "What is the current default review window for chargeback evidence holes?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-035",
+      "adversary_type": "state_update",
+      "query": "What is the current canonical field name for reconsideration vote time?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e5",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-036",
+      "adversary_type": "state_update",
+      "query": "What is the current reminder cadence for unresolved relabel incident memos?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "speaker-hard-033",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for making these new cases more challenging without making them noisy?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e4",
+        "e1",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "speaker-hard-034",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for making state-update cases nastier?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e5",
+        "e3",
+        "e1",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "speaker-hard-035",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for making time cases more deceptive?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e5",
+        "e4",
+        "e1",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.25
+    },
+    {
+      "id": "speaker-hard-036",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for making paraphrase cases harder than simple value swaps?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e4",
+        "e1",
+        "e2",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-033",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What confidence is required before a dependent audit note is auto-tagged as household-verified?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-034",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "How many merchant evidence gaps trigger a dispute escalation review?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-035",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the default delay before an unsigned reconsideration packet is escalated?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-hard-036",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the default hold period before an unsigned relabel correction is escalated?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "env-hard-037",
+      "adversary_type": "environment_swap",
+      "query": "What berth scheduler host does harbor-preview use for tug slot rehearsals?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e5",
+        "e2",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-038",
+      "adversary_type": "environment_swap",
+      "query": "What review host does registrar-preview use for transfer credit audits?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-039",
+      "adversary_type": "environment_swap",
+      "query": "What moisture broker does crop-lab use for irrigation failure drills?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-040",
+      "adversary_type": "environment_swap",
+      "query": "What dispatch host does rail-preview use for turnout outage rehearsals?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-041",
+      "adversary_type": "environment_swap",
+      "query": "What docket host does asylum-preview use for intake rehearing packets?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-042",
+      "adversary_type": "environment_swap",
+      "query": "What review host does grants-lab use for field report redactions?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-043",
+      "adversary_type": "environment_swap",
+      "query": "What panel host does trial-preview use for adverse event coding drills?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-044",
+      "adversary_type": "environment_swap",
+      "query": "What review host does newsroom-lab use for takedown rehearsal packets?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-045",
+      "adversary_type": "environment_swap",
+      "query": "What queue host does shelter-preview use for reunification packet drills?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-046",
+      "adversary_type": "environment_swap",
+      "query": "What pricing host does market-preview use for hedging exception drills?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-047",
+      "adversary_type": "environment_swap",
+      "query": "What archive host does archive-lab use for rights clearances rehearsal packets?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-048",
+      "adversary_type": "environment_swap",
+      "query": "What review host does transit-preview use for fare dispute packet drills?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e5",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-049",
+      "adversary_type": "environment_swap",
+      "query": "What panel host does ethics-preview use for consent variance rehearsals?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-037",
+      "adversary_type": "entity_swap",
+      "query": "What tea does Nivara drink during berth reassignment reviews?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-038",
+      "adversary_type": "entity_swap",
+      "query": "What pen does Loric use for transfer exception signatures?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-039",
+      "adversary_type": "entity_swap",
+      "query": "What snack does Aveline bring to irrigation variance boards?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-040",
+      "adversary_type": "entity_swap",
+      "query": "What drink does Parisa bring to turnout delay boards?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e5",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-041",
+      "adversary_type": "entity_swap",
+      "query": "What notebook does Sameer use during asylum intake rehearings?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-042",
+      "adversary_type": "entity_swap",
+      "query": "What snack does Taliah bring to field report redaction sweeps?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-043",
+      "adversary_type": "entity_swap",
+      "query": "What mug does Revan use during adverse event coding syncs?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-044",
+      "adversary_type": "entity_swap",
+      "query": "What tea does Soren bring to takedown rehearsal huddles?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e5",
+        "e1",
+        "e3",
+        "e2",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "entity-hard-045",
+      "adversary_type": "entity_swap",
+      "query": "What bag does Mirette carry during reunification packet checks?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "entity-hard-046",
+      "adversary_type": "entity_swap",
+      "query": "What drink does Orena bring to hedging exception panels?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-047",
+      "adversary_type": "entity_swap",
+      "query": "What notebook does Leontine use during rights clearance reviews?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-048",
+      "adversary_type": "entity_swap",
+      "query": "What snack does Kirel bring to fare dispute hearings?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e5",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-049",
+      "adversary_type": "entity_swap",
+      "query": "What mug does Selene bring to consent variance boards?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-hard-037",
+      "adversary_type": "time_swap",
+      "query": "When did we require harbor chief approval on emergency berth swaps?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-hard-038",
+      "adversary_type": "time_swap",
+      "query": "When did we stop auto-posting transfer exception clears?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-hard-039",
+      "adversary_type": "time_swap",
+      "query": "When did we rename the moisture review to the irrigation variance board?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-hard-040",
+      "adversary_type": "time_swap",
+      "query": "When did we require rail chief sign-off on turnout bypass approvals?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-hard-041",
+      "adversary_type": "time_swap",
+      "query": "When did we require clinic director approval on emergency rehearing packets?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-hard-042",
+      "adversary_type": "time_swap",
+      "query": "When did we stop auto-clearing redaction false positives?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-hard-043",
+      "adversary_type": "time_swap",
+      "query": "When did we rename the coding sync to the variance panel?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-hard-044",
+      "adversary_type": "time_swap",
+      "query": "When did we require standards editor approval on emergency takedown reversals?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-hard-045",
+      "adversary_type": "time_swap",
+      "query": "When did we require case supervisor approval on reunification overrides?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-hard-046",
+      "adversary_type": "time_swap",
+      "query": "When did we stop auto-closing hedging mismatch notices?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-hard-047",
+      "adversary_type": "time_swap",
+      "query": "When did we rename the rights review to the clearance board?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-hard-048",
+      "adversary_type": "time_swap",
+      "query": "When did we require hearings manager sign-off on fare dispute waivers?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-hard-049",
+      "adversary_type": "time_swap",
+      "query": "When did we require ethics vice-chair approval on reconsent deviations?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "state-hard-037",
+      "adversary_type": "state_update",
+      "query": "What is the current timeout before an unassigned berth exception escalates?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-038",
+      "adversary_type": "state_update",
+      "query": "What is the current default review window for transfer exception notes?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "state-hard-039",
+      "adversary_type": "state_update",
+      "query": "What is the current canonical field name for irrigation variance approval time?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-040",
+      "adversary_type": "state_update",
+      "query": "What is the current reminder cadence for unresolved turnout bypass memos?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "state-hard-041",
+      "adversary_type": "state_update",
+      "query": "What is the current timeout before an unassigned rehearing packet escalates?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-042",
+      "adversary_type": "state_update",
+      "query": "What is the current default review window for redaction false positives?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-043",
+      "adversary_type": "state_update",
+      "query": "What is the current canonical field name for coding panel decision time?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e5",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-044",
+      "adversary_type": "state_update",
+      "query": "What is the current reminder cadence for unresolved takedown reversal memos?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "state-hard-045",
+      "adversary_type": "state_update",
+      "query": "What is the current timeout before an unreviewed reunification override escalates?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-046",
+      "adversary_type": "state_update",
+      "query": "What is the current default review window for hedging mismatch notices?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-047",
+      "adversary_type": "state_update",
+      "query": "What is the current canonical field name for rights clearance vote time?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e5",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "state-hard-048",
+      "adversary_type": "state_update",
+      "query": "What is the current reminder cadence for unresolved fare dispute waivers?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-049",
+      "adversary_type": "state_update",
+      "query": "What is the current timeout before an unreviewed reconsent deviation escalates?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-037",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for making entity cases harder without making the names absurd?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e5",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "speaker-hard-038",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for making environment cases harder than simple prod-vs-staging swaps?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e5",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "speaker-hard-039",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for keeping 500 cases diverse without losing pressure?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e1",
+        "e2",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-040",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for getting to 500 cases without sliding into scripting patterns?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e5",
+        "e3",
+        "e1",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "speaker-hard-041",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for making environment distractors feel operationally wrong instead of random?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e4",
+        "e2",
+        "e1",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "speaker-hard-042",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for making paraphrase cases target concept tracking instead of number matching?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e5",
+        "e1",
+        "e4",
+        "e2"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-043",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for making time cases harder at the end of the dataset?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e5",
+        "e2",
+        "e1",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "speaker-hard-044",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for making state cases compete on tiny but consequential differences?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e4",
+        "e5",
+        "e1",
+        "e3",
+        "e2"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "paraphrase-hard-037",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What confidence is required before a berth note is auto-tagged as hazardous-priority?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-038",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "How many transfer note gaps trigger an academic exception board?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-039",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the default delay before an unsigned irrigation variance memo is escalated?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-hard-040",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the default hold period before an unsigned fare waiver note is escalated?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-041",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What confidence is required before a rehearing packet is auto-tagged as detention-priority?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-042",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "How many redaction misses trigger a grant compliance review?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e3",
+        "e1",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-043",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the default delay before an unsigned coding variance memo is escalated?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-044",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the default hold period before an unsigned takedown reversal is escalated?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-045",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What confidence is required before a reunification packet is auto-tagged as sibling-priority?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-046",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "How many hedge variance notes trigger a market controls review?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-hard-047",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the default delay before an unsigned rights clearance packet is escalated?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-hard-048",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What is the default hold period before an unsigned fare dispute packet is escalated?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-hard-049",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What confidence is required before a consent variance note is auto-tagged as immediate-risk?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "env-hard-050",
+      "adversary_type": "environment_swap",
+      "query": "What dispatch host does flood-preview use for levee gate rehearsal alerts?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "entity-hard-050",
+      "adversary_type": "entity_swap",
+      "query": "What snack does Ilya bring to levee gate incident boards?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e5",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-hard-050",
+      "adversary_type": "time_swap",
+      "query": "When did we require deputy chief approval on levee gate overrides?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "state-hard-050",
+      "adversary_type": "state_update",
+      "query": "What is the current timeout before an unreviewed levee alert escalates?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e3",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "speaker-hard-045",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for the last stretch to 500 cases?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e5",
+        "e1",
+        "e4",
+        "e3",
+        "e2"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    }
+  ]
+}

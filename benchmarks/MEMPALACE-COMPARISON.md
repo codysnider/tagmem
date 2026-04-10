@@ -16,8 +16,19 @@ Current `tagmem` GPU results:
 | Model | Recall@5 | Recall@10 | NDCG@10 | Time |
 |---|---:|---:|---:|---:|
 | `all-MiniLM-L6-v2` | 0.982 | 0.994 | 0.933 | 14.4s |
-| `bge-small-en-v1.5` | 0.990 | 0.996 | 0.951 | 22.4s |
+| `bge-small-en-v1.5` | 0.990 | 0.996 | 0.951 | 23.0s |
 | `bge-base-en-v1.5` | 0.992 | 0.994 | 0.950 | 44.1s |
+
+## Adversarial Retrieval Comparison
+
+Using the standalone adversarial distractor benchmark:
+
+| System | Cases | Recall@1 | Recall@5 | MRR |
+|---|---:|---:|---:|---:|
+| `tagmem` | 500 | 0.8860 | 1.0000 | 0.9430 |
+| MemPalace raw-style | 500 | 0.6600 | 1.0000 | 0.8193 |
+
+This benchmark stresses ranking under conflicting or near-miss memories. On the current `500`-case adversarial dataset, both systems saturate top-5 recall, but `tagmem` keeps a large top-1 and MRR advantage.
 
 ## Takeaways
 
