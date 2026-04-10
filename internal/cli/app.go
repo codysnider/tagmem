@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/codysnider/tagmem/internal/store"
-	"github.com/codysnider/tagmem/internal/ui"
 	"github.com/codysnider/tagmem/internal/vector"
 	"github.com/codysnider/tagmem/internal/xdg"
 )
@@ -46,14 +45,7 @@ func (a *App) Run(args []string) int {
 	repo := store.NewRepository(paths.StorePath, indexPath, provider)
 
 	if len(args) == 0 {
-		if err := repo.Init(); err != nil {
-			fmt.Fprintf(a.stderr, "initialize store: %v\n", err)
-			return 1
-		}
-		if err := ui.Run(repo, paths, provider); err != nil {
-			fmt.Fprintf(a.stderr, "run tui: %v\n", err)
-			return 1
-		}
+		a.printHelp()
 		return 0
 	}
 
@@ -94,16 +86,6 @@ func (a *App) Run(args []string) int {
 		return a.runMCP(repo, paths, provider)
 	case "bench":
 		return a.runBench(commandArgs, provider)
-	case "tui":
-		if err := repo.Init(); err != nil {
-			fmt.Fprintf(a.stderr, "initialize store: %v\n", err)
-			return 1
-		}
-		if err := ui.Run(repo, paths, provider); err != nil {
-			fmt.Fprintf(a.stderr, "run tui: %v\n", err)
-			return 1
-		}
-		return 0
 	default:
 		fmt.Fprintf(a.stderr, "unknown command %q\n\n", command)
 		a.printHelp()
@@ -117,7 +99,7 @@ func (a *App) runInit(repo *store.Repository, paths xdg.Paths, provider vector.P
 		return 1
 	}
 
-	fmt.Fprintf(a.stdout, "tiered-memory initialized\n")
+	fmt.Fprintf(a.stdout, "tagmem initialized\n")
 	fmt.Fprintf(a.stdout, "data:   %s\n", paths.DataDir)
 	fmt.Fprintf(a.stdout, "config: %s\n", paths.ConfigDir)
 	fmt.Fprintf(a.stdout, "cache:  %s\n", paths.CacheDir)
@@ -335,9 +317,8 @@ func (a *App) printHelp() {
 	fmt.Fprintln(a.stdout, "  repair               rebuild the vector index from stored entries")
 	fmt.Fprintln(a.stdout, "  mcp                  run MCP server over stdio")
 	fmt.Fprintln(a.stdout, "  bench                run perf, longmemeval, locomo, convomem, or suite")
-	fmt.Fprintln(a.stdout, "  tui                  open the terminal UI")
 	fmt.Fprintln(a.stdout, "")
-	fmt.Fprintln(a.stdout, "If no command is provided, the terminal UI opens.")
+	fmt.Fprintln(a.stdout, "Run `tagmem help` to see this list again.")
 }
 
 func parseCSV(input string) []string {

@@ -18,7 +18,6 @@ The system is local-first, retrieval-oriented, and designed to be usable through
 
 - CLI
 - MCP
-- TUI
 
 ## Install
 
@@ -26,10 +25,24 @@ The system is local-first, retrieval-oriented, and designed to be usable through
 
 The recommended way to run `tagmem` is in Docker.
 
+If a published image is available, use that rather than building locally.
+
 Build the development image:
 
 ```bash
 just build
+```
+
+Publish the Docker image to GitHub Container Registry:
+
+```bash
+just release-image
+```
+
+By default this publishes:
+
+```bash
+ghcr.io/codysnider/tagmem
 ```
 
 Open a shell in the container:
@@ -86,14 +99,6 @@ tagmem search --depth 2 "auth migration"
 tagmem search --tag auth "token refresh"
 ```
 
-Browse with the TUI:
-
-```bash
-tagmem tui
-```
-
-If no command is provided, the TUI opens.
-
 ## Docker Workflow
 
 The Docker workflow keeps model files, cache, and benchmark artifacts outside the repo in mounted volumes.
@@ -147,7 +152,6 @@ Core commands:
 - `tagmem repair`
 - `tagmem mcp`
 - `tagmem bench`
-- `tagmem tui`
 
 Examples:
 
@@ -161,35 +165,6 @@ tagmem context --depth 0
 tagmem context --tag auth
 tagmem show 1
 ```
-
-## TUI
-
-The TUI is intended to be the main operator interface.
-
-Navigation:
-
-- `Left` / `Right`: move between `Tags`, `Depths`, and `Entries`
-- `Up` / `Down`: navigate lists and forms
-- `/`: focus search
-- `H`: help overlay
-
-Actions:
-
-- `A`: add entry
-- `E`: edit selected entry
-- `X`: delete selected entry
-- `I`: import from path
-- `C`: import from clipboard
-- `S`: status
-- `D`: doctor
-- `R`: reload
-- `Q`: quit
-
-Forms:
-
-- `Tab`, `Up`, `Down`: move fields
-- `Ctrl+S`: save or submit
-- `Esc`: cancel
 
 ## MCP
 

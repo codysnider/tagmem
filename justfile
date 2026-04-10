@@ -3,6 +3,9 @@ set shell := ["bash", "-cu"]
 build:
 	./scripts/cmd/docker-build/run.sh
 
+release-image:
+	./scripts/cmd/release-image/run.sh
+
 shell:
 	./scripts/cmd/docker-shell/run.sh
 
