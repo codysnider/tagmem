@@ -1,8 +1,8 @@
 {
   "cases": 500,
-  "recall_at_1": 0.66,
+  "recall_at_1": 0.674,
   "recall_at_5": 1.0,
-  "mrr": 0.8193333333333332,
+  "mrr": 0.8271666666666666,
   "per_category": {
     "environment_swap": 1.0,
     "entity_swap": 1.0,
@@ -640,8 +640,10 @@
       "ranked_ids": [
         "e1",
         "e2",
+        "e4",
         "e3",
-        "e4"
+        "e6",
+        "e5"
       ],
       "hit_at_1": true,
       "hit_at_5": true,
@@ -656,9 +658,11 @@
       ],
       "ranked_ids": [
         "e1",
+        "e4",
         "e2",
+        "e5",
         "e3",
-        "e4"
+        "e6"
       ],
       "hit_at_1": true,
       "hit_at_5": true,
@@ -1167,14 +1171,16 @@
     {
       "id": "entityx-003",
       "adversary_type": "entity_swap",
-      "query": "What does Devon prefer?",
+      "query": "What orchestration platform does Devon prefer during cluster recovery drills?",
       "relevant_ids": [
         "e1"
       ],
       "ranked_ids": [
         "e1",
+        "e6",
         "e3",
         "e2",
+        "e5",
         "e4"
       ],
       "hit_at_1": true,
@@ -1184,31 +1190,35 @@
     {
       "id": "entityx-004",
       "adversary_type": "entity_swap",
-      "query": "What does Selena prefer?",
+      "query": "What frontend stack does Selena prefer during reliability dashboard rewrites?",
       "relevant_ids": [
         "e1"
       ],
       "ranked_ids": [
-        "e3",
         "e1",
+        "e3",
         "e2",
-        "e4"
+        "e4",
+        "e6",
+        "e5"
       ],
-      "hit_at_1": false,
+      "hit_at_1": true,
       "hit_at_5": true,
-      "mrr": 0.5
+      "mrr": 1.0
     },
     {
       "id": "entityx-005",
       "adversary_type": "entity_swap",
-      "query": "What does Tristan prefer?",
+      "query": "What meeting style does Tristan prefer during incident coordination weeks?",
       "relevant_ids": [
         "e1"
       ],
       "ranked_ids": [
         "e1",
-        "e3",
         "e2",
+        "e6",
+        "e5",
+        "e3",
         "e4"
       ],
       "hit_at_1": true,
@@ -1218,15 +1228,17 @@
     {
       "id": "entityx-006",
       "adversary_type": "entity_swap",
-      "query": "What does Nadia prefer?",
+      "query": "What drink does Nadia prefer during early benchmark triage mornings?",
       "relevant_ids": [
         "e1"
       ],
       "ranked_ids": [
         "e1",
         "e3",
+        "e5",
         "e2",
-        "e4"
+        "e4",
+        "e6"
       ],
       "hit_at_1": true,
       "hit_at_5": true,
@@ -1235,15 +1247,17 @@
     {
       "id": "entityx-007",
       "adversary_type": "entity_swap",
-      "query": "What does Harper prefer?",
+      "query": "What network tool does Harper prefer during remote access cleanup weeks?",
       "relevant_ids": [
         "e1"
       ],
       "ranked_ids": [
         "e1",
         "e3",
+        "e6",
         "e2",
-        "e4"
+        "e4",
+        "e5"
       ],
       "hit_at_1": true,
       "hit_at_5": true,
@@ -1252,19 +1266,21 @@
     {
       "id": "entityx-008",
       "adversary_type": "entity_swap",
-      "query": "What does Leona prefer?",
+      "query": "What database does Leona prefer during reporting pipeline repairs?",
       "relevant_ids": [
         "e1"
       ],
       "ranked_ids": [
-        "e3",
         "e1",
+        "e3",
         "e2",
-        "e4"
+        "e4",
+        "e5",
+        "e6"
       ],
-      "hit_at_1": false,
+      "hit_at_1": true,
       "hit_at_5": true,
-      "mrr": 0.5
+      "mrr": 1.0
     },
     {
       "id": "entityx-009",
@@ -2794,32 +2810,38 @@
       "adversary_type": "speaker_swap",
       "query": "What did you suggest for TUI removal?",
       "relevant_ids": [
-        "e1"
+        "e1",
+        "e3"
       ],
       "ranked_ids": [
-        "e3",
         "e2",
-        "e1"
+        "e1",
+        "e3",
+        "e4",
+        "e5"
       ],
       "hit_at_1": false,
       "hit_at_5": true,
-      "mrr": 0.3333333333333333
+      "mrr": 0.5
     },
     {
       "id": "speakerx-009",
       "adversary_type": "speaker_swap",
       "query": "What did you suggest for depth model?",
       "relevant_ids": [
-        "e1"
+        "e1",
+        "e3"
       ],
       "ranked_ids": [
-        "e3",
         "e1",
-        "e2"
+        "e5",
+        "e2",
+        "e3",
+        "e4"
       ],
-      "hit_at_1": false,
+      "hit_at_1": true,
       "hit_at_5": true,
-      "mrr": 0.5
+      "mrr": 1.0
     },
     {
       "id": "speakerx-010",
@@ -2842,28 +2864,34 @@
       "adversary_type": "speaker_swap",
       "query": "What did you suggest for docs cleanup?",
       "relevant_ids": [
-        "e1"
+        "e1",
+        "e3"
       ],
       "ranked_ids": [
-        "e3",
         "e1",
+        "e3",
+        "e4",
+        "e5",
         "e2"
       ],
-      "hit_at_1": false,
+      "hit_at_1": true,
       "hit_at_5": true,
-      "mrr": 0.5
+      "mrr": 1.0
     },
     {
       "id": "speakerx-012",
       "adversary_type": "speaker_swap",
       "query": "What did you suggest for fresh install testing?",
       "relevant_ids": [
-        "e1"
+        "e1",
+        "e3"
       ],
       "ranked_ids": [
-        "e3",
+        "e5",
         "e1",
-        "e2"
+        "e3",
+        "e2",
+        "e4"
       ],
       "hit_at_1": false,
       "hit_at_5": true,
@@ -2874,60 +2902,72 @@
       "adversary_type": "speaker_swap",
       "query": "What did you suggest for image publish process?",
       "relevant_ids": [
-        "e1"
+        "e1",
+        "e3"
       ],
       "ranked_ids": [
         "e3",
         "e2",
-        "e1"
+        "e1",
+        "e4",
+        "e5"
       ],
-      "hit_at_1": false,
+      "hit_at_1": true,
       "hit_at_5": true,
-      "mrr": 0.3333333333333333
+      "mrr": 1.0
     },
     {
       "id": "speakerx-014",
       "adversary_type": "speaker_swap",
       "query": "What did you suggest for memory terminology?",
       "relevant_ids": [
-        "e1"
-      ],
-      "ranked_ids": [
-        "e3",
-        "e2",
-        "e1"
-      ],
-      "hit_at_1": false,
-      "hit_at_5": true,
-      "mrr": 0.3333333333333333
-    },
-    {
-      "id": "speakerx-015",
-      "adversary_type": "speaker_swap",
-      "query": "What did you suggest for public benchmark reporting?",
-      "relevant_ids": [
-        "e1"
-      ],
-      "ranked_ids": [
-        "e3",
         "e1",
-        "e2"
+        "e3"
+      ],
+      "ranked_ids": [
+        "e5",
+        "e1",
+        "e2",
+        "e4",
+        "e3"
       ],
       "hit_at_1": false,
       "hit_at_5": true,
       "mrr": 0.5
     },
     {
+      "id": "speakerx-015",
+      "adversary_type": "speaker_swap",
+      "query": "What did you suggest for public benchmark reporting?",
+      "relevant_ids": [
+        "e1",
+        "e3"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e5",
+        "e4",
+        "e3",
+        "e2"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
       "id": "speakerx-016",
       "adversary_type": "speaker_swap",
       "query": "What did you suggest for OpenAI-compatible support?",
       "relevant_ids": [
-        "e1"
+        "e1",
+        "e3"
       ],
       "ranked_ids": [
-        "e3",
         "e2",
-        "e1"
+        "e5",
+        "e1",
+        "e3",
+        "e4"
       ],
       "hit_at_1": false,
       "hit_at_5": true,
@@ -2938,32 +2978,38 @@
       "adversary_type": "speaker_swap",
       "query": "What did you suggest for CLI install docs?",
       "relevant_ids": [
-        "e1"
+        "e1",
+        "e3"
       ],
       "ranked_ids": [
-        "e3",
+        "e5",
+        "e4",
         "e2",
-        "e1"
+        "e1",
+        "e3"
       ],
       "hit_at_1": false,
       "hit_at_5": true,
-      "mrr": 0.3333333333333333
+      "mrr": 0.25
     },
     {
       "id": "speakerx-018",
       "adversary_type": "speaker_swap",
       "query": "What did you suggest for graph naming?",
       "relevant_ids": [
-        "e1"
+        "e1",
+        "e3"
       ],
       "ranked_ids": [
         "e3",
+        "e2",
+        "e5",
         "e1",
-        "e2"
+        "e4"
       ],
-      "hit_at_1": false,
+      "hit_at_1": true,
       "hit_at_5": true,
-      "mrr": 0.5
+      "mrr": 1.0
     },
     {
       "id": "speakerx-019",
@@ -3062,13 +3108,16 @@
       "adversary_type": "near_duplicate_paraphrase",
       "query": "How often does auth refresh run?",
       "relevant_ids": [
-        "e1"
+        "e1",
+        "e3"
       ],
       "ranked_ids": [
         "e1",
         "e2",
-        "e4",
-        "e3"
+        "e3",
+        "e5",
+        "e6",
+        "e4"
       ],
       "hit_at_1": true,
       "hit_at_5": true,
@@ -3079,13 +3128,16 @@
       "adversary_type": "near_duplicate_paraphrase",
       "query": "When does the reporting batch run?",
       "relevant_ids": [
-        "e1"
+        "e1",
+        "e3"
       ],
       "ranked_ids": [
         "e2",
         "e1",
+        "e3",
+        "e6",
         "e4",
-        "e3"
+        "e5"
       ],
       "hit_at_1": false,
       "hit_at_5": true,
@@ -3273,28 +3325,34 @@
       "adversary_type": "near_duplicate_paraphrase",
       "query": "What does the install wrapper do first?",
       "relevant_ids": [
-        "e1"
-      ],
-      "ranked_ids": [
         "e1",
-        "e2",
         "e3"
       ],
-      "hit_at_1": true,
+      "ranked_ids": [
+        "e4",
+        "e3",
+        "e1",
+        "e2",
+        "e5"
+      ],
+      "hit_at_1": false,
       "hit_at_5": true,
-      "mrr": 1.0
+      "mrr": 0.5
     },
     {
       "id": "paraphrasex-005",
       "adversary_type": "near_duplicate_paraphrase",
       "query": "How is the benchmark section presented in the README?",
       "relevant_ids": [
-        "e1"
+        "e1",
+        "e3"
       ],
       "ranked_ids": [
         "e2",
+        "e4",
         "e3",
-        "e1"
+        "e1",
+        "e5"
       ],
       "hit_at_1": false,
       "hit_at_5": true,
@@ -3321,12 +3379,15 @@
       "adversary_type": "near_duplicate_paraphrase",
       "query": "What should the graph browser use?",
       "relevant_ids": [
-        "e1"
+        "e1",
+        "e3"
       ],
       "ranked_ids": [
         "e1",
         "e2",
-        "e3"
+        "e3",
+        "e4",
+        "e5"
       ],
       "hit_at_1": true,
       "hit_at_5": true,
@@ -3337,12 +3398,15 @@
       "adversary_type": "near_duplicate_paraphrase",
       "query": "Where should the public image be published?",
       "relevant_ids": [
-        "e1"
+        "e1",
+        "e3"
       ],
       "ranked_ids": [
         "e2",
         "e1",
-        "e3"
+        "e3",
+        "e5",
+        "e4"
       ],
       "hit_at_1": false,
       "hit_at_5": true,
@@ -3353,12 +3417,15 @@
       "adversary_type": "near_duplicate_paraphrase",
       "query": "What happens when tagmem runs without a command?",
       "relevant_ids": [
-        "e1"
+        "e1",
+        "e3"
       ],
       "ranked_ids": [
+        "e3",
+        "e4",
         "e1",
         "e2",
-        "e3"
+        "e5"
       ],
       "hit_at_1": true,
       "hit_at_5": true,
@@ -3369,12 +3436,15 @@
       "adversary_type": "near_duplicate_paraphrase",
       "query": "Where should the adversarial benchmark live?",
       "relevant_ids": [
-        "e1"
+        "e1",
+        "e3"
       ],
       "ranked_ids": [
         "e1",
+        "e3",
         "e2",
-        "e3"
+        "e4",
+        "e5"
       ],
       "hit_at_1": true,
       "hit_at_5": true,
@@ -3385,28 +3455,34 @@
       "adversary_type": "near_duplicate_paraphrase",
       "query": "How does the improved tagger work?",
       "relevant_ids": [
-        "e1"
+        "e1",
+        "e3"
       ],
       "ranked_ids": [
-        "e3",
         "e1",
-        "e2"
+        "e3",
+        "e2",
+        "e5",
+        "e4"
       ],
-      "hit_at_1": false,
+      "hit_at_1": true,
       "hit_at_5": true,
-      "mrr": 0.5
+      "mrr": 1.0
     },
     {
       "id": "paraphrasex-012",
       "adversary_type": "near_duplicate_paraphrase",
       "query": "Why is bge-small the default GPU model?",
       "relevant_ids": [
-        "e1"
+        "e1",
+        "e3"
       ],
       "ranked_ids": [
         "e1",
+        "e3",
+        "e4",
         "e2",
-        "e3"
+        "e5"
       ],
       "hit_at_1": true,
       "hit_at_5": true,
@@ -3417,12 +3493,15 @@
       "adversary_type": "near_duplicate_paraphrase",
       "query": "What MCP tool prefix does the project use?",
       "relevant_ids": [
-        "e1"
+        "e1",
+        "e3"
       ],
       "ranked_ids": [
+        "e3",
         "e1",
         "e2",
-        "e3"
+        "e4",
+        "e5"
       ],
       "hit_at_1": true,
       "hit_at_5": true,
@@ -3433,12 +3512,15 @@
       "adversary_type": "near_duplicate_paraphrase",
       "query": "How do you override the Docker data root?",
       "relevant_ids": [
-        "e1"
+        "e1",
+        "e3"
       ],
       "ranked_ids": [
+        "e3",
         "e1",
         "e2",
-        "e3"
+        "e4",
+        "e5"
       ],
       "hit_at_1": true,
       "hit_at_5": true,

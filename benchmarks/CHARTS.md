@@ -88,7 +88,7 @@ xychart-beta
     title "Adversarial Recall@1"
     x-axis ["tagmem", "MemPalace raw"]
     y-axis "Recall@1" 0.60 --> 0.90
-    bar [0.8860, 0.6600]
+    bar [0.8880, 0.6740]
 ```
 
 ## Adversarial MRR
@@ -98,6 +98,6 @@ xychart-beta
     title "Adversarial MRR"
     x-axis ["tagmem", "MemPalace raw"]
     y-axis "MRR" 0.75 --> 0.95
-    bar [0.9430, 0.8193]
+    bar [0.9440, 0.8272]
 ```
 ```

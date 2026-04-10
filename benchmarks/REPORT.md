@@ -71,8 +71,8 @@ All three `tagmem` GPU runs beat that quality baseline comfortably.
 
 | System | Cases | Recall@1 | Recall@5 | MRR |
 |---|---:|---:|---:|---:|
-| `tagmem` | 500 | 0.8860 | 1.0000 | 0.9430 |
-| MemPalace raw-style | 500 | 0.6600 | 1.0000 | 0.8193 |
+| `tagmem` | 500 | 0.8880 | 1.0000 | 0.9440 |
+| MemPalace raw-style | 500 | 0.6740 | 1.0000 | 0.8272 |
 
 Interpretation:
 
