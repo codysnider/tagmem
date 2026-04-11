@@ -3,6 +3,7 @@ set -euo pipefail
 
 TAGMEM_IMAGE_REF="${TAGMEM_IMAGE_REF:-ghcr.io/codysnider/tagmem:latest}"
 TAGMEM_RELEASES_URL="${TAGMEM_RELEASES_URL:-https://api.github.com/repos/codysnider/tagmem/releases/latest}"
+TAGMEM_RAW_BASE="${TAGMEM_RAW_BASE:-https://raw.githubusercontent.com/codysnider/tagmem/main}"
 TAGMEM_PATCH_OPENCODE="ask"
 TAGMEM_YES=0
 TAGMEM_DRY_RUN=0
@@ -236,10 +237,11 @@ download_release_binary() {
 
 patch_opencode() {
   local mcp_wrapper="$1"
-  local cfg created=0 opencode_dir script_dir
+  local cfg created=0 opencode_dir remember_url remember_compact_url
   local default_global_linux="$HOME/.config/opencode/opencode.json"
   local default_global_macos="$HOME/Library/Application Support/opencode/opencode.json"
-  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  remember_url="$TAGMEM_RAW_BASE/assets/opencode/commands/remember.md"
+  remember_compact_url="$TAGMEM_RAW_BASE/assets/opencode/commands/remember-compact.md"
 
   if ! command -v opencode >/dev/null 2>&1; then
     printf 'OpenCode binary not found on PATH.\n'
@@ -297,8 +299,8 @@ patch_opencode() {
 
   opencode_dir="$(dirname "$cfg")"
   mkdir -p "$opencode_dir/commands"
-  install -m 0644 "$script_dir/../assets/opencode/commands/remember.md" "$opencode_dir/commands/remember.md"
-  install -m 0644 "$script_dir/../assets/opencode/commands/remember-compact.md" "$opencode_dir/commands/remember-compact.md"
+  curl -fsSL "$remember_url" -o "$opencode_dir/commands/remember.md"
+  curl -fsSL "$remember_compact_url" -o "$opencode_dir/commands/remember-compact.md"
   printf 'Installed OpenCode commands: remember, remember-compact\n'
 }
 
