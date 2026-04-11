@@ -5,10 +5,8 @@ This folder contains publishable benchmark results for `tagmem`.
 Contents:
 
 - `REPORT.md`: executive summary and cross-model comparison tables
-- `CHARTS.md`: GitHub-friendly charts for the benchmark matrix
 - `MACHINE.md`: hardware and software environment details
 - `METHODOLOGY.md`: exact commands, dataset sources, hashes, and reproducibility notes
-- `MEMPALACE-COMPARISON.md`: direct comparison against MemPalace on comparable published metrics
 - `raw/`: raw JSON outputs for each model and benchmark set
 
 Current benchmark matrix:
@@ -23,6 +21,9 @@ Current benchmark matrix:
   - `locomo`
   - `membench`
   - `convomem`
+  - `FalseMemBench`
+
+Measured systems and source-reported reference values are intentionally separated in the detailed report.
 
 Recommended default after these runs:
 

@@ -18,7 +18,14 @@ Main conclusion:
 - `bge-base-en-v1.5` improves `LongMemEval` and `LoCoMo` slightly, but costs materially more runtime and indexing overhead.
 - `all-MiniLM-L6-v2` remains the strongest throughput-first fallback.
 
-## Cross-Benchmark Comparison
+This report is organized around two evidence classes:
+
+- **Measured by us**: results produced directly from the benchmark harnesses and raw artifacts in this repository
+- **Source-reported references**: external values we did not independently reproduce
+
+## Measured By Us
+
+### Cross-Benchmark Comparison
 
 | Model | LongMemEval R@5 | LongMemEval Time | LoCoMo Avg Recall | LoCoMo Time | MemBench R@5 | MemBench Time | ConvoMem Avg Recall | ConvoMem Time | Add Avg ms | Search Avg ms |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -26,7 +33,7 @@ Main conclusion:
 | `bge-small-en-v1.5` | 0.990 | 23.0s | 0.941 | 1633.6s | 0.804 | 1775.2s | 0.898 | 18.1s | 1.120 | 2.220 |
 | `bge-base-en-v1.5` | 0.992 | 44.1s | 0.949 | 1696.2s | 0.802 | 1877.9s | 0.920 | 19.3s | 2.369 | 0.635 |
 
-## Best Model By Benchmark
+### Best Model By Benchmark
 
 | Benchmark | Best Quality | Fastest |
 |---|---|---|
@@ -36,9 +43,9 @@ Main conclusion:
 | ConvoMem | `all-MiniLM-L6-v2` | `all-MiniLM-L6-v2` |
 | Perf add/search | `n/a` | `all-MiniLM-L6-v2` |
 
-## Recommendation
+### Recommendation
 
-### Default GPU model
+#### Default GPU model
 
 Use `bge-small-en-v1.5` as the default embedded model for Docker/GPU execution.
 
@@ -49,23 +56,12 @@ Why:
 - much faster than `bge-base-en-v1.5`
 - acceptable `LoCoMo` improvement while keeping runtime practical
 
-### Alternate modes
+#### Alternate modes
 
 - Use `all-MiniLM-L6-v2` for maximum throughput.
 - Use `bge-base-en-v1.5` only when the slight gains on `LongMemEval` and `LoCoMo` are worth the extra runtime and memory.
 
-## Published Baseline Comparison
-
-The publicly cited MemPalace raw baseline on LongMemEval is:
-
-- `Recall@5 = 0.966`
-- `Recall@10 = 0.982`
-- `NDCG@10 = 0.889`
-- approximately `~300s` on Apple Silicon
-
-All three `tagmem` GPU runs beat that quality baseline comfortably.
-
-## FalseMemBench Comparison
+### FalseMemBench
 
 `FalseMemBench` is a standalone adversarial distractor benchmark designed to stress ranking under conflicting, stale, or near-miss memories.
 
@@ -81,8 +77,22 @@ Interpretation:
 
 - `tagmem` is the best measured system in this comparison on `Recall@1` and `MRR`, and remains strongest overall.
 - BM25 is a serious baseline and outperforms the dense academic baselines tested here.
-- MemPalace raw-style remains competitive, but is materially weaker than `tagmem` on top-of-list ranking.
+- MemPalace raw-style remains a useful measured reference point, but is materially weaker than `tagmem` on top-of-list ranking.
 - This benchmark suggests that claim-aware reranking and value precision matter more than dense retrieval strength alone.
+
+## Source-Reported Reference Values
+
+These values are included for context only. They are not produced by the benchmark harnesses in this repository.
+
+### LongMemEval reference values
+
+| System | Recall@5 | Source status |
+|---|---:|---|
+| Mastra | 0.9487 | Project-reported |
+| Hindsight | 0.914 | Project-reported |
+| MemPalace raw baseline | 0.966 | Project-reported |
+
+When possible, prefer the measured results in this repository over reference values.
 
 ## Raw Data
 
@@ -95,5 +105,5 @@ Raw benchmark JSON outputs are included under:
 
 See also:
 
-- `CHARTS.md`
-- `MEMPALACE-COMPARISON.md`
+- `MACHINE.md`
+- `METHODOLOGY.md`

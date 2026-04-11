@@ -4,39 +4,55 @@
 
 # tagmem
 
-Tagged, depth-aware memory storage and retrieval for LLM agents.
+**Deterministic local memory for LLM agents.**
 
-[Install](#install) · [OpenCode](#opencode) · [MCP](#mcp) · [Benchmarks](#benchmarks) · [Full install guide](INSTALL.md)
+`tagmem` is a local-first memory system that stores original text, retrieves it with hybrid semantic and lexical ranking, and exposes that memory through a simple CLI and MCP interface.
+
+[Install](#install) · [OpenCode](#opencode) · [MCP](#mcp) · [Benchmarks](#benchmarks) · [Configuration](#configuration) · [Install guide](INSTALL.md)
 
 ## Quick Start
 
-Install with one command:
+Install `tagmem` with one command:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/codysnider/tagmem/main/scripts/install.sh | bash
 ```
 
-This installer is:
+The installer is:
 
 - interactive by default
 - Docker-first
 - release-binary fallback when Docker is unavailable
-- able to patch OpenCode config safely with backups
+- able to detect and patch OpenCode safely with backups
 
-For full installation details, see [`INSTALL.md`](INSTALL.md).
+For a detailed installation guide, see [`INSTALL.md`](INSTALL.md).
 
-It is built around a simple model:
+## Why tagmem
 
-- `entries` store verbatim text
-- `tags` are the primary way to organize and filter memory
-- `depth` indicates how close a memory should stay to the surface
-- `facts` store structured knowledge
-- `diary` stores agent-specific notes
+`tagmem` is built for teams and individuals who want memory behavior they can inspect, reproduce, and trust.
 
-The system is local-first, retrieval-oriented, and designed to be usable through:
+- **Verbatim storage**: original text stays intact
+- **Deterministic retrieval**: hybrid semantic + keyword ranking with predictable behavior
+- **Local-first**: runs locally with Docker or a release binary
+- **Clear organization**: tags are primary, depth is secondary
+- **Reproducible evaluation**: benchmark methodology and raw outputs are published in the repo
 
-- CLI
-- MCP
+## OpenCode
+
+The installer can detect and patch OpenCode automatically.
+
+Install and patch OpenCode in one step:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/codysnider/tagmem/main/scripts/install.sh | bash -s -- --patch-opencode
+```
+
+That installs:
+
+- `tagmem`
+- `tagmem-mcp`
+
+and adds the `tagmem` MCP entry to OpenCode when a supported config is found.
 
 ## Install
 
@@ -46,7 +62,7 @@ Published image:
 ghcr.io/codysnider/tagmem:latest
 ```
 
-After install, initialize storage:
+After installation, initialize local storage:
 
 ```bash
 tagmem init
@@ -55,7 +71,7 @@ tagmem init
 Add an entry:
 
 ```bash
-tagmem add --depth 0 --title "Working identity" --body "You are helping ship a local-first memory system."
+tagmem add --depth 0 --title "identity" --body "You are building a local memory system."
 ```
 
 Search:
@@ -66,39 +82,17 @@ tagmem search --depth 2 "auth migration"
 tagmem search --tag auth "token refresh"
 ```
 
-## OpenCode
+## Core Model
 
-The installer can detect and patch OpenCode automatically.
+`tagmem` uses a simple memory model:
 
-If you want to patch OpenCode during install:
+- **entries** store verbatim text
+- **tags** provide primary organization and filtering
+- **depth** acts as a closeness and retrieval-priority signal
+- **facts** store structured knowledge
+- **diary** stores agent-specific notes
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/codysnider/tagmem/main/scripts/install.sh | bash -s -- --patch-opencode
-```
-
-If you want to skip patching and handle config yourself:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/codysnider/tagmem/main/scripts/install.sh | bash -s -- --no-patch-opencode
-```
-
-## Runtime Notes
-
-The Docker path keeps model files, cache, and runtime state outside the repo in mounted directories.
-
-Default Docker data root:
-
-```bash
-$HOME/.local/share/tagmem
-```
-
-Override it if you want Docker state elsewhere:
-
-```bash
-export TAGMEM_DATA_ROOT=/path/to/tagmem-data
-```
-
-The helper `just` commands are for development and release work. Most users only need the installer.
+This keeps the memory layer understandable while still supporting richer retrieval behavior.
 
 ## Commands
 
@@ -166,82 +160,25 @@ Current MCP tools:
 - `tagmem_diary_read`
 - `tagmem_doctor`
 
-## Embedding Backends
-
-### Embedded
-
-The embedded backend runs locally.
-
-Default embedded configuration:
-
-```bash
-export TAGMEM_EMBED_PROVIDER=embedded
-export TAGMEM_EMBED_MODEL=bge-small-en-v1.5
-export TAGMEM_EMBED_ACCEL=auto
-```
-
-### OpenAI-compatible
-
-```bash
-export TAGMEM_EMBED_PROVIDER=openai
-export TAGMEM_OPENAI_MODEL=nomic-embed-text
-export TAGMEM_OPENAI_BASE_URL=http://localhost:11434/v1
-export TAGMEM_OPENAI_API_KEY=
-```
-
-## Environment Variables
-
-| Variable | Default | Purpose |
-|---|---|---|
-| `TAGMEM_EMBED_PROVIDER` | `embedded` | Selects the embedding backend: `embedded`, `openai`, or `embedded-hash`. |
-| `TAGMEM_EMBED_MODEL` | `bge-small-en-v1.5` | Selects the embedded local model. Supported values currently include `all-MiniLM-L6-v2`, `bge-small-en-v1.5`, and `bge-base-en-v1.5`. |
-| `TAGMEM_EMBED_ACCEL` | `auto` | Embedded acceleration mode: `auto`, `cuda`, or `cpu`. |
-| `TAGMEM_OPENAI_MODEL` | `nomic-embed-text` | Model name for OpenAI-compatible embeddings. |
-| `OPENAI_MODEL` | unset | Fallback model name for OpenAI-compatible mode. |
-| `TAGMEM_OPENAI_BASE_URL` | unset | Base URL for an OpenAI-compatible embeddings endpoint. If no path is provided, `/v1` is assumed. |
-| `OPENAI_BASE_URL` | unset | Fallback base URL for OpenAI-compatible mode. |
-| `OLLAMA_HOST` | unset | Convenience fallback base URL, normalized to `/v1` if used. |
-| `TAGMEM_OPENAI_API_KEY` | unset | API key for an OpenAI-compatible endpoint. |
-| `OPENAI_API_KEY` | unset | Fallback API key for OpenAI-compatible mode. |
-| `TAGMEM_DATA_ROOT` | `$HOME/.local/share/tagmem` | Host-side root directory for Docker state, including XDG data, model caches, datasets, and benchmark results. |
-| `TAGMEM_BENCH_ROOT` | Docker-only | Root path for benchmark outputs in the Docker workflow. |
-| `TAGMEM_DATASET_ROOT` | Docker-only | Root path for benchmark datasets in the Docker workflow. |
-| `XDG_CONFIG_HOME` | platform default | XDG config root used for config and identity files. |
-| `XDG_DATA_HOME` | platform default | XDG data root used for storage, vectors, knowledge graph, diaries, and models. |
-| `XDG_CACHE_HOME` | platform default | XDG cache root. |
-
-## Storage Layout
-
-- data: `~/.local/share/tagmem/store.json`
-- vector index: `~/.local/share/tagmem/vector/`
-- knowledge graph: `~/.local/share/tagmem/knowledge.json`
-- diaries: `~/.local/share/tagmem/diaries/`
-- models: `~/.local/share/tagmem/models/`
-- config: `~/.config/tagmem/`
-- cache: `~/.cache/tagmem/`
-
-`tagmem` is local-first, keeps original text intact, avoids lossy memory dialects, and uses simple user-facing concepts: entries, tags, depth, facts, and diary.
-
 ## Benchmarks
 
 Current benchmark snapshot:
 
-### LongMemEval Comparison
+### LongMemEval
 
 ```mermaid
 xychart-beta
     title "LongMemEval Recall@5"
-    x-axis ["bge-base", "bge-small", "MemPalace", "Mastra", "Hindsight", "Stella", "Contriever", "BM25"]
-    y-axis "Recall@5" 0.65 --> 1.00
-    bar [0.992, 0.990, 0.966, 0.9487, 0.914, 0.85, 0.78, 0.70]
+    x-axis ["bge-base", "bge-small", "MemPalace"]
+    y-axis "Recall@5" 0.90 --> 1.00
+    bar [0.992, 0.990, 0.966]
 ```
 
 - `tagmem` (`bge-small-en-v1.5`): `Recall@1 0.924`, `Recall@5 0.990`, `MRR 0.955`
 - `tagmem` (`bge-base-en-v1.5`): `Recall@1 0.922`, `Recall@5 0.992`, `MRR 0.953`
 - MemPalace raw baseline: `Recall@5 0.966`
-- Source-reported comparisons from MemPalace docs: `Mastra 0.9487`, `Hindsight 0.914`, `Stella ~0.85`, `Contriever ~0.78`, `BM25 ~0.70`
 
-### Adversarial Retrieval Snapshot
+### FalseMemBench
 
 `FalseMemBench` is a standalone adversarial distractor benchmark focused on conflicting, stale, and near-miss memories.
 
@@ -267,17 +204,56 @@ xychart-beta
 - `Contriever`: `Recall@1 0.6527`, `Recall@5 0.9843`, `MRR 0.8049`
 - `Stella`: `Recall@1 0.4258`, `Recall@5 0.9791`, `MRR 0.6465`
 
-### Current GPU Model Snapshot
-
-| Model | LongMemEval R@5 | LongMemEval Time | LoCoMo Avg Recall | MemBench R@5 | ConvoMem Avg Recall |
-|---|---:|---:|---:|---:|---:|
-| `all-MiniLM-L6-v2` | 0.982 | 14.4s | 0.915 | 0.778 | 0.931 |
-| `bge-small-en-v1.5` | 0.990 | 23.0s | 0.941 | 0.804 | 0.898 |
-| `bge-base-en-v1.5` | 0.992 | 44.1s | 0.949 | 0.802 | 0.920 |
-
-For methodology, machine specs, charts, and raw JSON outputs, see:
+For methodology, machine specs, and raw benchmark outputs, see:
 
 - [`benchmarks/README.md`](benchmarks/README.md)
 - [`benchmarks/REPORT.md`](benchmarks/REPORT.md)
 - [`benchmarks/METHODOLOGY.md`](benchmarks/METHODOLOGY.md)
-- [`benchmarks/MEMPALACE-COMPARISON.md`](benchmarks/MEMPALACE-COMPARISON.md)
+
+## Configuration
+
+### Embedded
+
+Default embedded configuration:
+
+```bash
+export TAGMEM_EMBED_PROVIDER=embedded
+export TAGMEM_EMBED_MODEL=bge-small-en-v1.5
+export TAGMEM_EMBED_ACCEL=auto
+```
+
+### OpenAI-compatible
+
+```bash
+export TAGMEM_EMBED_PROVIDER=openai
+export TAGMEM_OPENAI_MODEL=nomic-embed-text
+export TAGMEM_OPENAI_BASE_URL=http://localhost:11434/v1
+export TAGMEM_OPENAI_API_KEY=
+```
+
+### Environment variables
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `TAGMEM_EMBED_PROVIDER` | `embedded` | Selects the embedding backend: `embedded`, `openai`, or `embedded-hash`. |
+| `TAGMEM_EMBED_MODEL` | `bge-small-en-v1.5` | Selects the embedded local model. |
+| `TAGMEM_EMBED_ACCEL` | `auto` | Embedded acceleration mode: `auto`, `cuda`, or `cpu`. |
+| `TAGMEM_OPENAI_MODEL` | `nomic-embed-text` | Model name for OpenAI-compatible embeddings. |
+| `TAGMEM_OPENAI_BASE_URL` | unset | Base URL for an OpenAI-compatible embeddings endpoint. |
+| `TAGMEM_OPENAI_API_KEY` | unset | API key for an OpenAI-compatible endpoint. |
+| `TAGMEM_DATA_ROOT` | `$HOME/.local/share/tagmem` | Host-side root directory for Docker state, datasets, and benchmark outputs. |
+| `TAGMEM_BENCH_ROOT` | Docker-only | Root path for benchmark outputs in the Docker workflow. |
+| `TAGMEM_DATASET_ROOT` | Docker-only | Root path for benchmark datasets in the Docker workflow. |
+| `XDG_CONFIG_HOME` | platform default | XDG config root used for config and identity files. |
+| `XDG_DATA_HOME` | platform default | XDG data root used for storage, vectors, facts, diary, and models. |
+| `XDG_CACHE_HOME` | platform default | XDG cache root. |
+
+## Storage Layout
+
+- data: `~/.local/share/tagmem/store.json`
+- vector index: `~/.local/share/tagmem/vector/`
+- knowledge graph: `~/.local/share/tagmem/knowledge.json`
+- diaries: `~/.local/share/tagmem/diaries/`
+- models: `~/.local/share/tagmem/models/`
+- config: `~/.config/tagmem/`
+- cache: `~/.cache/tagmem/`

@@ -17,6 +17,7 @@ Benchmark sets:
 - `locomo`
 - `membench`
 - `convomem`
+- `FalseMemBench`
 
 ## Execution Environment
 
@@ -83,6 +84,19 @@ TAGMEM_EMBED_MODEL=bge-base-en-v1.5 just bench-longmemeval
   - HuggingFace `Salesforce/ConvoMem`
 - Retrieval during run:
   - downloaded and cached automatically to `${TAGMEM_DATA_ROOT}/datasets/convomem_cache`
+
+### FalseMemBench
+
+- Source project:
+  - standalone benchmark project maintained outside the main repo
+- Published artifacts:
+  - copied into `benchmarks/raw/adversarial/`
+- Compared measured systems currently include:
+  - `tagmem`
+  - `BM25`
+  - `MemPalace raw-style`
+  - `Contriever`
+  - `Stella`
 
 ## Embedded Runtime Details
 
