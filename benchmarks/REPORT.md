@@ -71,7 +71,7 @@ All three `tagmem` GPU runs beat that quality baseline comfortably.
 
 | System | Cases | Recall@1 | Recall@5 | MRR |
 |---|---:|---:|---:|---:|
-| `tagmem` | 573 | 0.8674 | 1.0000 | 0.9328 |
+| `tagmem` | 573 | 0.8674 | 0.9983 | 0.9288 |
 | BM25 | 573 | 0.6946 | 0.9930 | 0.8278 |
 | MemPalace raw-style | 573 | 0.6632 | 0.9948 | 0.8154 |
 | Contriever | 573 | 0.6527 | 0.9843 | 0.8049 |
@@ -79,7 +79,7 @@ All three `tagmem` GPU runs beat that quality baseline comfortably.
 
 Interpretation:
 
-- `tagmem` is the best measured system in this comparison on `Recall@1`, `Recall@5`, and `MRR`.
+- `tagmem` is the best measured system in this comparison on `Recall@1` and `MRR`, and remains strongest overall.
 - BM25 is a serious baseline and outperforms the dense academic baselines tested here.
 - MemPalace raw-style remains competitive, but is materially weaker than `tagmem` on top-of-list ranking.
 - This benchmark suggests that claim-aware reranking and value precision matter more than dense retrieval strength alone.

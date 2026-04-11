@@ -98,6 +98,6 @@ xychart-beta
     title "FalseMemBench MRR"
     x-axis ["tagmem", "BM25", "MemPalace", "Contriever", "Stella"]
     y-axis "MRR" 0.60 --> 0.95
-    bar [0.9328, 0.8278, 0.8154, 0.8049, 0.6465]
+    bar [0.9288, 0.8278, 0.8154, 0.8049, 0.6465]
 ```
 ```

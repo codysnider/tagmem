@@ -25,10 +25,10 @@ Using the standalone FalseMemBench adversarial benchmark:
 
 | System | Cases | Recall@1 | Recall@5 | MRR |
 |---|---:|---:|---:|---:|
-| `tagmem` | 573 | 0.8674 | 1.0000 | 0.9328 |
+| `tagmem` | 573 | 0.8674 | 0.9983 | 0.9288 |
 | MemPalace raw-style | 573 | 0.6632 | 0.9948 | 0.8154 |
 
-This benchmark stresses ranking under conflicting or near-miss memories. On the current `573`-case FalseMemBench dataset, `tagmem` keeps a large top-1 and MRR advantage while also holding a small top-5 edge.
+This benchmark stresses ranking under conflicting or near-miss memories. On the current `573`-case FalseMemBench dataset, `tagmem` keeps a large top-1 and MRR advantage while remaining slightly ahead on top-5 recall.
 
 ## Takeaways
 
