@@ -227,34 +227,48 @@ export TAGMEM_OPENAI_API_KEY=
 
 ## Benchmarks
 
-The current published benchmark default is GPU-backed `bge-small-en-v1.5`.
+Current benchmark snapshot:
 
 ### LongMemEval Comparison
 
-The table below compares `tagmem` against MemPalace's published LongMemEval baseline and the other systems MemPalace cites in its own comparison material. External scores below are included as reported by MemPalace's benchmark documentation.
+```mermaid
+xychart-beta
+    title "LongMemEval Recall@5"
+    x-axis ["bge-base", "bge-small", "MemPalace", "Mastra", "Hindsight", "Stella", "Contriever", "BM25"]
+    y-axis "Recall@5" 0.65 --> 1.00
+    bar [0.992, 0.990, 0.966, 0.9487, 0.914, 0.85, 0.78, 0.70]
+```
 
-| System | Recall@5 | LLM required | Notes |
-|---|---:|---|---|
-| `tagmem` (`bge-small-en-v1.5`, GPU) | **0.990** | No | Current published `tagmem` default |
-| `tagmem` (`bge-base-en-v1.5`, GPU) | **0.992** | No | Highest current `tagmem` LongMemEval score |
-| MemPalace raw | 0.966 | No | Published raw baseline |
-| Mastra | 0.9487 | Yes | Reported by MemPalace |
-| Hindsight | 0.914 | Yes | Reported by MemPalace |
-| Stella | ~0.85 | No | Reported by MemPalace |
-| Contriever | ~0.78 | No | Reported by MemPalace |
-| BM25 | ~0.70 | No | Reported by MemPalace |
+| System | Recall@1 | Recall@5 | MRR |
+|---|---:|---:|---:|
+| `tagmem` (`bge-base-en-v1.5`) | **0.922** | **0.992** | 0.953 |
+| `tagmem` (`bge-small-en-v1.5`) | **0.924** | **0.990** | **0.955** |
+| MemPalace raw | — | 0.966 | — |
+| Mastra | — | 0.9487 | — |
+| Hindsight | — | 0.914 | — |
+| Stella | — | ~0.85 | — |
+| Contriever | — | ~0.78 | — |
+| BM25 | — | ~0.70 | — |
 
 ### Adversarial Retrieval Snapshot
 
 `FalseMemBench` is a standalone adversarial distractor benchmark focused on conflicting, stale, and near-miss memories.
 
-| System | Cases | Recall@1 | Recall@5 | MRR |
-|---|---:|---:|---:|---:|
-| `tagmem` | 573 | **0.8674** | **1.0000** | **0.9328** |
-| BM25 | 573 | 0.6946 | 0.9930 | 0.8278 |
-| MemPalace raw-style | 573 | 0.6632 | 0.9948 | 0.8154 |
-| Contriever | 573 | 0.6527 | 0.9843 | 0.8049 |
-| Stella | 573 | 0.4258 | 0.9791 | 0.6465 |
+```mermaid
+xychart-beta
+    title "FalseMemBench Recall@1"
+    x-axis ["tagmem", "BM25", "MemPalace", "Contriever", "Stella"]
+    y-axis "Recall@1" 0.40 --> 0.90
+    bar [0.8674, 0.6946, 0.6632, 0.6527, 0.4258]
+```
+
+| System | Recall@1 | Recall@5 | MRR |
+|---|---:|---:|---:|
+| `tagmem` | **0.8674** | **0.9983** | **0.9288** |
+| BM25 | 0.6946 | 0.9930 | 0.8278 |
+| MemPalace raw-style | 0.6632 | 0.9948 | 0.8154 |
+| Contriever | 0.6527 | 0.9843 | 0.8049 |
+| Stella | 0.4258 | 0.9791 | 0.6465 |
 
 ### Current GPU Model Snapshot
 
