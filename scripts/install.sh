@@ -236,9 +236,10 @@ download_release_binary() {
 
 patch_opencode() {
   local mcp_wrapper="$1"
-  local opencode_bin cfg created=0
+  local cfg created=0 opencode_dir script_dir
   local default_global_linux="$HOME/.config/opencode/opencode.json"
   local default_global_macos="$HOME/Library/Application Support/opencode/opencode.json"
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
   if ! command -v opencode >/dev/null 2>&1; then
     printf 'OpenCode binary not found on PATH.\n'
@@ -293,6 +294,12 @@ patch_opencode() {
   jq --arg wrapper "$mcp_wrapper" '.mcp = (.mcp // {}) | .mcp.tagmem = {type:"local", command:[$wrapper], enabled:true, timeout:20000}' "$cfg" > "$tmp"
   mv "$tmp" "$cfg"
   printf 'Patched OpenCode config: %s\n' "$cfg"
+
+  opencode_dir="$(dirname "$cfg")"
+  mkdir -p "$opencode_dir/commands"
+  install -m 0644 "$script_dir/../assets/opencode/commands/remember.md" "$opencode_dir/commands/remember.md"
+  install -m 0644 "$script_dir/../assets/opencode/commands/remember-compact.md" "$opencode_dir/commands/remember-compact.md"
+  printf 'Installed OpenCode commands: remember, remember-compact\n'
 }
 
 main() {
