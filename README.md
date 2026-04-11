@@ -239,16 +239,10 @@ xychart-beta
     bar [0.992, 0.990, 0.966, 0.9487, 0.914, 0.85, 0.78, 0.70]
 ```
 
-| System | Recall@1 | Recall@5 | MRR |
-|---|---:|---:|---:|
-| `tagmem` (`bge-base-en-v1.5`) | **0.922** | **0.992** | 0.953 |
-| `tagmem` (`bge-small-en-v1.5`) | **0.924** | **0.990** | **0.955** |
-| MemPalace raw | — | 0.966 | — |
-| Mastra | — | 0.9487 | — |
-| Hindsight | — | 0.914 | — |
-| Stella | — | ~0.85 | — |
-| Contriever | — | ~0.78 | — |
-| BM25 | — | ~0.70 | — |
+- `tagmem` (`bge-small-en-v1.5`): `Recall@1 0.924`, `Recall@5 0.990`, `MRR 0.955`
+- `tagmem` (`bge-base-en-v1.5`): `Recall@1 0.922`, `Recall@5 0.992`, `MRR 0.953`
+- MemPalace raw baseline: `Recall@5 0.966`
+- Source-reported comparisons from MemPalace docs: `Mastra 0.9487`, `Hindsight 0.914`, `Stella ~0.85`, `Contriever ~0.78`, `BM25 ~0.70`
 
 ### Adversarial Retrieval Snapshot
 
@@ -262,13 +256,19 @@ xychart-beta
     bar [0.8674, 0.6946, 0.6632, 0.6527, 0.4258]
 ```
 
-| System | Recall@1 | Recall@5 | MRR |
-|---|---:|---:|---:|
-| `tagmem` | **0.8674** | **0.9983** | **0.9288** |
-| BM25 | 0.6946 | 0.9930 | 0.8278 |
-| MemPalace raw-style | 0.6632 | 0.9948 | 0.8154 |
-| Contriever | 0.6527 | 0.9843 | 0.8049 |
-| Stella | 0.4258 | 0.9791 | 0.6465 |
+```mermaid
+xychart-beta
+    title "FalseMemBench MRR"
+    x-axis ["tagmem", "BM25", "MemPalace", "Contriever", "Stella"]
+    y-axis "MRR" 0.60 --> 0.95
+    bar [0.9288, 0.8278, 0.8154, 0.8049, 0.6465]
+```
+
+- `tagmem`: `Recall@1 0.8674`, `Recall@5 0.9983`, `MRR 0.9288`
+- `BM25`: `Recall@1 0.6946`, `Recall@5 0.9930`, `MRR 0.8278`
+- MemPalace raw-style: `Recall@1 0.6632`, `Recall@5 0.9948`, `MRR 0.8154`
+- `Contriever`: `Recall@1 0.6527`, `Recall@5 0.9843`, `MRR 0.8049`
+- `Stella`: `Recall@1 0.4258`, `Recall@5 0.9791`, `MRR 0.6465`
 
 ### Current GPU Model Snapshot
 
