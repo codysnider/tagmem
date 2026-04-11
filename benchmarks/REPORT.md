@@ -65,20 +65,24 @@ The publicly cited MemPalace raw baseline on LongMemEval is:
 
 All three `tagmem` GPU runs beat that quality baseline comfortably.
 
-## Adversarial Comparison
+## FalseMemBench Comparison
 
-`tagmem` was also compared against a standalone adversarial distractor benchmark designed to stress ranking under conflicting or near-miss memories.
+`FalseMemBench` is a standalone adversarial distractor benchmark designed to stress ranking under conflicting, stale, or near-miss memories.
 
 | System | Cases | Recall@1 | Recall@5 | MRR |
 |---|---:|---:|---:|---:|
-| `tagmem` | 500 | 0.8880 | 1.0000 | 0.9440 |
-| MemPalace raw-style | 500 | 0.6740 | 1.0000 | 0.8272 |
+| `tagmem` | 573 | 0.8674 | 1.0000 | 0.9328 |
+| BM25 | 573 | 0.6946 | 0.9930 | 0.8278 |
+| MemPalace raw-style | 573 | 0.6632 | 0.9948 | 0.8154 |
+| Contriever | 573 | 0.6527 | 0.9843 | 0.8049 |
+| Stella | 573 | 0.4258 | 0.9791 | 0.6465 |
 
 Interpretation:
 
-- Both systems now saturate top-5 recall on the current adversarial dataset.
-- `tagmem` maintains a large advantage on top-1 ranking quality and mean reciprocal rank.
-- For agent memory, this indicates `tagmem` is more likely to surface the right answer near the top even when distractors are semantically close.
+- `tagmem` is the best measured system in this comparison on `Recall@1`, `Recall@5`, and `MRR`.
+- BM25 is a serious baseline and outperforms the dense academic baselines tested here.
+- MemPalace raw-style remains competitive, but is materially weaker than `tagmem` on top-of-list ranking.
+- This benchmark suggests that claim-aware reranking and value precision matter more than dense retrieval strength alone.
 
 ## Raw Data
 

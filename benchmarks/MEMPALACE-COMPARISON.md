@@ -19,16 +19,16 @@ Current `tagmem` GPU results:
 | `bge-small-en-v1.5` | 0.990 | 0.996 | 0.951 | 23.0s |
 | `bge-base-en-v1.5` | 0.992 | 0.994 | 0.950 | 44.1s |
 
-## Adversarial Retrieval Comparison
+## FalseMemBench Comparison
 
-Using the standalone adversarial distractor benchmark:
+Using the standalone FalseMemBench adversarial benchmark:
 
 | System | Cases | Recall@1 | Recall@5 | MRR |
 |---|---:|---:|---:|---:|
-| `tagmem` | 500 | 0.8880 | 1.0000 | 0.9440 |
-| MemPalace raw-style | 500 | 0.6740 | 1.0000 | 0.8272 |
+| `tagmem` | 573 | 0.8674 | 1.0000 | 0.9328 |
+| MemPalace raw-style | 573 | 0.6632 | 0.9948 | 0.8154 |
 
-This benchmark stresses ranking under conflicting or near-miss memories. On the current `500`-case adversarial dataset, both systems saturate top-5 recall, but `tagmem` keeps a large top-1 and MRR advantage.
+This benchmark stresses ranking under conflicting or near-miss memories. On the current `573`-case FalseMemBench dataset, `tagmem` keeps a large top-1 and MRR advantage while also holding a small top-5 edge.
 
 ## Takeaways
 

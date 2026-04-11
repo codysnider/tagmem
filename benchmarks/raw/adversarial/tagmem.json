@@ -1,12 +1,12 @@
 {
-  "cases": 500,
-  "recall_at_1": 0.888,
-  "recall_at_5": 1.0,
-  "mrr": 0.944,
+  "cases": 573,
+  "recall_at_1": 0.8673647469458988,
+  "recall_at_5": 0.9982547993019197,
+  "mrr": 0.9288103548574758,
   "per_category": {
     "environment_swap": 1.0,
     "entity_swap": 1.0,
-    "time_swap": 1.0,
+    "time_swap": 0.990990990990991,
     "state_update": 1.0,
     "speaker_swap": 1.0,
     "near_duplicate_paraphrase": 1.0
@@ -780,6 +780,8 @@
       "ranked_ids": [
         "e1",
         "e4",
+        "e5",
+        "e6",
         "e2",
         "e3"
       ],
@@ -798,7 +800,9 @@
         "e1",
         "e4",
         "e2",
-        "e3"
+        "e3",
+        "e6",
+        "e5"
       ],
       "hit_at_1": true,
       "hit_at_5": true,
@@ -1281,14 +1285,17 @@
     {
       "id": "entityx-009",
       "adversary_type": "entity_swap",
-      "query": "What does Mason prefer?",
+      "query": "What demo rhythm does Mason prefer during launch stabilization months?",
       "relevant_ids": [
         "e1"
       ],
       "ranked_ids": [
         "e1",
+        "e3",
         "e2",
-        "e3"
+        "e4",
+        "e6",
+        "e5"
       ],
       "hit_at_1": true,
       "hit_at_5": true,
@@ -1297,14 +1304,17 @@
     {
       "id": "entityx-010",
       "adversary_type": "entity_swap",
-      "query": "What does Tessa prefer?",
+      "query": "What editor theme does Tessa prefer during overnight dashboard review?",
       "relevant_ids": [
         "e1"
       ],
       "ranked_ids": [
         "e1",
         "e2",
-        "e3"
+        "e3",
+        "e4",
+        "e6",
+        "e5"
       ],
       "hit_at_1": true,
       "hit_at_5": true,
@@ -2909,11 +2919,11 @@
         "e3"
       ],
       "ranked_ids": [
-        "e3",
         "e1",
+        "e3",
         "e2",
-        "e5",
-        "e4"
+        "e4",
+        "e5"
       ],
       "hit_at_1": true,
       "hit_at_5": true,
@@ -3000,12 +3010,15 @@
       "adversary_type": "speaker_swap",
       "query": "What did you suggest for CPU fallback verification?",
       "relevant_ids": [
-        "e1"
+        "e1",
+        "e3"
       ],
       "ranked_ids": [
         "e1",
+        "e3",
         "e2",
-        "e3"
+        "e5",
+        "e4"
       ],
       "hit_at_1": true,
       "hit_at_5": true,
@@ -3016,16 +3029,19 @@
       "adversary_type": "speaker_swap",
       "query": "What did you suggest for benchmark expansion?",
       "relevant_ids": [
-        "e1"
-      ],
-      "ranked_ids": [
-        "e2",
         "e1",
         "e3"
       ],
-      "hit_at_1": false,
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": true,
       "hit_at_5": true,
-      "mrr": 0.5
+      "mrr": 1.0
     },
     {
       "id": "paraphrase-001",
@@ -3130,13 +3146,16 @@
       "adversary_type": "near_duplicate_paraphrase",
       "query": "What port does the public API use?",
       "relevant_ids": [
-        "e1"
+        "e1",
+        "e3"
       ],
       "ranked_ids": [
         "e1",
+        "e3",
         "e2",
-        "e4",
-        "e3"
+        "e5",
+        "e6",
+        "e4"
       ],
       "hit_at_1": true,
       "hit_at_5": true,
@@ -3147,13 +3166,16 @@
       "adversary_type": "near_duplicate_paraphrase",
       "query": "What is the Docker data root default?",
       "relevant_ids": [
-        "e1"
+        "e1",
+        "e3"
       ],
       "ranked_ids": [
         "e2",
         "e1",
-        "e4",
-        "e3"
+        "e6",
+        "e3",
+        "e5",
+        "e4"
       ],
       "hit_at_1": false,
       "hit_at_5": true,
@@ -3180,13 +3202,16 @@
       "adversary_type": "near_duplicate_paraphrase",
       "query": "What is the default GPU model?",
       "relevant_ids": [
-        "e1"
+        "e1",
+        "e3"
       ],
       "ranked_ids": [
         "e1",
         "e2",
-        "e4",
-        "e3"
+        "e6",
+        "e3",
+        "e5",
+        "e4"
       ],
       "hit_at_1": true,
       "hit_at_5": true,
@@ -3197,12 +3222,15 @@
       "adversary_type": "near_duplicate_paraphrase",
       "query": "What is the runtime image name?",
       "relevant_ids": [
-        "e1"
+        "e1",
+        "e3"
       ],
       "ranked_ids": [
         "e1",
         "e2",
-        "e4"
+        "e6",
+        "e3",
+        "e5"
       ],
       "hit_at_1": true,
       "hit_at_5": true,
@@ -9047,6 +9075,1729 @@
         "e5",
         "e4",
         "e2"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-precision-001",
+      "adversary_type": "time_swap",
+      "query": "What is the exact date the settlement exception policy took effect?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e5",
+        "e3",
+        "e2"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-precision-002",
+      "adversary_type": "time_swap",
+      "query": "What is the exact date the orbital telemetry archive switched to immutable filenames?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e1",
+        "e5",
+        "e4",
+        "e2"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "time-precision-003",
+      "adversary_type": "time_swap",
+      "query": "What is the exact date the witness portal began requiring second-factor review for sealed exhibits?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e5",
+        "e2",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-precision-004",
+      "adversary_type": "time_swap",
+      "query": "What is the exact date the museum loan desk stopped auto-approving outbound packing exceptions?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-precision-005",
+      "adversary_type": "time_swap",
+      "query": "What is the exact date the flood control board required deputy sign-off on overnight gate reversals?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e4",
+        "e2",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "time-precision-006",
+      "adversary_type": "time_swap",
+      "query": "What is the exact date the energy desk began manual review of cross-day hedge mismatches?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-precision-001",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact reimbursement amount on the bookstore charge?",
+      "relevant_ids": [
+        "e1",
+        "e5"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e5",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-precision-002",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact disputed lunch charge?",
+      "relevant_ids": [
+        "e1",
+        "e4"
+      ],
+      "ranked_ids": [
+        "e4",
+        "e1",
+        "e2",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-precision-003",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact transfer amount, not the rounded amount?",
+      "relevant_ids": [
+        "e1",
+        "e4"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e5",
+        "e3",
+        "e2"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-precision-004",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact distance recorded between the probe and the relay satellite?",
+      "relevant_ids": [
+        "e1",
+        "e4"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "paraphrase-precision-005",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact measured separation between the observatory pair?",
+      "relevant_ids": [
+        "e1",
+        "e4"
+      ],
+      "ranked_ids": [
+        "e4",
+        "e1",
+        "e3",
+        "e5",
+        "e2"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "paraphrase-precision-006",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact settlement discount, not the rounded shorthand?",
+      "relevant_ids": [
+        "e1",
+        "e4"
+      ],
+      "ranked_ids": [
+        "e4",
+        "e1",
+        "e5",
+        "e2",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "court-precision-001",
+      "adversary_type": "time_swap",
+      "query": "What was the exact time the defendant entered the loading corridor?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e5",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "court-precision-002",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact amount of the disputed wire reimbursement?",
+      "relevant_ids": [
+        "e1",
+        "e4"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e4",
+        "e2",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "court-precision-003",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact measured separation between the survey craft and the marker buoy?",
+      "relevant_ids": [
+        "e1",
+        "e4"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "court-precision-004",
+      "adversary_type": "time_swap",
+      "query": "What was the exact call time on the witness phone log?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e3",
+        "e5",
+        "e2"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "r5-breaker-001",
+      "adversary_type": "time_swap",
+      "query": "What was the exact time the storage room door badge event was logged?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e4",
+        "e2",
+        "e6",
+        "e9",
+        "e8",
+        "e5",
+        "e7"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "r5-breaker-002",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact amount of the pharmacy reimbursement?",
+      "relevant_ids": [
+        "e1",
+        "e5"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e5",
+        "e7",
+        "e2",
+        "e9",
+        "e3",
+        "e8",
+        "e4",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "r5-breaker-003",
+      "adversary_type": "time_swap",
+      "query": "What was the exact time the witness called the dispatcher?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e5",
+        "e3",
+        "e7",
+        "e8",
+        "e6",
+        "e4",
+        "e2"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "r5-breaker-004",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact measured separation between the marker buoy and the survey launch?",
+      "relevant_ids": [
+        "e1",
+        "e5"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e5",
+        "e3",
+        "e2",
+        "e8",
+        "e7",
+        "e6",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "weather-precision-001",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact average temperature recorded at the Central Park weather station on 2023-07-14?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e6",
+        "e5",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "weather-precision-002",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact average temperature recorded at the LaGuardia Airport weather station on 2023-07-14?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4",
+        "e6",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "weather-precision-003",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact average temperature recorded at the Central Park weather station on 2022-01-29?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e6",
+        "e3",
+        "e2",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "weather-precision-004",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact average temperature recorded at the LaGuardia Airport weather station on 2022-01-29?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e6",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "debate-precision-001",
+      "adversary_type": "time_swap",
+      "query": "What was the exact date of the last confirmed death of the passenger pigeon Martha?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e6",
+        "e4",
+        "e3",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "debate-precision-002",
+      "adversary_type": "time_swap",
+      "query": "What was the exact date of the last captive thylacine's death at the Hobart Zoo?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e2",
+        "e3",
+        "e5",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "debate-precision-003",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact annual mean CO2 concentration recorded at Mauna Loa for 1990?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e6",
+        "e5",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "debate-precision-004",
+      "adversary_type": "time_swap",
+      "query": "What was the exact date of the final confirmed great auk killing on Eldey?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e4",
+        "e6",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "debate-precision-005",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact annual mean global sea level anomaly cited from the report?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e5",
+        "e6",
+        "e4",
+        "e3",
+        "e2"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "court-precision-005",
+      "adversary_type": "time_swap",
+      "query": "What was the exact timestamp on the dock camera when the crate crossed the yellow line?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e6",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "mega-precision-001",
+      "adversary_type": "time_swap",
+      "query": "What was the exact timestamp on the courthouse vestibule camera when the blue evidence binder was first carried past the metal detector?",
+      "relevant_ids": [
+        "e1",
+        "e6"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e3",
+        "e2",
+        "e8",
+        "e6",
+        "e5",
+        "e7",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "mega-precision-002",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact annual mean atmospheric methane concentration cited for 2004?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e4",
+        "e3",
+        "e6",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "mega-precision-003",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact amount of the estate reimbursement check?",
+      "relevant_ids": [
+        "e1",
+        "e5"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e5",
+        "e3",
+        "e2",
+        "e6",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "quartet-r5-001",
+      "adversary_type": "speaker_swap",
+      "query": "What was the exact timestamp when the red ledger binder first left the witness prep room?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e5",
+        "e4",
+        "e7",
+        "e3",
+        "e2",
+        "e9",
+        "e10",
+        "e8",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "quartet-r5-002",
+      "adversary_type": "speaker_swap",
+      "query": "What was the exact amount on the disputed maintenance reimbursement check?",
+      "relevant_ids": [
+        "e1",
+        "e8"
+      ],
+      "ranked_ids": [
+        "e8",
+        "e1",
+        "e9",
+        "e4",
+        "e2",
+        "e3",
+        "e5",
+        "e6",
+        "e7",
+        "e10"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "quartet-r5-003",
+      "adversary_type": "time_swap",
+      "query": "What was the exact date the marsh habitat permit became effective?",
+      "relevant_ids": [
+        "e1",
+        "e6"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e6",
+        "e9",
+        "e4",
+        "e8",
+        "e2",
+        "e5",
+        "e10",
+        "e3",
+        "e7"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "top5-killer-001",
+      "adversary_type": "time_swap",
+      "query": "What was the exact timestamp when the east stairwell badge event was logged?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e6",
+        "e2",
+        "e7",
+        "e11",
+        "e5",
+        "e3",
+        "e9",
+        "e10",
+        "e8"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "top5-killer-002",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact reimbursement amount on the courier receipt?",
+      "relevant_ids": [
+        "e1",
+        "e7"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e6",
+        "e8",
+        "e3",
+        "e11",
+        "e7",
+        "e10",
+        "e4",
+        "e2",
+        "e5",
+        "e9"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "top5-killer-003",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact average temperature recorded at the Central Park station on 2023-07-14?",
+      "relevant_ids": [
+        "e1",
+        "e11"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e9",
+        "e5",
+        "e11",
+        "e10",
+        "e6",
+        "e8",
+        "e7",
+        "e4",
+        "e3"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "top5-killer-004",
+      "adversary_type": "time_swap",
+      "query": "What was the exact effective date of the wetland access permit?",
+      "relevant_ids": [
+        "e1",
+        "e10"
+      ],
+      "ranked_ids": [
+        "e7",
+        "e1",
+        "e8",
+        "e11",
+        "e10",
+        "e5",
+        "e6",
+        "e2",
+        "e9",
+        "e3",
+        "e4"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "top5-killer-005",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact annual mean methane concentration cited for 2004?",
+      "relevant_ids": [
+        "e1",
+        "e10"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e5",
+        "e2",
+        "e7",
+        "e11",
+        "e3",
+        "e8",
+        "e10",
+        "e6",
+        "e4",
+        "e9"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "top5-killer-006",
+      "adversary_type": "time_swap",
+      "query": "What was the exact timestamp on the witness phone log?",
+      "relevant_ids": [
+        "e1",
+        "e7"
+      ],
+      "ranked_ids": [
+        "e11",
+        "e1",
+        "e4",
+        "e9",
+        "e7",
+        "e6",
+        "e10",
+        "e3",
+        "e5",
+        "e8",
+        "e2"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "top5-killer-007",
+      "adversary_type": "time_swap",
+      "query": "What was the exact timestamp when the west loading dock camera first showed the silver case crossing the threshold?",
+      "relevant_ids": [
+        "e1"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e10",
+        "e5",
+        "e2",
+        "e12",
+        "e6",
+        "e3",
+        "e7",
+        "e9",
+        "e8",
+        "e11"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "top5-killer-008",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact amount on the emergency lodging reimbursement?",
+      "relevant_ids": [
+        "e1",
+        "e8"
+      ],
+      "ranked_ids": [
+        "e8",
+        "e1",
+        "e7",
+        "e2",
+        "e11",
+        "e5",
+        "e3",
+        "e4",
+        "e6",
+        "e10",
+        "e9"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "top5-killer-009",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact annual mean CO2 concentration cited for 1988?",
+      "relevant_ids": [
+        "e1",
+        "e8",
+        "e11"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e11",
+        "e7",
+        "e2",
+        "e5",
+        "e8",
+        "e9",
+        "e10",
+        "e3",
+        "e6",
+        "e4"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "top5-killer-010",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact average temperature recorded at LaGuardia on 2023-07-14?",
+      "relevant_ids": [
+        "e1",
+        "e6",
+        "e10"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e10",
+        "e6",
+        "e5",
+        "e7",
+        "e11",
+        "e3",
+        "e9",
+        "e4",
+        "e8",
+        "e2"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "top5-killer-011",
+      "adversary_type": "time_swap",
+      "query": "What was the exact timestamp when the archive cabinet sensor first alarmed?",
+      "relevant_ids": [
+        "e1",
+        "e10"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e7",
+        "e9",
+        "e6",
+        "e8",
+        "e2",
+        "e4",
+        "e3",
+        "e11",
+        "e10",
+        "e5"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "top5-killer-012",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact annual mean sea level anomaly cited for the report year?",
+      "relevant_ids": [
+        "e1",
+        "e7",
+        "e10"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e11",
+        "e4",
+        "e9",
+        "e3",
+        "e10",
+        "e7",
+        "e5",
+        "e8",
+        "e2",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "extreme-r5-001",
+      "adversary_type": "time_swap",
+      "query": "What was the exact timestamp on the corridor camera when the black portfolio first crossed the doorway?",
+      "relevant_ids": [
+        "e1",
+        "e14"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e15",
+        "e14",
+        "e9",
+        "e8",
+        "e5",
+        "e12",
+        "e13",
+        "e7",
+        "e10",
+        "e3",
+        "e2",
+        "e6",
+        "e16",
+        "e11"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "extreme-r5-002",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact amount on the hotel incident reimbursement?",
+      "relevant_ids": [
+        "e1",
+        "e9"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e9",
+        "e5",
+        "e14",
+        "e15",
+        "e8",
+        "e12",
+        "e4",
+        "e13",
+        "e7",
+        "e11",
+        "e3",
+        "e10",
+        "e2",
+        "e6"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "extreme-r5-003",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact annual mean sea ice extent value cited in the report?",
+      "relevant_ids": [
+        "e1",
+        "e14",
+        "e18"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e18",
+        "e7",
+        "e13",
+        "e5",
+        "e6",
+        "e11",
+        "e8",
+        "e17",
+        "e16",
+        "e10",
+        "e15",
+        "e2",
+        "e12",
+        "e14",
+        "e4",
+        "e3",
+        "e9"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "extreme-r5-004",
+      "adversary_type": "time_swap",
+      "query": "What was the exact timestamp on the stairwell camera when the gray archive box first cleared the landing?",
+      "relevant_ids": [
+        "e1",
+        "e13"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e6",
+        "e9",
+        "e5",
+        "e18",
+        "e15",
+        "e17",
+        "e12",
+        "e10",
+        "e2",
+        "e7",
+        "e11",
+        "e3",
+        "e8",
+        "e13",
+        "e16",
+        "e14"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "extreme-r5-005",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact amount on the emergency courier wire adjustment?",
+      "relevant_ids": [
+        "e1",
+        "e10"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e18",
+        "e2",
+        "e17",
+        "e9",
+        "e13",
+        "e10",
+        "e8",
+        "e6",
+        "e14",
+        "e7",
+        "e16",
+        "e3",
+        "e12",
+        "e15",
+        "e5",
+        "e4",
+        "e11"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "anti-lexical-001",
+      "adversary_type": "time_swap",
+      "query": "What was the exact timestamp on the interview room camera when the envelope was placed on the table?",
+      "relevant_ids": [
+        "e9",
+        "e10"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e9",
+        "e7",
+        "e11",
+        "e10",
+        "e6",
+        "e5",
+        "e4",
+        "e2",
+        "e3",
+        "e8"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "anti-lexical-002",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact reimbursement amount on the witness travel receipt?",
+      "relevant_ids": [
+        "e7",
+        "e9"
+      ],
+      "ranked_ids": [
+        "e4",
+        "e1",
+        "e9",
+        "e11",
+        "e2",
+        "e7",
+        "e3",
+        "e8",
+        "e5",
+        "e10",
+        "e6"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "anti-lexical-003",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact annual mean methane concentration recorded for 2004?",
+      "relevant_ids": [
+        "e5",
+        "e7"
+      ],
+      "ranked_ids": [
+        "e4",
+        "e2",
+        "e1",
+        "e5",
+        "e3",
+        "e7",
+        "e6",
+        "e8",
+        "e10",
+        "e9"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.25
+    },
+    {
+      "id": "anti-lexical-extreme-001",
+      "adversary_type": "time_swap",
+      "query": "What was the exact timestamp on the interview room camera when the envelope was placed on the table?",
+      "relevant_ids": [
+        "e10",
+        "e11"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e7",
+        "e10",
+        "e12",
+        "e8",
+        "e6",
+        "e11",
+        "e5",
+        "e4",
+        "e2",
+        "e16",
+        "e14",
+        "e15",
+        "e13",
+        "e3",
+        "e9"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "anti-lexical-extreme-002",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact reimbursement amount on the emergency hotel receipt?",
+      "relevant_ids": [
+        "e9",
+        "e10"
+      ],
+      "ranked_ids": [
+        "e4",
+        "e1",
+        "e10",
+        "e6",
+        "e2",
+        "e14",
+        "e9",
+        "e8",
+        "e5",
+        "e15",
+        "e3",
+        "e11",
+        "e12",
+        "e13",
+        "e16",
+        "e7"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "anti-lexical-extreme-003",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact annual mean CO2 concentration recorded for 1988?",
+      "relevant_ids": [
+        "e6",
+        "e7"
+      ],
+      "ranked_ids": [
+        "e2",
+        "e4",
+        "e8",
+        "e6",
+        "e1",
+        "e7",
+        "e3",
+        "e5",
+        "e9",
+        "e10",
+        "e11",
+        "e12"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.25
+    },
+    {
+      "id": "mega-top5-001",
+      "adversary_type": "time_swap",
+      "query": "What was the exact timestamp on the service corridor camera when the green evidence case first crossed the painted threshold?",
+      "relevant_ids": [
+        "e13",
+        "e14"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e4",
+        "e5",
+        "e13",
+        "e16",
+        "e7",
+        "e3",
+        "e2",
+        "e8",
+        "e6",
+        "e10",
+        "e11",
+        "e12",
+        "e15",
+        "e9",
+        "e14"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.25
+    },
+    {
+      "id": "mega-top5-002",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact reimbursement amount on the overnight relocation receipt?",
+      "relevant_ids": [
+        "e9",
+        "e10"
+      ],
+      "ranked_ids": [
+        "e4",
+        "e10",
+        "e1",
+        "e2",
+        "e14",
+        "e9",
+        "e12",
+        "e6",
+        "e13",
+        "e8",
+        "e5",
+        "e15",
+        "e11",
+        "e3",
+        "e16",
+        "e7"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "mega-top5-003",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact annual mean nitrous oxide concentration recorded for 1997?",
+      "relevant_ids": [
+        "e6",
+        "e9"
+      ],
+      "ranked_ids": [
+        "e4",
+        "e2",
+        "e1",
+        "e6",
+        "e9",
+        "e3",
+        "e7",
+        "e10",
+        "e13",
+        "e12",
+        "e5",
+        "e8",
+        "e11"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.25
+    },
+    {
+      "id": "anti-lexical-extreme-004",
+      "adversary_type": "time_swap",
+      "query": "What was the exact timestamp on the west annex camera when the silver evidence pouch first touched the intake shelf?",
+      "relevant_ids": [
+        "e13",
+        "e14"
+      ],
+      "ranked_ids": [
+        "e13",
+        "e5",
+        "e4",
+        "e7",
+        "e16",
+        "e3",
+        "e1",
+        "e2",
+        "e6",
+        "e17",
+        "e8",
+        "e14",
+        "e18",
+        "e11",
+        "e15",
+        "e10",
+        "e9",
+        "e12"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "anti-lexical-extreme-005",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact reimbursement amount on the emergency relocation hotel receipt?",
+      "relevant_ids": [
+        "e9",
+        "e10"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e2",
+        "e10",
+        "e4",
+        "e5",
+        "e16",
+        "e3",
+        "e9",
+        "e18",
+        "e11",
+        "e12",
+        "e15",
+        "e8",
+        "e7",
+        "e17",
+        "e13",
+        "e6",
+        "e14"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "anti-lexical-extreme-006",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact annual mean CO2 concentration recorded for 1991?",
+      "relevant_ids": [
+        "e6",
+        "e9"
+      ],
+      "ranked_ids": [
+        "e4",
+        "e2",
+        "e6",
+        "e1",
+        "e9",
+        "e3",
+        "e13",
+        "e10",
+        "e7",
+        "e11",
+        "e5",
+        "e12",
+        "e8"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "anti-lexical-mega-007",
+      "adversary_type": "time_swap",
+      "query": "What was the exact timestamp on the archive intake camera when the sealed tube first touched the stainless bench?",
+      "relevant_ids": [
+        "e15",
+        "e16"
+      ],
+      "ranked_ids": [
+        "e5",
+        "e4",
+        "e1",
+        "e15",
+        "e3",
+        "e14",
+        "e16",
+        "e6",
+        "e17",
+        "e2",
+        "e18",
+        "e7",
+        "e12",
+        "e13",
+        "e8",
+        "e10",
+        "e9",
+        "e11"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.25
+    },
+    {
+      "id": "anti-lexical-mega-008",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact reimbursement amount on the witness lodging relocation claim?",
+      "relevant_ids": [
+        "e9",
+        "e10"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e10",
+        "e17",
+        "e9",
+        "e18",
+        "e4",
+        "e2",
+        "e3",
+        "e14",
+        "e15",
+        "e12",
+        "e8",
+        "e5",
+        "e11",
+        "e7",
+        "e13",
+        "e16",
+        "e6"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "source-confusion-001",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact average temperature recorded for the city station on 2023-07-14?",
+      "relevant_ids": [
+        "e8",
+        "e9"
+      ],
+      "ranked_ids": [
+        "e9",
+        "e7",
+        "e6",
+        "e2",
+        "e8",
+        "e4",
+        "e12",
+        "e10",
+        "e1",
+        "e3",
+        "e5",
+        "e11"
+      ],
+      "hit_at_1": true,
+      "hit_at_5": true,
+      "mrr": 1.0
+    },
+    {
+      "id": "source-confusion-002",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact amount of the travel reimbursement in the official ledger?",
+      "relevant_ids": [
+        "e5",
+        "e6"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e10",
+        "e6",
+        "e3",
+        "e11",
+        "e2",
+        "e4",
+        "e9",
+        "e7",
+        "e5",
+        "e8"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "source-confusion-003",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact concentration listed in the official monitoring ledger for the harbor nitrate reading?",
+      "relevant_ids": [
+        "e7",
+        "e8"
+      ],
+      "ranked_ids": [
+        "e1",
+        "e5",
+        "e8",
+        "e2",
+        "e11",
+        "e7",
+        "e4",
+        "e10",
+        "e6",
+        "e3",
+        "e9"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.3333333333333333
+    },
+    {
+      "id": "source-confusion-004",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact average temperature recorded in the official airport climatology table for 2023-07-14?",
+      "relevant_ids": [
+        "e7",
+        "e8"
+      ],
+      "ranked_ids": [
+        "e5",
+        "e7",
+        "e8",
+        "e2",
+        "e1",
+        "e3",
+        "e4",
+        "e10",
+        "e11",
+        "e6",
+        "e9"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": true,
+      "mrr": 0.5
+    },
+    {
+      "id": "aggressive-r5-001",
+      "adversary_type": "time_swap",
+      "query": "What was the exact timestamp on the south evidence room camera when the orange file box first crossed the interior tape line?",
+      "relevant_ids": [
+        "e10",
+        "e11"
+      ],
+      "ranked_ids": [
+        "e3",
+        "e4",
+        "e2",
+        "e6",
+        "e1",
+        "e13",
+        "e14",
+        "e10",
+        "e8",
+        "e12",
+        "e5",
+        "e7",
+        "e9",
+        "e11"
+      ],
+      "hit_at_1": false,
+      "hit_at_5": false,
+      "mrr": 0.125
+    },
+    {
+      "id": "aggressive-r5-002",
+      "adversary_type": "near_duplicate_paraphrase",
+      "query": "What was the exact amount on the overnight evacuation lodging reimbursement?",
+      "relevant_ids": [
+        "e8",
+        "e9"
+      ],
+      "ranked_ids": [
+        "e9",
+        "e5",
+        "e4",
+        "e2",
+        "e8",
+        "e7",
+        "e13",
+        "e14",
+        "e1",
+        "e12",
+        "e3",
+        "e6",
+        "e10",
+        "e11"
       ],
       "hit_at_1": true,
       "hit_at_5": true,

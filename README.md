@@ -246,10 +246,15 @@ The table below compares `tagmem` against MemPalace's published LongMemEval base
 
 ### Adversarial Retrieval Snapshot
 
+`FalseMemBench` is a standalone adversarial distractor benchmark focused on conflicting, stale, and near-miss memories.
+
 | System | Cases | Recall@1 | Recall@5 | MRR |
 |---|---:|---:|---:|---:|
-| `tagmem` | 500 | **0.8880** | **1.0000** | **0.9440** |
-| MemPalace raw-style | 500 | 0.6740 | **1.0000** | 0.8272 |
+| `tagmem` | 573 | **0.8674** | **1.0000** | **0.9328** |
+| BM25 | 573 | 0.6946 | 0.9930 | 0.8278 |
+| MemPalace raw-style | 573 | 0.6632 | 0.9948 | 0.8154 |
+| Contriever | 573 | 0.6527 | 0.9843 | 0.8049 |
+| Stella | 573 | 0.4258 | 0.9791 | 0.6465 |
 
 ### Current GPU Model Snapshot
 

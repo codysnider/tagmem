@@ -81,23 +81,23 @@ xychart-beta
     y-axis "Ops/sec" 0 --> 1700
     bar [1616.44, 451.36, 1575.09]
 
-## Adversarial Recall@1
+## FalseMemBench Recall@1
 
 ```mermaid
 xychart-beta
-    title "Adversarial Recall@1"
-    x-axis ["tagmem", "MemPalace raw"]
-    y-axis "Recall@1" 0.60 --> 0.90
-    bar [0.8880, 0.6740]
+    title "FalseMemBench Recall@1"
+    x-axis ["tagmem", "BM25", "MemPalace", "Contriever", "Stella"]
+    y-axis "Recall@1" 0.40 --> 0.90
+    bar [0.8674, 0.6946, 0.6632, 0.6527, 0.4258]
 ```
 
-## Adversarial MRR
+## FalseMemBench MRR
 
 ```mermaid
 xychart-beta
-    title "Adversarial MRR"
-    x-axis ["tagmem", "MemPalace raw"]
-    y-axis "MRR" 0.75 --> 0.95
-    bar [0.9440, 0.8272]
+    title "FalseMemBench MRR"
+    x-axis ["tagmem", "BM25", "MemPalace", "Contriever", "Stella"]
+    y-axis "MRR" 0.60 --> 0.95
+    bar [0.9328, 0.8278, 0.8154, 0.8049, 0.6465]
 ```
 ```
