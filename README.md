@@ -4,7 +4,26 @@
 
 # tagmem
 
-`tagmem` is local memory storage and retrieval for LLM agents.
+Tagged, depth-aware memory storage and retrieval for LLM agents.
+
+[Install](#install) · [OpenCode](#opencode) · [MCP](#mcp) · [Benchmarks](#benchmarks) · [Full install guide](INSTALL.md)
+
+## Quick Start
+
+Install with one command:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/codysnider/tagmem/main/scripts/install.sh | bash
+```
+
+This installer is:
+
+- interactive by default
+- Docker-first
+- release-binary fallback when Docker is unavailable
+- able to patch OpenCode config safely with backups
+
+For full installation details, see [`INSTALL.md`](INSTALL.md).
 
 It is built around a simple model:
 
@@ -21,51 +40,13 @@ The system is local-first, retrieval-oriented, and designed to be usable through
 
 ## Install
 
-### Recommended: Docker
-
-The recommended way to run `tagmem` is in Docker.
-
 Published image:
 
 ```bash
-ghcr.io/codysnider/tagmem
+ghcr.io/codysnider/tagmem:latest
 ```
 
-Run the CLI from the published image:
-
-```bash
-docker run --rm ghcr.io/codysnider/tagmem:latest help
-```
-
-Run the MCP server from the published image:
-
-```bash
-docker run -i --rm ghcr.io/codysnider/tagmem:latest mcp
-```
-
-### Build from source
-
-If you want to build locally from source:
-
-```bash
-go build ./cmd/tagmem
-```
-
-This creates the `tagmem` binary in the current directory.
-
-### Install with Go
-
-If you want a direct Go-based install:
-
-```bash
-go install github.com/codysnider/tagmem/cmd/tagmem@latest
-```
-
-This is best used once a release/tag workflow is in place. Docker is still the preferred runtime path.
-
-## Quick Start
-
-Initialize storage:
+After install, initialize storage:
 
 ```bash
 tagmem init
@@ -85,9 +66,25 @@ tagmem search --depth 2 "auth migration"
 tagmem search --tag auth "token refresh"
 ```
 
-## Docker Workflow
+## OpenCode
 
-The Docker workflow keeps model files, cache, and benchmark artifacts outside the repo in mounted volumes.
+The installer can detect and patch OpenCode automatically.
+
+If you want to patch OpenCode during install:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/codysnider/tagmem/main/scripts/install.sh | bash -s -- --patch-opencode
+```
+
+If you want to skip patching and handle config yourself:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/codysnider/tagmem/main/scripts/install.sh | bash -s -- --no-patch-opencode
+```
+
+## Runtime Notes
+
+The Docker path keeps model files, cache, and runtime state outside the repo in mounted directories.
 
 Default Docker data root:
 
@@ -101,7 +98,7 @@ Override it if you want Docker state elsewhere:
 export TAGMEM_DATA_ROOT=/path/to/tagmem-data
 ```
 
-The helper `just` commands are primarily for development and benchmarking. Most users only need the published image or the `go install` path.
+The helper `just` commands are for development and release work. Most users only need the installer.
 
 ## Commands
 

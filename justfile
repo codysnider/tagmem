@@ -3,8 +3,20 @@ set shell := ["bash", "-cu"]
 build:
 	./scripts/cmd/docker-build/run.sh
 
+release:
+	./scripts/cmd/release/run.sh
+
+release-patch:
+	./scripts/cmd/release/run.sh patch
+
+release-minor:
+	./scripts/cmd/release/run.sh minor
+
+release-major:
+	./scripts/cmd/release/run.sh major
+
 release-image:
-	./scripts/cmd/release-image/run.sh
+	./scripts/cmd/release/run.sh
 
 shell:
 	./scripts/cmd/docker-shell/run.sh

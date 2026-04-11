@@ -6,6 +6,7 @@ import (
 
 	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 
+	"github.com/codysnider/tagmem/internal/buildinfo"
 	"github.com/codysnider/tagmem/internal/diary"
 	"github.com/codysnider/tagmem/internal/kg"
 	"github.com/codysnider/tagmem/internal/store"
@@ -25,7 +26,7 @@ type Server struct {
 
 func New(_ any, _ any, _ any, repo *store.Repository, kgStore *kg.Store, diaryStore *diary.Store, paths xdg.Paths, provider vector.Provider) *Server {
 	s := &Server{repo: repo, kg: kgStore, diary: diaryStore, paths: paths, provider: provider}
-	s.server = sdk.NewServer(&sdk.Implementation{Name: "tagmem", Version: "0.1.0"}, nil)
+	s.server = sdk.NewServer(&sdk.Implementation{Name: "tagmem", Version: buildinfo.Version}, nil)
 	s.registerTools()
 	return s
 }

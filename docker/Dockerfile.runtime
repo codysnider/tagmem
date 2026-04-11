@@ -1,30 +1,27 @@
-FROM nvidia/cuda:13.0.0-cudnn-devel-ubuntu24.04
+FROM golang:1.25-bookworm AS build
 
-ARG GO_VERSION=1.22.12
+ARG TAGMEM_VERSION=dev
+ARG TARGETARCH
 
-ENV DEBIAN_FRONTEND=noninteractive
-ENV GOPATH=/go
-ENV PATH=/usr/local/go/bin:/go/bin:${PATH}
+WORKDIR /src
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+      CGO_ENABLED=1 GOOS=linux GOARCH=$TARGETARCH go build -tags tagmem_onnx -buildvcs=false -trimpath -ldflags="-s -w -X github.com/codysnider/tagmem/internal/buildinfo.Version=${TAGMEM_VERSION}" -o /out/tagmem ./cmd/tagmem; \
+    else \
+      CGO_ENABLED=0 GOOS=linux GOARCH=$TARGETARCH go build -buildvcs=false -trimpath -ldflags="-s -w -X github.com/codysnider/tagmem/internal/buildinfo.Version=${TAGMEM_VERSION}" -o /out/tagmem ./cmd/tagmem; \
+    fi
+
+FROM debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    bash \
-    build-essential \
     ca-certificates \
-    curl \
-    git \
-    python3 \
-    tar \
  && rm -rf /var/lib/apt/lists/*
 
-RUN curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" -o /tmp/go.tgz \
- && rm -rf /usr/local/go \
- && tar -C /usr/local -xzf /tmp/go.tgz \
- && rm /tmp/go.tgz
-
-WORKDIR /workspace
-
-COPY . /workspace
-
-RUN go build -buildvcs=false -o /usr/local/bin/tagmem ./cmd/tagmem
+COPY --from=build /out/tagmem /usr/local/bin/tagmem
 
 ENTRYPOINT ["/usr/local/bin/tagmem"]
