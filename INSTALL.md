@@ -61,10 +61,15 @@ If Docker is not available, the installer will:
 
 If an OpenCode config file is detected, the installer will:
 
-- show the path
+- detect the `opencode` binary on `PATH`
+- choose the documented global config path (or `OPENCODE_CONFIG` if set)
+- create a new config file if one does not already exist
+- validate existing JSON with `jq`
 - ask before patching
-- back up the file first
+- back up the file first when modifying an existing config
 - add or update the `tagmem` MCP entry
+
+If `jq` is unavailable or the config file is invalid, the installer will stop short of patching and print the MCP command path you can use manually.
 
 ## Environment variables
 

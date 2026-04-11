@@ -236,47 +236,63 @@ download_release_binary() {
 
 patch_opencode() {
   local mcp_wrapper="$1"
-  local found=0 cfg
-  for cfg in \
-    "$HOME/.config/opencode/opencode.json" \
-    "$HOME/.config/opencode/config.json" \
-    "$HOME/Library/Application Support/opencode/opencode.json" \
-    "$HOME/Library/Application Support/opencode/config.json"; do
-    [[ -f "$cfg" ]] || continue
-    found=1
-    printf 'Detected OpenCode config: %s\n' "$cfg"
-    case "$TAGMEM_PATCH_OPENCODE" in
-      yes) ;;
-      no) continue ;;
-      ask)
-        if ! ask "Patch OpenCode config?" yes; then
-          continue
-        fi
-        ;;
-    esac
-    backup_file "$cfg"
-    python3 - <<'PY' "$cfg" "$mcp_wrapper"
-import json, sys
-cfg_path, wrapper = sys.argv[1], sys.argv[2]
-with open(cfg_path) as f:
-    data = json.load(f)
-mcp = data.setdefault('mcp', {})
-mcp['tagmem'] = {
-    'type': 'local',
-    'command': [wrapper],
-    'enabled': True,
-    'timeout': 20000,
-}
-with open(cfg_path, 'w') as f:
-    json.dump(data, f, indent=2)
-    f.write('\n')
-PY
-    printf 'Patched OpenCode config: %s\n' "$cfg"
-  done
-  if [[ "$found" == "0" ]]; then
-    printf 'No OpenCode config detected.\n'
+  local opencode_bin cfg created=0
+  local default_global_linux="$HOME/.config/opencode/opencode.json"
+  local default_global_macos="$HOME/Library/Application Support/opencode/opencode.json"
+
+  if ! command -v opencode >/dev/null 2>&1; then
+    printf 'OpenCode binary not found on PATH.\n'
     printf 'Use this MCP command if needed: %s\n' "$mcp_wrapper"
+    return 0
   fi
+
+  if [[ -n "${OPENCODE_CONFIG:-}" ]]; then
+    cfg="$OPENCODE_CONFIG"
+  elif [[ "$(detect_os)" == "darwin" ]]; then
+    cfg="$default_global_macos"
+  else
+    cfg="$default_global_linux"
+  fi
+
+  printf 'OpenCode detected: %s\n' "$(command -v opencode)"
+  printf 'Target OpenCode config: %s\n' "$cfg"
+
+  case "$TAGMEM_PATCH_OPENCODE" in
+    no)
+      printf 'Skipping OpenCode patch. Use this MCP command if needed: %s\n' "$mcp_wrapper"
+      return 0
+      ;;
+    ask)
+      if ! ask "Patch OpenCode config?" yes; then
+        printf 'Skipping OpenCode patch. Use this MCP command if needed: %s\n' "$mcp_wrapper"
+        return 0
+      fi
+      ;;
+  esac
+
+  mkdir -p "$(dirname "$cfg")"
+
+  if [[ ! -f "$cfg" ]]; then
+    printf '{\n  "mcp": {}\n}\n' > "$cfg"
+    created=1
+    printf 'Created new OpenCode config: %s\n' "$cfg"
+  fi
+
+  if ! jq empty "$cfg" >/dev/null 2>&1; then
+    printf 'OpenCode config is not valid JSON: %s\n' "$cfg" >&2
+    printf 'Manual MCP command: %s\n' "$mcp_wrapper" >&2
+    return 1
+  fi
+
+  if [[ "$created" == "0" ]]; then
+    backup_file "$cfg"
+  fi
+
+  local tmp
+  tmp="$(mktemp)"
+  jq --arg wrapper "$mcp_wrapper" '.mcp = (.mcp // {}) | .mcp.tagmem = {type:"local", command:[$wrapper], enabled:true, timeout:20000}' "$cfg" > "$tmp"
+  mv "$tmp" "$cfg"
+  printf 'Patched OpenCode config: %s\n' "$cfg"
 }
 
 main() {
