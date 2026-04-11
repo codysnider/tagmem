@@ -44,7 +44,9 @@ in a local bin directory, typically:
 If Docker is available, the installer will:
 
 1. pull `ghcr.io/codysnider/tagmem:latest`
-2. run a smoke test with `help`
+2. probe whether the Docker runtime can use the embedded model successfully
+3. use GPU-backed wrappers when the probe succeeds
+4. fall back to CPU-safe wrappers when the probe fails
 3. install a `tagmem` wrapper
 4. install a `tagmem-mcp` wrapper
 

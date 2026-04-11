@@ -113,15 +113,17 @@ render_with_python() {
   local config_root="$4"
   local cache_root="$5"
   local gpu_snippet="$6"
-  python3 - <<'PY' "$path" "$template" "$data_root" "$config_root" "$cache_root" "$TAGMEM_IMAGE_REF" "$gpu_snippet"
+  local default_accel="$7"
+  python3 - <<'PY' "$path" "$template" "$data_root" "$config_root" "$cache_root" "$TAGMEM_IMAGE_REF" "$gpu_snippet" "$default_accel"
 from pathlib import Path
 import sys
-path, template, data_root, config_root, cache_root, image_ref, gpu_snippet = sys.argv[1:8]
+path, template, data_root, config_root, cache_root, image_ref, gpu_snippet, default_accel = sys.argv[1:9]
 text = template.replace('@DATA_ROOT@', data_root)
 text = text.replace('@CONFIG_ROOT@', config_root)
 text = text.replace('@CACHE_ROOT@', cache_root)
 text = text.replace('@IMAGE_REF@', image_ref)
 text = text.replace('@GPU_SNIPPET@', gpu_snippet)
+text = text.replace('@DEFAULT_ACCEL@', default_accel)
 Path(path).write_text(text)
 PY
   chmod +x "$path"
@@ -135,7 +137,7 @@ elif [[ "${TAGMEM_DOCKER_GPU:-auto}" == "auto" ]] && command -v nvidia-smi >/dev
 fi'
 
 write_docker_wrapper() {
-  local path="$1" data_root="$2" config_root="$3" cache_root="$4"
+  local path="$1" data_root="$2" config_root="$3" cache_root="$4" default_accel="$5"
   local template
   template=$(cat <<'EOF'
 #!/usr/bin/env bash
@@ -156,15 +158,15 @@ exec docker run --rm \
   -e XDG_CACHE_HOME="$CACHE_ROOT" \
   -e TAGMEM_EMBED_PROVIDER="${TAGMEM_EMBED_PROVIDER:-embedded}" \
   -e TAGMEM_EMBED_MODEL="${TAGMEM_EMBED_MODEL:-bge-small-en-v1.5}" \
-  -e TAGMEM_EMBED_ACCEL="${TAGMEM_EMBED_ACCEL:-auto}" \
+  -e TAGMEM_EMBED_ACCEL="${TAGMEM_EMBED_ACCEL:-@DEFAULT_ACCEL@}" \
   "$IMAGE_REF" "$@"
 EOF
 )
-  render_with_python "$path" "$template" "$data_root" "$config_root" "$cache_root" "$docker_gpu_snippet"
+  render_with_python "$path" "$template" "$data_root" "$config_root" "$cache_root" "$docker_gpu_snippet" "$default_accel"
 }
 
 write_docker_mcp_wrapper() {
-  local path="$1" data_root="$2" config_root="$3" cache_root="$4"
+  local path="$1" data_root="$2" config_root="$3" cache_root="$4" default_accel="$5"
   local template
   template=$(cat <<'EOF'
 #!/usr/bin/env bash
@@ -185,11 +187,11 @@ exec docker run -i --rm --init \
   -e XDG_CACHE_HOME="$CACHE_ROOT" \
   -e TAGMEM_EMBED_PROVIDER="${TAGMEM_EMBED_PROVIDER:-embedded}" \
   -e TAGMEM_EMBED_MODEL="${TAGMEM_EMBED_MODEL:-bge-small-en-v1.5}" \
-  -e TAGMEM_EMBED_ACCEL="${TAGMEM_EMBED_ACCEL:-auto}" \
+  -e TAGMEM_EMBED_ACCEL="${TAGMEM_EMBED_ACCEL:-@DEFAULT_ACCEL@}" \
   "$IMAGE_REF" mcp
 EOF
 )
-  render_with_python "$path" "$template" "$data_root" "$config_root" "$cache_root" "$docker_gpu_snippet"
+  render_with_python "$path" "$template" "$data_root" "$config_root" "$cache_root" "$docker_gpu_snippet" "$default_accel"
 }
 
 write_binary_wrapper() {
@@ -305,7 +307,7 @@ patch_opencode() {
 }
 
 main() {
-  local os arch data_root config_root cache_root bin_dir install_root backend real_bin docker_ok=0
+  local os arch data_root config_root cache_root bin_dir install_root backend real_bin docker_ok=0 default_accel=auto
   require_command python3
   os="$(detect_os)"
   arch="$(detect_arch)"
@@ -355,12 +357,20 @@ main() {
     docker pull "$TAGMEM_IMAGE_REF"
     printf 'Running Docker smoke test...\n'
     if [[ "${TAGMEM_DOCKER_GPU:-auto}" == "on" ]] || ([[ "${TAGMEM_DOCKER_GPU:-auto}" == "auto" ]] && command -v nvidia-smi >/dev/null 2>&1); then
-      docker run --rm --gpus all "$TAGMEM_IMAGE_REF" doctor >/dev/null
+      if docker run --rm --gpus all -e TAGMEM_EMBED_PROVIDER=embedded -e TAGMEM_EMBED_MODEL="${TAGMEM_EMBED_MODEL:-bge-small-en-v1.5}" -e TAGMEM_EMBED_ACCEL=auto "$TAGMEM_IMAGE_REF" doctor >/dev/null 2>&1; then
+        default_accel=auto
+        printf '  Docker GPU probe: usable\n'
+      else
+        default_accel=cpu
+        printf '  Docker GPU probe: failed, falling back to CPU wrappers\n'
+      fi
     else
+      default_accel=cpu
       docker run --rm "$TAGMEM_IMAGE_REF" help >/dev/null
+      printf '  Docker GPU probe: skipped, using CPU wrappers\n'
     fi
-    write_docker_wrapper "$bin_dir/tagmem" "$data_root" "$config_root" "$cache_root"
-    write_docker_mcp_wrapper "$bin_dir/tagmem-mcp" "$data_root" "$config_root" "$cache_root"
+    write_docker_wrapper "$bin_dir/tagmem" "$data_root" "$config_root" "$cache_root" "$default_accel"
+    write_docker_mcp_wrapper "$bin_dir/tagmem-mcp" "$data_root" "$config_root" "$cache_root" "$default_accel"
   else
     printf 'Downloading release binary for %s/%s\n' "$os" "$arch"
     real_bin="$(download_release_binary "$os" "$arch" "$install_root")"

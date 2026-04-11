@@ -1,3 +1,5 @@
+//go:build linux && amd64 && tagmem_onnx
+
 package vector
 
 import (
@@ -15,7 +17,6 @@ import (
 	"strings"
 	"sync"
 
-	chromem "github.com/philippgille/chromem-go"
 	ort "github.com/yalue/onnxruntime_go"
 )
 
@@ -37,27 +38,7 @@ type miniLMEmbedder struct {
 var ortInitOnce sync.Once
 var ortInitErr error
 
-func EmbeddedHashProvider() Provider {
-	return Provider{
-		Name:        ProviderEmbedded,
-		IndexKey:    ProviderEmbedded + "-hash-v1",
-		Description: "embedded hash fallback embedding",
-		Model:       "embedded-hash-v1",
-		Func:        embeddedEmbeddingFunc(),
-		Batch: func(ctx context.Context, texts []string) ([][]float32, error) {
-			out := make([][]float32, 0, len(texts))
-			fn := embeddedEmbeddingFunc()
-			for _, text := range texts {
-				vector, err := fn(ctx, text)
-				if err != nil {
-					return nil, err
-				}
-				out = append(out, vector)
-			}
-			return out, nil
-		},
-	}
-}
+func localBERTSupported() bool { return true }
 
 func loadLocalBERTEmbedder(modelDir string, spec localModelSpec, accel string, state *embeddedRuntimeState) (*miniLMEmbedder, error) {
 	if _, err := loadBERTTokenizer(filepath.Join(modelDir, "vocab.txt")); err != nil {
@@ -140,12 +121,6 @@ func loadLocalBERTEmbedderWithRuntime(modelDir string, spec localModelSpec, useG
 		state.runtimeLibrary = runtimePath
 	}
 	return &miniLMEmbedder{modelDir: modelDir, tokenizer: vocab, sessions: sessions}, nil
-}
-
-func (e *miniLMEmbedder) EmbeddingFunc() chromem.EmbeddingFunc {
-	return func(_ context.Context, text string) ([]float32, error) {
-		return e.Embed(text)
-	}
 }
 
 func (e *miniLMEmbedder) EmbedBatch(_ context.Context, texts []string) ([][]float32, error) {
