@@ -90,6 +90,14 @@ ask() {
   fi
 }
 
+path_contains() {
+  local dir="$1"
+  case ":$PATH:" in
+    *":$dir:"*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 backup_file() {
   local file="$1"
   local stamp
@@ -357,7 +365,8 @@ main() {
     docker pull "$TAGMEM_IMAGE_REF"
     printf 'Running Docker smoke test...\n'
     if [[ "${TAGMEM_DOCKER_GPU:-auto}" == "on" ]] || ([[ "${TAGMEM_DOCKER_GPU:-auto}" == "auto" ]] && command -v nvidia-smi >/dev/null 2>&1); then
-      if docker run --rm --gpus all -e TAGMEM_EMBED_PROVIDER=embedded -e TAGMEM_EMBED_MODEL="${TAGMEM_EMBED_MODEL:-bge-small-en-v1.5}" -e TAGMEM_EMBED_ACCEL=auto "$TAGMEM_IMAGE_REF" doctor >/dev/null 2>&1; then
+      probe_output="$(docker run --rm --gpus all -e TAGMEM_EMBED_PROVIDER=embedded -e TAGMEM_EMBED_MODEL="${TAGMEM_EMBED_MODEL:-bge-small-en-v1.5}" -e TAGMEM_EMBED_ACCEL=auto "$TAGMEM_IMAGE_REF" doctor 2>&1 || true)"
+      if grep -q 'device:[[:space:]]*cuda' <<<"$probe_output"; then
         default_accel=auto
         printf '  Docker GPU probe: usable\n'
       else
@@ -383,7 +392,13 @@ main() {
   printf '\nInstalled tagmem via %s\n' "$backend"
   printf '  tagmem:     %s\n' "$bin_dir/tagmem"
   printf '  tagmem-mcp: %s\n' "$bin_dir/tagmem-mcp"
-  printf '\nIf %s is not on your PATH, add it and restart your shell.\n' "$bin_dir"
+  if path_contains "$bin_dir"; then
+    printf '\n%s is already on your PATH.\n' "$bin_dir"
+  else
+    printf '\n%s is not on your PATH. Add it and restart your shell.\n' "$bin_dir"
+    printf 'Suggested line:\n'
+    printf '  export PATH="%s:$PATH"\n' "$bin_dir"
+  fi
 }
 
 main "$@"
