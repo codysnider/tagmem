@@ -73,6 +73,50 @@ func TestAppIngestStatusAndContextFlow(t *testing.T) {
 	}
 }
 
+func TestAppSearchExplainShowsComputedSignals(t *testing.T) {
+	t.Parallel()
+
+	root := t.TempDir()
+	xdgConfig := filepath.Join(root, ".config")
+	xdgData := filepath.Join(root, ".local", "share")
+	xdgCache := filepath.Join(root, ".cache")
+	if err := os.MkdirAll(filepath.Join(xdgConfig, "tagmem"), 0o755); err != nil {
+		t.Fatalf("MkdirAll(config) error = %v", err)
+	}
+	env := []string{
+		"HOME=" + root,
+		"XDG_CONFIG_HOME=" + xdgConfig,
+		"XDG_DATA_HOME=" + xdgData,
+		"XDG_CACHE_HOME=" + xdgCache,
+		"TAGMEM_EMBED_PROVIDER=embedded-hash",
+	}
+	tags := "staging,database,config"
+
+	_, stderr, code := runApp(t, append(append([]string{}, env...), "TAGMEM_IMPORT_UPDATED_AT=2026-04-07T10:00:00Z"), "add", "--depth", "1", "--title", "Legacy staging database", "--body", "Staging uses mysql.internal.example.com.", "--tags", tags, "--origin", "docs/legacy.md")
+	if code != 0 {
+		t.Fatalf("add legacy exit=%d stderr=%s", code, stderr)
+	}
+	_, stderr, code = runApp(t, append(append([]string{}, env...), "TAGMEM_IMPORT_UPDATED_AT=2026-04-07T11:00:00Z"), "add", "--depth", "1", "--title", "Staging database", "--body", "Staging uses postgres.internal.example.com.", "--tags", tags, "--origin", "manual")
+	if code != 0 {
+		t.Fatalf("add current exit=%d stderr=%s", code, stderr)
+	}
+	_, stderr, code = runApp(t, append(append([]string{}, env...), "TAGMEM_IMPORT_UPDATED_AT=2026-04-07T12:00:00Z"), "add", "--depth", "1", "--title", "Staging database confirmation", "--body", "Staging uses postgres.internal.example.com.", "--tags", tags, "--origin", "notes/runbook.md")
+	if code != 0 {
+		t.Fatalf("add confirmation exit=%d stderr=%s", code, stderr)
+	}
+
+	stdout, stderr, code := runApp(t, env, "search", "--explain", "What database does staging use?")
+	if code != 0 {
+		t.Fatalf("search --explain exit=%d stderr=%s", code, stderr)
+	}
+	if !strings.Contains(stdout, "support=2") || !strings.Contains(stdout, "sources=2") || !strings.Contains(stdout, "conflicts=1") {
+		t.Fatalf("search --explain stdout = %q, want computed signal fields", stdout)
+	}
+	if !strings.Contains(stdout, "Staging database confirmation") {
+		t.Fatalf("search --explain stdout = %q, want top staging result", stdout)
+	}
+}
+
 func runApp(t *testing.T, env []string, args ...string) (string, string, int) {
 	t.Helper()
 	stdout := &bytes.Buffer{}

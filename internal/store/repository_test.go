@@ -157,3 +157,40 @@ func TestRepositorySearchTrimsLowSignalTail(t *testing.T) {
 		t.Fatalf("results[0].Title = %q, want %q", results[0].Title, "Auth migration")
 	}
 }
+
+func TestRepositorySearchDetailedIncludesSupportAndConflicts(t *testing.T) {
+	t.Parallel()
+
+	root := t.TempDir()
+	repo := NewRepository(filepath.Join(root, "store.json"), filepath.Join(root, "vector"), vector.EmbeddedHashProvider())
+	now := time.Date(2026, 4, 7, 12, 0, 0, 0, time.UTC)
+	repo.now = func() time.Time {
+		now = now.Add(time.Minute)
+		return now
+	}
+
+	sharedTags := []string{"staging", "database", "config"}
+	_, _ = repo.Add(AddEntry{Depth: 1, Title: "Legacy staging database", Body: "Staging uses mysql.internal.example.com.", Tags: sharedTags, Origin: "docs/legacy.md"})
+	_, _ = repo.Add(AddEntry{Depth: 1, Title: "Staging database", Body: "Staging uses postgres.internal.example.com.", Tags: sharedTags, Origin: "manual"})
+	_, _ = repo.Add(AddEntry{Depth: 1, Title: "Staging database confirmation", Body: "Staging uses postgres.internal.example.com.", Tags: sharedTags, Origin: "notes/runbook.md"})
+
+	results, err := repo.SearchDetailed(Query{Text: "What database does staging use?", Limit: 5})
+	if err != nil {
+		t.Fatalf("SearchDetailed() error = %v", err)
+	}
+	if len(results) == 0 {
+		t.Fatal("expected detailed search results")
+	}
+	if results[0].SupportCount != 2 {
+		t.Fatalf("results[0].SupportCount = %d, want 2", results[0].SupportCount)
+	}
+	if results[0].SourceKinds != 2 {
+		t.Fatalf("results[0].SourceKinds = %d, want 2", results[0].SourceKinds)
+	}
+	if results[0].ConflictCount != 1 {
+		t.Fatalf("results[0].ConflictCount = %d, want 1", results[0].ConflictCount)
+	}
+	if results[0].Entry.Body != "Staging uses postgres.internal.example.com." {
+		t.Fatalf("results[0].Entry.Body = %q, want postgres match", results[0].Entry.Body)
+	}
+}

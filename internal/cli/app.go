@@ -169,19 +169,19 @@ func (a *App) runList(repo *store.Repository, args []string) int {
 }
 
 func (a *App) runSearch(repo *store.Repository, args []string) int {
-	entries, err := a.queryEntries(repo, args, true)
+	results, explain, err := a.querySearch(repo, args)
 	if err != nil {
 		fmt.Fprintf(a.stderr, "%v\n", err)
 		return 1
 	}
 
-	if len(entries) == 0 {
+	if len(results) == 0 {
 		fmt.Fprintln(a.stdout, "no matches")
 		return 0
 	}
 
-	for _, entry := range entries {
-		fmt.Fprintln(a.stdout, formatEntryLine(entry))
+	for _, result := range results {
+		fmt.Fprintln(a.stdout, formatSearchResultLine(result, explain))
 	}
 
 	return 0
@@ -309,6 +309,37 @@ func (a *App) queryEntries(repo *store.Repository, args []string, useSearch bool
 	return repo.List(query)
 }
 
+func (a *App) querySearch(repo *store.Repository, args []string) ([]store.SearchResult, bool, error) {
+	fs := flag.NewFlagSet("search", flag.ContinueOnError)
+	fs.SetOutput(a.stderr)
+
+	depth := fs.Int("depth", -1, "filter to one depth")
+	limit := fs.Int("limit", 5, "maximum entries to show")
+	explain := fs.Bool("explain", false, "include computed support and conflict signals")
+
+	if err := fs.Parse(args); err != nil {
+		return nil, false, err
+	}
+
+	if err := repo.Init(); err != nil {
+		return nil, false, fmt.Errorf("initialize store: %w", err)
+	}
+
+	query := store.Query{Limit: *limit, Text: strings.Join(fs.Args(), " ")}
+	if *depth >= 0 {
+		query.Depth = depth
+	}
+	if strings.TrimSpace(query.Text) == "" {
+		return nil, false, errors.New("usage: tagmem search [--depth N] [--limit N] [--explain] <query>")
+	}
+
+	results, err := repo.SearchDetailed(query)
+	if err != nil {
+		return nil, false, err
+	}
+	return results, *explain, nil
+}
+
 func (a *App) printHelp() {
 	fmt.Fprintln(a.stdout, "tagmem")
 	fmt.Fprintln(a.stdout, "")
@@ -354,6 +385,18 @@ func formatEntryLine(entry store.Entry) string {
 		parts = append(parts, "origin="+entry.Origin)
 	}
 
+	return strings.Join(parts, "  ")
+}
+
+func formatSearchResultLine(result store.SearchResult, explain bool) string {
+	parts := []string{formatEntryLine(result.Entry)}
+	if explain {
+		parts = append(parts,
+			fmt.Sprintf("support=%d", result.SupportCount),
+			fmt.Sprintf("sources=%d", result.SourceKinds),
+			fmt.Sprintf("conflicts=%d", result.ConflictCount),
+		)
+	}
 	return strings.Join(parts, "  ")
 }
 

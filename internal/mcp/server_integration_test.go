@@ -104,30 +104,90 @@ func TestMCPMemoryFlowWithBenchmarkFixtures(t *testing.T) {
 	}
 }
 
-func TestMCPKnowledgeGraphAndDiaryFlow(t *testing.T) {
+func TestMCPKnowledgeGraphLifecycleAndDiaryFlow(t *testing.T) {
 	t.Parallel()
 	_, session := newTestSession(t)
 
-	var fact struct {
+	var firstFact struct {
 		Fact struct {
-			Subject string `json:"subject"`
-			Object  string `json:"object"`
+			Subject   string `json:"subject"`
+			Predicate string `json:"predicate"`
+			Object    string `json:"object"`
+			Source    string `json:"source"`
 		} `json:"fact"`
 	}
-	callTool(t, session, "tagmem_kg_add", map[string]any{"subject": "caroline", "predicate": "attended", "object": "lgbtq support group", "valid_from": "2023-05-07"}, &fact)
-	if fact.Fact.Subject != "caroline" {
-		t.Fatalf("fact subject = %q, want caroline", fact.Fact.Subject)
+	callTool(t, session, "tagmem_kg_add", map[string]any{"subject": "caroline", "predicate": "attended", "object": "lgbtq support group", "valid_from": "2023-05-07", "source_entry": "entry:1"}, &firstFact)
+	if firstFact.Fact.Subject != "caroline" || firstFact.Fact.Predicate != "attended" || firstFact.Fact.Source != "entry:1" {
+		t.Fatalf("firstFact = %+v", firstFact.Fact)
 	}
+	callTool(t, session, "tagmem_kg_add", map[string]any{"subject": "caroline", "predicate": "lives_in", "object": "new york", "valid_from": "2024-01-01", "source_entry": "entry:2"}, nil)
+	callTool(t, session, "tagmem_kg_invalidate", map[string]any{"subject": "caroline", "predicate": "lives_in", "object": "new york", "ended": "2025-12-31"}, nil)
+	callTool(t, session, "tagmem_kg_add", map[string]any{"subject": "caroline", "predicate": "lives_in", "object": "san francisco", "valid_from": "2026-01-01", "source_entry": "entry:3"}, nil)
 
-	var query struct {
+	var currentQuery struct {
 		Count float64 `json:"count"`
 		Facts []struct {
-			Object string `json:"object"`
+			Predicate string `json:"predicate"`
+			Object    string `json:"object"`
 		} `json:"facts"`
 	}
-	callTool(t, session, "tagmem_kg_query", map[string]any{"entity": "caroline"}, &query)
-	if int(query.Count) != 1 || query.Facts[0].Object != "lgbtq support group" {
-		t.Fatalf("kg query = %+v", query)
+	callTool(t, session, "tagmem_kg_query", map[string]any{"entity": "caroline", "direction": "outgoing"}, &currentQuery)
+	if int(currentQuery.Count) != 2 {
+		t.Fatalf("currentQuery.Count = %v, want 2", currentQuery.Count)
+	}
+	assertFact(t, currentQuery.Facts, "attended", "lgbtq support group")
+	assertFact(t, currentQuery.Facts, "lives_in", "san francisco")
+
+	var historicalQuery struct {
+		Count float64 `json:"count"`
+		Facts []struct {
+			Predicate string `json:"predicate"`
+			Object    string `json:"object"`
+		} `json:"facts"`
+	}
+	callTool(t, session, "tagmem_kg_query", map[string]any{"entity": "caroline", "direction": "outgoing", "as_of": "2025-06-01"}, &historicalQuery)
+	if int(historicalQuery.Count) != 2 {
+		t.Fatalf("historicalQuery.Count = %v, want 2", historicalQuery.Count)
+	}
+	assertFact(t, historicalQuery.Facts, "attended", "lgbtq support group")
+	assertFact(t, historicalQuery.Facts, "lives_in", "new york")
+
+	var incomingQuery struct {
+		Count float64 `json:"count"`
+		Facts []struct {
+			Subject string `json:"subject"`
+			Object  string `json:"object"`
+		} `json:"facts"`
+	}
+	callTool(t, session, "tagmem_kg_query", map[string]any{"entity": "san francisco", "direction": "incoming"}, &incomingQuery)
+	if int(incomingQuery.Count) != 1 || incomingQuery.Facts[0].Subject != "caroline" || incomingQuery.Facts[0].Object != "san francisco" {
+		t.Fatalf("incomingQuery = %+v", incomingQuery)
+	}
+
+	var timeline struct {
+		Count    float64 `json:"count"`
+		Timeline []struct {
+			Predicate string `json:"predicate"`
+			Object    string `json:"object"`
+			ValidFrom string `json:"valid_from"`
+			ValidTo   string `json:"valid_to"`
+		} `json:"timeline"`
+	}
+	callTool(t, session, "tagmem_kg_timeline", map[string]any{"entity": "caroline"}, &timeline)
+	if int(timeline.Count) != 3 {
+		t.Fatalf("timeline.Count = %v, want 3", timeline.Count)
+	}
+	if timeline.Timeline[0].Object != "lgbtq support group" || timeline.Timeline[1].Object != "new york" || timeline.Timeline[2].Object != "san francisco" {
+		t.Fatalf("timeline = %+v, want chronological fact order", timeline.Timeline)
+	}
+	if timeline.Timeline[1].ValidTo != "2025-12-31" {
+		t.Fatalf("timeline[1].ValidTo = %q, want 2025-12-31", timeline.Timeline[1].ValidTo)
+	}
+
+	var stats map[string]any
+	callTool(t, session, "tagmem_kg_stats", map[string]any{}, &stats)
+	if int(stats["facts"].(float64)) != 3 || int(stats["current"].(float64)) != 2 || int(stats["expired"].(float64)) != 1 {
+		t.Fatalf("stats = %+v, want facts=3 current=2 expired=1", stats)
 	}
 
 	var diaryRead struct {
@@ -140,6 +200,73 @@ func TestMCPKnowledgeGraphAndDiaryFlow(t *testing.T) {
 	callTool(t, session, "tagmem_diary_read", map[string]any{"agent_name": "researcher", "last_n": 5}, &diaryRead)
 	if int(diaryRead.Showing) != 1 || diaryRead.Entries[0].Topic != "integration" {
 		t.Fatalf("diary read = %+v", diaryRead)
+	}
+}
+
+func TestMCPSearchReturnsComputedSignals(t *testing.T) {
+	t.Parallel()
+	_, session := newTestSession(t)
+	sharedTags := []string{"staging", "database", "config"}
+	callTool(t, session, "tagmem_add_entry", map[string]any{"depth": 1, "title": "Legacy staging database", "body": "Staging uses mysql.internal.example.com.", "tags": sharedTags, "origin": "docs/legacy.md"}, nil)
+	callTool(t, session, "tagmem_add_entry", map[string]any{"depth": 1, "title": "Staging database", "body": "Staging uses postgres.internal.example.com.", "tags": sharedTags, "origin": "manual"}, nil)
+	callTool(t, session, "tagmem_add_entry", map[string]any{"depth": 1, "title": "Staging database confirmation", "body": "Staging uses postgres.internal.example.com.", "tags": sharedTags, "origin": "notes/runbook.md"}, nil)
+
+	var results struct {
+		Entries []struct {
+			Title string `json:"title"`
+		} `json:"entries"`
+		Results []struct {
+			Entry struct {
+				Body string `json:"body"`
+			} `json:"entry"`
+			SupportCount  int `json:"support_count"`
+			SourceKinds   int `json:"source_kinds"`
+			ConflictCount int `json:"conflict_count"`
+		} `json:"results"`
+	}
+	callTool(t, session, "tagmem_search", map[string]any{"query": "What database does staging use?", "limit": 5}, &results)
+	if len(results.Entries) == 0 || len(results.Results) == 0 {
+		t.Fatalf("search result payload missing entries or results: %+v", results)
+	}
+	if results.Results[0].Entry.Body != "Staging uses postgres.internal.example.com." {
+		t.Fatalf("results[0].entry.body = %q, want postgres match", results.Results[0].Entry.Body)
+	}
+	if results.Results[0].SupportCount != 2 {
+		t.Fatalf("results[0].support_count = %d, want 2", results.Results[0].SupportCount)
+	}
+	if results.Results[0].SourceKinds != 2 {
+		t.Fatalf("results[0].source_kinds = %d, want 2", results.Results[0].SourceKinds)
+	}
+	if results.Results[0].ConflictCount != 1 {
+		t.Fatalf("results[0].conflict_count = %d, want 1", results.Results[0].ConflictCount)
+	}
+}
+
+func TestMCPFactRubricAssessesPromotion(t *testing.T) {
+	t.Parallel()
+	_, session := newTestSession(t)
+
+	var canonical struct {
+		Assessment struct {
+			StoreAsFact bool   `json:"store_as_fact"`
+			KeepAsEntry bool   `json:"keep_as_entry"`
+			Predicate   string `json:"predicate"`
+		} `json:"assessment"`
+	}
+	callTool(t, session, "tagmem_fact_rubric", map[string]any{"text": "Staging uses postgres.internal.example.com."}, &canonical)
+	if !canonical.Assessment.StoreAsFact || canonical.Assessment.KeepAsEntry || canonical.Assessment.Predicate != "uses" {
+		t.Fatalf("canonical assessment = %+v", canonical.Assessment)
+	}
+
+	var soft struct {
+		Assessment struct {
+			StoreAsFact bool `json:"store_as_fact"`
+			KeepAsEntry bool `json:"keep_as_entry"`
+		} `json:"assessment"`
+	}
+	callTool(t, session, "tagmem_fact_rubric", map[string]any{"text": "We discussed maybe moving staging to postgres next quarter."}, &soft)
+	if soft.Assessment.StoreAsFact || !soft.Assessment.KeepAsEntry {
+		t.Fatalf("soft assessment = %+v", soft.Assessment)
 	}
 }
 
@@ -265,4 +392,17 @@ func assertBridgeTag(t *testing.T, bridges []map[string]any, tag string) {
 		}
 	}
 	t.Fatalf("expected bridge tag %q not found", tag)
+}
+
+func assertFact(t *testing.T, facts []struct {
+	Predicate string `json:"predicate"`
+	Object    string `json:"object"`
+}, predicate, object string) {
+	t.Helper()
+	for _, fact := range facts {
+		if fact.Predicate == predicate && fact.Object == object {
+			return
+		}
+	}
+	t.Fatalf("expected fact %s -> %s not found in %+v", predicate, object, facts)
 }

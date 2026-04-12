@@ -48,6 +48,9 @@ func (s *Store) Add(subject, predicate, object, validFrom, source string) (Fact,
 }
 
 func (s *Store) Invalidate(subject, predicate, object, ended string) error {
+	subject = strings.TrimSpace(subject)
+	predicate = strings.TrimSpace(predicate)
+	object = strings.TrimSpace(object)
 	snapshot, err := s.load()
 	if err != nil {
 		return err
@@ -65,6 +68,8 @@ func (s *Store) Invalidate(subject, predicate, object, ended string) error {
 }
 
 func (s *Store) Query(entity, asOf, direction string) ([]Fact, error) {
+	entity = strings.TrimSpace(entity)
+	asOf = strings.TrimSpace(asOf)
 	snapshot, err := s.load()
 	if err != nil {
 		return nil, err
@@ -89,6 +94,7 @@ func (s *Store) Query(entity, asOf, direction string) ([]Fact, error) {
 }
 
 func (s *Store) Timeline(entity string) ([]Fact, error) {
+	entity = strings.TrimSpace(entity)
 	snapshot, err := s.load()
 	if err != nil {
 		return nil, err
@@ -179,8 +185,9 @@ func matchesDirection(fact Fact, entity, direction string) bool {
 }
 
 func factValidAt(fact Fact, asOf string) bool {
-	if strings.TrimSpace(asOf) == "" {
-		return fact.ValidTo == "" || fact.ValidTo >= fact.ValidFrom
+	asOf = strings.TrimSpace(asOf)
+	if asOf == "" {
+		return fact.ValidTo == ""
 	}
 	if fact.ValidFrom != "" && fact.ValidFrom > asOf {
 		return false

@@ -113,11 +113,23 @@ func (s *Server) registerTools() {
 		if in.Depth != nil {
 			q.Depth = in.Depth
 		}
-		entries, err := s.repo.Search(q)
+		results, err := s.repo.SearchDetailed(q)
 		if err != nil {
 			return nil, nil, err
 		}
-		return nil, map[string]any{"entries": entries}, nil
+		entries := make([]store.Entry, 0, len(results))
+		for _, result := range results {
+			entries = append(entries, result.Entry)
+		}
+		return nil, map[string]any{"entries": entries, "results": results}, nil
+	})
+
+	type factRubricArgs struct {
+		Text string `json:"text"`
+	}
+	sdk.AddTool(s.server, &sdk.Tool{Name: "tagmem_fact_rubric", Description: "Assess whether text should stay as an entry, become a knowledge graph fact, or both."}, func(ctx context.Context, _ *sdk.CallToolRequest, in factRubricArgs) (*sdk.CallToolResult, map[string]any, error) {
+		assessment := kg.AssessFactPromotion(in.Text)
+		return nil, map[string]any{"assessment": assessment}, nil
 	})
 
 	type idArgs struct {

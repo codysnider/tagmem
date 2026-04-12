@@ -8,7 +8,7 @@
 
 `tagmem` is a local-first memory system that stores original text, retrieves it with hybrid semantic and lexical ranking, and exposes that memory through a simple CLI and MCP interface.
 
-[Install](#install) · [OpenCode](#opencode) · [MCP](#mcp) · [Benchmarks](#benchmarks) · [Configuration](#configuration) · [Install guide](INSTALL.md)
+[Install](#install) · [OpenCode](#opencode) · [MCP](#mcp) · [Benchmarks](#benchmarks) · [Configuration](#configuration) · [Fact rubric](FACT_RUBRIC.md) · [Install guide](INSTALL.md)
 
 ## Quick Start
 
@@ -26,6 +26,7 @@ For a detailed installation guide, see [`INSTALL.md`](INSTALL.md).
 
 - **Verbatim source retrieval**: original source material stays retrievable with each memory ([verification](VERBATIM_SOURCE.md))
 - **Deterministic retrieval**: hybrid semantic + keyword ranking with predictable behavior
+- **Structured facts and timelines**: a small knowledge graph supports exact current-state and historical queries ([details](KNOWLEDGE_GRAPH.md))
 - **Local-first**: runs locally with Docker or a release binary
 - **Clear organization**: tags are primary, depth is secondary
 - **Reproducible evaluation**: benchmark methodology and raw outputs are published in the repo ([report](benchmarks/REPORT.md))
@@ -73,6 +74,7 @@ Search:
 tagmem search "identity"
 tagmem search --depth 2 "auth migration"
 tagmem search --tag auth "token refresh"
+tagmem search --explain "What database does staging use?"
 ```
 
 ## Core Model
@@ -86,6 +88,8 @@ tagmem search --tag auth "token refresh"
 - **diary** stores agent-specific notes
 
 This keeps the memory layer understandable while still supporting richer retrieval behavior.
+
+For a practical rule set on when text should stay an entry, become a fact, or both, see [`FACT_RUBRIC.md`](FACT_RUBRIC.md). For the graph model and query semantics, see [`KNOWLEDGE_GRAPH.md`](KNOWLEDGE_GRAPH.md).
 
 ## Commands
 
@@ -137,6 +141,7 @@ Current MCP tools:
 - `tagmem_get_tag_map`
 - `tagmem_list_entries`
 - `tagmem_search`
+- `tagmem_fact_rubric`
 - `tagmem_show_entry`
 - `tagmem_check_duplicate`
 - `tagmem_add_entry`

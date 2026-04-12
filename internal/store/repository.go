@@ -59,6 +59,13 @@ type Query struct {
 	Limit int
 }
 
+type SearchResult struct {
+	Entry         Entry `json:"entry"`
+	SupportCount  int   `json:"support_count,omitempty"`
+	SourceKinds   int   `json:"source_kinds,omitempty"`
+	ConflictCount int   `json:"conflict_count,omitempty"`
+}
+
 type DuplicateMatch struct {
 	Entry      Entry   `json:"entry"`
 	Similarity float64 `json:"similarity"`
@@ -320,13 +327,33 @@ func (r *Repository) List(q Query) ([]Entry, error) {
 }
 
 func (r *Repository) Search(q Query) ([]Entry, error) {
+	results, err := r.SearchDetailed(q)
+	if err != nil {
+		return nil, err
+	}
+	entries := make([]Entry, 0, len(results))
+	for _, result := range results {
+		entries = append(entries, result.Entry)
+	}
+	return entries, nil
+}
+
+func (r *Repository) SearchDetailed(q Query) ([]SearchResult, error) {
 	text := strings.TrimSpace(q.Text)
 	if text == "" {
-		return r.List(q)
+		entries, err := r.List(q)
+		if err != nil {
+			return nil, err
+		}
+		return wrapSearchEntries(entries), nil
 	}
 	queryKeywords := retrieval.ExtractKeywords(text)
 	if len(queryKeywords) == 0 {
-		return r.List(q)
+		entries, err := r.List(q)
+		if err != nil {
+			return nil, err
+		}
+		return wrapSearchEntries(entries), nil
 	}
 
 	snapshot, err := r.load()
@@ -404,7 +431,7 @@ func (r *Repository) Search(q Query) ([]Entry, error) {
 	}
 
 	if len(scored) == 0 {
-		return r.searchFallback(snapshot, q), nil
+		return wrapSearchEntries(r.searchFallback(snapshot, q)), nil
 	}
 
 	type supportInfo struct {
@@ -465,12 +492,17 @@ func (r *Repository) Search(q Query) ([]Entry, error) {
 		filtered = scored[:1]
 	}
 
-	entries := make([]Entry, 0, len(filtered))
+	searchResults := make([]SearchResult, 0, len(filtered))
 	for _, result := range filtered {
-		entries = append(entries, result.entry)
+		searchResults = append(searchResults, SearchResult{
+			Entry:         result.entry,
+			SupportCount:  result.supportCount,
+			SourceKinds:   result.sourceKinds,
+			ConflictCount: result.conflicts,
+		})
 	}
 
-	return limitEntries(entries, q.Limit), nil
+	return limitSearchResults(searchResults, q.Limit), nil
 }
 
 func sourceKind(source string) string {
@@ -1099,4 +1131,20 @@ func limitEntries(entries []Entry, limit int) []Entry {
 	}
 
 	return entries[:limit]
+}
+
+func wrapSearchEntries(entries []Entry) []SearchResult {
+	results := make([]SearchResult, 0, len(entries))
+	for _, entry := range entries {
+		results = append(results, SearchResult{Entry: entry})
+	}
+	return results
+}
+
+func limitSearchResults(results []SearchResult, limit int) []SearchResult {
+	if limit <= 0 || limit >= len(results) {
+		return results
+	}
+
+	return results[:limit]
 }
