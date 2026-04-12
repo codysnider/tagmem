@@ -344,7 +344,7 @@ func (a *App) printHelp() {
 	fmt.Fprintln(a.stdout, "tagmem")
 	fmt.Fprintln(a.stdout, "")
 	fmt.Fprintln(a.stdout, "Commands:")
-	fmt.Fprintln(a.stdout, "  init                 initialize local storage")
+	fmt.Fprintln(a.stdout, "  init                 optionally precreate local storage")
 	fmt.Fprintln(a.stdout, "  ingest               import files or conversations from a directory")
 	fmt.Fprintln(a.stdout, "  split                split transcript mega-files into per-session files")
 	fmt.Fprintln(a.stdout, "  add                  add a memory entry")

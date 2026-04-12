@@ -114,6 +114,11 @@ require_command() {
   fi
 }
 
+supports_release_binary() {
+  local os="$1" arch="$2"
+  [[ "$os" == "linux" && "$arch" == "amd64" ]]
+}
+
 render_with_python() {
   local path="$1"
   local template="$2"
@@ -161,6 +166,9 @@ exec docker run --rm \
   -v "$DATA_ROOT:$DATA_ROOT" \
   -v "$CONFIG_ROOT:$CONFIG_ROOT" \
   -v "$CACHE_ROOT:$CACHE_ROOT" \
+  -e TAGMEM_DATA_ROOT="$DATA_ROOT" \
+  -e TAGMEM_CONFIG_ROOT="$CONFIG_ROOT" \
+  -e TAGMEM_CACHE_ROOT="$CACHE_ROOT" \
   -e XDG_CONFIG_HOME="$CONFIG_ROOT" \
   -e XDG_DATA_HOME="$DATA_ROOT" \
   -e XDG_CACHE_HOME="$CACHE_ROOT" \
@@ -190,6 +198,9 @@ exec docker run -i --rm --init \
   -v "$DATA_ROOT:$DATA_ROOT" \
   -v "$CONFIG_ROOT:$CONFIG_ROOT" \
   -v "$CACHE_ROOT:$CACHE_ROOT" \
+  -e TAGMEM_DATA_ROOT="$DATA_ROOT" \
+  -e TAGMEM_CONFIG_ROOT="$CONFIG_ROOT" \
+  -e TAGMEM_CACHE_ROOT="$CACHE_ROOT" \
   -e XDG_CONFIG_HOME="$CONFIG_ROOT" \
   -e XDG_DATA_HOME="$DATA_ROOT" \
   -e XDG_CACHE_HOME="$CACHE_ROOT" \
@@ -203,20 +214,34 @@ EOF
 }
 
 write_binary_wrapper() {
-  local path="$1" real_bin="$2"
+  local path="$1" real_bin="$2" data_root="$3" config_root="$4" cache_root="$5"
   cat >"$path" <<EOF
 #!/usr/bin/env bash
 set -euo pipefail
+DATA_ROOT="\${TAGMEM_DATA_ROOT:-$data_root}"
+CONFIG_ROOT="\${TAGMEM_CONFIG_ROOT:-$config_root}"
+CACHE_ROOT="\${TAGMEM_CACHE_ROOT:-$cache_root}"
+mkdir -p "\$DATA_ROOT" "\$CONFIG_ROOT" "\$CACHE_ROOT"
+export TAGMEM_DATA_ROOT="\$DATA_ROOT"
+export TAGMEM_CONFIG_ROOT="\$CONFIG_ROOT"
+export TAGMEM_CACHE_ROOT="\$CACHE_ROOT"
 exec "$real_bin" "\$@"
 EOF
   chmod +x "$path"
 }
 
 write_binary_mcp_wrapper() {
-  local path="$1" real_bin="$2"
+  local path="$1" real_bin="$2" data_root="$3" config_root="$4" cache_root="$5"
   cat >"$path" <<EOF
 #!/usr/bin/env bash
 set -euo pipefail
+DATA_ROOT="\${TAGMEM_DATA_ROOT:-$data_root}"
+CONFIG_ROOT="\${TAGMEM_CONFIG_ROOT:-$config_root}"
+CACHE_ROOT="\${TAGMEM_CACHE_ROOT:-$cache_root}"
+mkdir -p "\$DATA_ROOT" "\$CONFIG_ROOT" "\$CACHE_ROOT"
+export TAGMEM_DATA_ROOT="\$DATA_ROOT"
+export TAGMEM_CONFIG_ROOT="\$CONFIG_ROOT"
+export TAGMEM_CACHE_ROOT="\$CACHE_ROOT"
 exec "$real_bin" mcp
 EOF
   chmod +x "$path"
@@ -233,16 +258,41 @@ PY
 
 download_release_binary() {
   local os="$1" arch="$2" install_root="$3"
-  local version asset url tmpdir
+  local version asset url tmpdir target
   require_command curl
+  require_command tar
   version="$(latest_version)"
   asset="tagmem_${version}_${os}_${arch}.tar.gz"
   url="https://github.com/codysnider/tagmem/releases/download/v${version}/${asset}"
   tmpdir="$(mktemp -d)"
+  target="$install_root/bin/tagmem"
   curl -fsSL "$url" -o "$tmpdir/$asset"
   tar -C "$install_root/bin" -xzf "$tmpdir/$asset"
   rm -rf "$tmpdir"
-  printf '%s' "$install_root/bin/tagmem"
+  if [[ ! -x "$target" ]]; then
+    printf 'Extracted release binary not found: %s\n' "$target" >&2
+    return 1
+  fi
+}
+
+validate_doctor_output() {
+  local subject="$1" output="$2"
+  if grep -q 'embedded hash fallback' <<<"$output"; then
+    printf '%s\n' "$output" >&2
+    printf '%s validation failed: embedded hash fallback is not supported for installer installs.\n' "$subject" >&2
+    return 1
+  fi
+}
+
+validate_release_binary() {
+  local real_bin="$1" data_root="$2" config_root="$3" cache_root="$4"
+  local output
+  printf 'Validating release binary...\n'
+  if ! output="$(TAGMEM_DATA_ROOT="$data_root" TAGMEM_CONFIG_ROOT="$config_root" TAGMEM_CACHE_ROOT="$cache_root" "$real_bin" doctor 2>&1)"; then
+    printf '%s\n' "$output" >&2
+    return 1
+  fi
+  validate_doctor_output "Release binary" "$output"
 }
 
 patch_opencode() {
@@ -270,12 +320,46 @@ patch_opencode() {
   printf 'OpenCode detected: %s\n' "$(command -v opencode)"
   printf 'Target OpenCode config: %s\n' "$cfg"
 
+  if ! command -v jq >/dev/null 2>&1; then
+    printf 'jq not found; skipping OpenCode patch. Use this MCP command if needed: %s\n' "$mcp_wrapper"
+    return 0
+  fi
+
+  opencode_dir="$(dirname "$cfg")"
+  if ! mkdir -p "$opencode_dir"; then
+    printf 'OpenCode config directory is not writable: %s\n' "$opencode_dir"
+    printf 'Use this MCP command if needed: %s\n' "$mcp_wrapper"
+    return 0
+  fi
+
+  if [[ -f "$cfg" ]]; then
+    if [[ ! -r "$cfg" || ! -w "$cfg" ]]; then
+      printf 'OpenCode config is not readable and writable: %s\n' "$cfg"
+      printf 'Use this MCP command if needed: %s\n' "$mcp_wrapper"
+      return 0
+    fi
+    if ! jq empty "$cfg" >/dev/null 2>&1; then
+      printf 'OpenCode config is not valid JSON: %s\n' "$cfg" >&2
+      printf 'Manual MCP command: %s\n' "$mcp_wrapper" >&2
+      return 0
+    fi
+  elif [[ ! -w "$opencode_dir" ]]; then
+    printf 'OpenCode config directory is not writable: %s\n' "$opencode_dir"
+    printf 'Use this MCP command if needed: %s\n' "$mcp_wrapper"
+    return 0
+  fi
+
   case "$TAGMEM_PATCH_OPENCODE" in
     no)
       printf 'Skipping OpenCode patch. Use this MCP command if needed: %s\n' "$mcp_wrapper"
       return 0
       ;;
     ask)
+      if [[ "$TAGMEM_YES" == "1" ]]; then
+        printf 'Skipping OpenCode patch during non-interactive install. Use --patch-opencode to enable it.\n'
+        printf 'Use this MCP command if needed: %s\n' "$mcp_wrapper"
+        return 0
+      fi
       if ! ask "Patch OpenCode config?" yes; then
         printf 'Skipping OpenCode patch. Use this MCP command if needed: %s\n' "$mcp_wrapper"
         return 0
@@ -283,18 +367,10 @@ patch_opencode() {
       ;;
   esac
 
-  mkdir -p "$(dirname "$cfg")"
-
   if [[ ! -f "$cfg" ]]; then
     printf '{\n  "mcp": {}\n}\n' > "$cfg"
     created=1
     printf 'Created new OpenCode config: %s\n' "$cfg"
-  fi
-
-  if ! jq empty "$cfg" >/dev/null 2>&1; then
-    printf 'OpenCode config is not valid JSON: %s\n' "$cfg" >&2
-    printf 'Manual MCP command: %s\n' "$mcp_wrapper" >&2
-    return 1
   fi
 
   if [[ "$created" == "0" ]]; then
@@ -307,7 +383,6 @@ patch_opencode() {
   mv "$tmp" "$cfg"
   printf 'Patched OpenCode config: %s\n' "$cfg"
 
-  opencode_dir="$(dirname "$cfg")"
   mkdir -p "$opencode_dir/commands"
   curl -fsSL "$remember_url" -o "$opencode_dir/commands/remember.md"
   curl -fsSL "$remember_compact_url" -o "$opencode_dir/commands/remember-compact.md"
@@ -317,6 +392,7 @@ patch_opencode() {
 main() {
   local os arch data_root config_root cache_root bin_dir install_root backend real_bin docker_ok=0 default_accel=auto
   require_command python3
+  require_command grep
   os="$(detect_os)"
   arch="$(detect_arch)"
   data_root="${TAGMEM_DATA_ROOT:-$(default_data_root)}"
@@ -365,7 +441,13 @@ main() {
     docker pull "$TAGMEM_IMAGE_REF"
     printf 'Running Docker smoke test...\n'
     if [[ "${TAGMEM_DOCKER_GPU:-auto}" == "on" ]] || ([[ "${TAGMEM_DOCKER_GPU:-auto}" == "auto" ]] && command -v nvidia-smi >/dev/null 2>&1); then
-      probe_output="$(docker run --rm --gpus all -e TAGMEM_EMBED_PROVIDER=embedded -e TAGMEM_EMBED_MODEL="${TAGMEM_EMBED_MODEL:-bge-small-en-v1.5}" -e TAGMEM_EMBED_ACCEL=auto "$TAGMEM_IMAGE_REF" doctor 2>&1 || true)"
+      if ! probe_output="$(docker run --rm --gpus all -e TAGMEM_EMBED_PROVIDER=embedded -e TAGMEM_EMBED_MODEL="${TAGMEM_EMBED_MODEL:-bge-small-en-v1.5}" -e TAGMEM_EMBED_ACCEL=auto "$TAGMEM_IMAGE_REF" doctor 2>&1)"; then
+        printf '%s\n' "$probe_output" >&2
+        exit 1
+      fi
+      if ! validate_doctor_output "Docker image" "$probe_output"; then
+        exit 1
+      fi
       if grep -q 'device:[[:space:]]*cuda' <<<"$probe_output"; then
         default_accel=auto
         printf '  Docker GPU probe: usable\n'
@@ -375,16 +457,29 @@ main() {
       fi
     else
       default_accel=cpu
-      docker run --rm "$TAGMEM_IMAGE_REF" help >/dev/null
+      if ! probe_output="$(docker run --rm -e TAGMEM_EMBED_PROVIDER=embedded -e TAGMEM_EMBED_MODEL="${TAGMEM_EMBED_MODEL:-bge-small-en-v1.5}" -e TAGMEM_EMBED_ACCEL=cpu "$TAGMEM_IMAGE_REF" doctor 2>&1)"; then
+        printf '%s\n' "$probe_output" >&2
+        exit 1
+      fi
+      if ! validate_doctor_output "Docker image" "$probe_output"; then
+        exit 1
+      fi
       printf '  Docker GPU probe: skipped, using CPU wrappers\n'
     fi
     write_docker_wrapper "$bin_dir/tagmem" "$data_root" "$config_root" "$cache_root" "$default_accel"
     write_docker_mcp_wrapper "$bin_dir/tagmem-mcp" "$data_root" "$config_root" "$cache_root" "$default_accel"
   else
+    if ! supports_release_binary "$os" "$arch"; then
+      printf 'Release binary fallback is currently supported only on linux/amd64.\n' >&2
+      printf 'Use Docker on %s/%s or wait for native ONNX support on this platform.\n' "$os" "$arch" >&2
+      exit 1
+    fi
     printf 'Downloading release binary for %s/%s\n' "$os" "$arch"
-    real_bin="$(download_release_binary "$os" "$arch" "$install_root")"
-    write_binary_wrapper "$bin_dir/tagmem" "$real_bin"
-    write_binary_mcp_wrapper "$bin_dir/tagmem-mcp" "$real_bin"
+    download_release_binary "$os" "$arch" "$install_root"
+    real_bin="$install_root/bin/tagmem"
+    validate_release_binary "$real_bin" "$data_root" "$config_root" "$cache_root"
+    write_binary_wrapper "$bin_dir/tagmem" "$real_bin" "$data_root" "$config_root" "$cache_root"
+    write_binary_mcp_wrapper "$bin_dir/tagmem-mcp" "$real_bin" "$data_root" "$config_root" "$cache_root"
   fi
 
   patch_opencode "$bin_dir/tagmem-mcp"

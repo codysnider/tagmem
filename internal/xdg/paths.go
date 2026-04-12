@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type Paths struct {
@@ -21,6 +22,10 @@ type Paths struct {
 }
 
 func Resolve(appName string) (Paths, error) {
+	configOverride := strings.TrimSpace(os.Getenv(appEnvName(appName, "CONFIG_ROOT")))
+	dataOverride := strings.TrimSpace(os.Getenv(appEnvName(appName, "DATA_ROOT")))
+	cacheOverride := strings.TrimSpace(os.Getenv(appEnvName(appName, "CACHE_ROOT")))
+
 	configRoot, err := os.UserConfigDir()
 	if err != nil {
 		return Paths{}, fmt.Errorf("resolve config dir: %w", err)
@@ -36,9 +41,18 @@ func Resolve(appName string) (Paths, error) {
 		return Paths{}, fmt.Errorf("resolve cache dir: %w", err)
 	}
 
-	configDir := filepath.Join(configRoot, appName)
-	dataDir := filepath.Join(dataRoot, appName)
-	cacheDir := filepath.Join(cacheRoot, appName)
+	configDir := configOverride
+	if configDir == "" {
+		configDir = filepath.Join(configRoot, appName)
+	}
+	dataDir := dataOverride
+	if dataDir == "" {
+		dataDir = filepath.Join(dataRoot, appName)
+	}
+	cacheDir := cacheOverride
+	if cacheDir == "" {
+		cacheDir = filepath.Join(cacheRoot, appName)
+	}
 
 	return Paths{
 		AppName:      appName,
@@ -53,6 +67,11 @@ func Resolve(appName string) (Paths, error) {
 		KGPath:       filepath.Join(dataDir, "knowledge.json"),
 		IdentityPath: filepath.Join(configDir, "identity.txt"),
 	}, nil
+}
+
+func appEnvName(appName, suffix string) string {
+	replacer := strings.NewReplacer("-", "_", ".", "_")
+	return strings.ToUpper(replacer.Replace(appName)) + "_" + suffix
 }
 
 func (p Paths) Ensure() error {

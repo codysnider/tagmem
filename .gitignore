@@ -1,6 +1,7 @@
 dist/
 coverage.out
 /tagmem
+/tagmem.exe
 /tiered-memory
 *~
 .idea/

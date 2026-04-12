@@ -8,7 +8,7 @@
 
 `tagmem` is a local-first memory system that stores original text, retrieves it with hybrid semantic and lexical ranking, and exposes that memory through a simple CLI and MCP interface.
 
-[Install](#install) · [OpenCode](#opencode) · [MCP](#mcp) · [Benchmarks](#benchmarks) · [Configuration](#configuration) · [Fact rubric](FACT_RUBRIC.md) · [Install guide](INSTALL.md)
+[Install](#install) · [MCP](#mcp) · [Benchmarks](#benchmarks) · [Configuration](#configuration) · [Fact rubric](FACT_RUBRIC.md) · [Install guide](INSTALL.md)
 
 ## Quick Start
 
@@ -27,26 +27,9 @@ For a detailed installation guide, see [`INSTALL.md`](INSTALL.md).
 - **Verbatim source retrieval**: original source material stays retrievable with each memory ([verification](VERBATIM_SOURCE.md))
 - **Deterministic retrieval**: hybrid semantic + keyword ranking with predictable behavior
 - **Structured facts and timelines**: a small knowledge graph supports exact current-state and historical queries ([details](KNOWLEDGE_GRAPH.md))
-- **Local-first**: runs locally with Docker or a release binary
+- **Local-first**: runs locally with Docker, with a native linux/amd64 binary fallback
 - **Clear organization**: tags are primary, depth is secondary
 - **Reproducible evaluation**: benchmark methodology and raw outputs are published in the repo ([report](benchmarks/REPORT.md))
-
-## OpenCode
-
-The installer can detect and patch OpenCode automatically.
-
-Install and patch OpenCode in one step:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/codysnider/tagmem/main/scripts/install.sh | bash -s -- --patch-opencode
-```
-
-That installs:
-
-- `tagmem`
-- `tagmem-mcp`
-
-and adds the `tagmem` MCP entry to OpenCode when a supported config is found.
 
 ## Install
 
@@ -56,11 +39,11 @@ Published image:
 ghcr.io/codysnider/tagmem:latest
 ```
 
-After installation, initialize local storage:
+After installation, just use `tagmem`.
 
-```bash
-tagmem init
-```
+Local storage is created automatically on first use.
+
+If OpenCode is detected during an interactive install and its config is patchable, the installer can offer to add the `tagmem` MCP entry.
 
 Add an entry:
 
@@ -110,6 +93,8 @@ Core commands:
 - `tagmem repair`
 - `tagmem mcp`
 - `tagmem bench`
+
+`tagmem init` remains available as an optional bootstrap command if you want to precreate storage and print the resolved paths.
 
 Examples:
 

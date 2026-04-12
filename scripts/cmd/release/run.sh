@@ -47,11 +47,66 @@ else
 fi
 
 IMAGE_REPO="${TAGMEM_IMAGE_REPO:-ghcr.io/codysnider/tagmem}"
-IMAGE_PLATFORMS="${TAGMEM_IMAGE_PLATFORMS:-linux/amd64,linux/arm64}"
+BINARY_TARGETS="${TAGMEM_BINARY_TARGETS:-linux/amd64}"
+IMAGE_PLATFORMS="${TAGMEM_IMAGE_PLATFORMS:-linux/amd64}"
 DIST_DIR="$REPO_ROOT/dist/$VERSION"
 TAG_NAME="v$VERSION"
 
 mkdir -p "$DIST_DIR"
+
+validate_targets() {
+  local kind="$1"
+  local targets_csv="$2"
+  local target
+  IFS=',' read -r -a targets <<< "$targets_csv"
+  for target in "${targets[@]}"; do
+    case "$target" in
+      linux/amd64) ;;
+      *)
+        log_error "$kind target $target is not supported for release artifacts yet. Only linux/amd64 is currently allowed."
+        exit 1
+        ;;
+    esac
+  done
+}
+
+validate_binary() {
+  local binary="$1"
+  local root output
+  root="$(mktemp -d)"
+  if ! output="$(TAGMEM_DATA_ROOT="$root/data" TAGMEM_CONFIG_ROOT="$root/config" TAGMEM_CACHE_ROOT="$root/cache" "$binary" doctor 2>&1)"; then
+    printf '%s\n' "$output"
+    rm -rf "$root"
+    log_error "Built binary failed doctor validation"
+    exit 1
+  fi
+  rm -rf "$root"
+  if grep -q 'embedded hash fallback' <<<"$output"; then
+    printf '%s\n' "$output"
+    log_error "Built binary fell back to embedded hash embeddings"
+    exit 1
+  fi
+  log_success "Validated linux/amd64 release binary"
+}
+
+validate_runtime_image() {
+  local image_ref="$1"
+  local output
+  if ! output="$(docker run --rm --platform linux/amd64 -e TAGMEM_EMBED_PROVIDER=embedded -e TAGMEM_EMBED_MODEL="${TAGMEM_EMBED_MODEL:-bge-small-en-v1.5}" -e TAGMEM_EMBED_ACCEL=cpu "$image_ref" doctor 2>&1)"; then
+    printf '%s\n' "$output"
+    log_error "Runtime image failed doctor validation"
+    exit 1
+  fi
+  if grep -q 'embedded hash fallback' <<<"$output"; then
+    printf '%s\n' "$output"
+    log_error "Runtime image fell back to embedded hash embeddings"
+    exit 1
+  fi
+  log_success "Validated linux/amd64 runtime image"
+}
+
+validate_targets "Binary" "$BINARY_TARGETS"
+validate_targets "Image" "$IMAGE_PLATFORMS"
 
 log_status "Building release binaries for $VERSION"
 
@@ -65,23 +120,25 @@ build_binary() {
   fi
   local outdir
   outdir="$(mktemp -d)"
-  CGO_ENABLED=0 GOOS="$goos" GOARCH="$goarch" \
-    go build -buildvcs=false -trimpath -ldflags="-s -w -X github.com/codysnider/tagmem/internal/buildinfo.Version=$VERSION" -o "$outdir/tagmem$ext" ./cmd/tagmem
+  CGO_ENABLED=1 GOOS="$goos" GOARCH="$goarch" \
+    go build -tags tagmem_onnx -buildvcs=false -trimpath -ldflags="-s -w -X github.com/codysnider/tagmem/internal/buildinfo.Version=$VERSION" -o "$outdir/tagmem$ext" ./cmd/tagmem
+  validate_binary "$outdir/tagmem$ext"
   tar -C "$outdir" -czf "$DIST_DIR/${name}.tar.gz" "tagmem$ext"
   (cd "$outdir" && zip -q "$DIST_DIR/${name}.zip" "tagmem$ext")
   rm -rf "$outdir"
 }
 
 build_binary linux amd64
-build_binary linux arm64
-build_binary darwin amd64
-build_binary darwin arm64
-build_binary windows amd64
-build_binary windows arm64
 
 (cd "$DIST_DIR" && sha256sum * > SHA256SUMS)
 
 log_success "Release binaries written to $DIST_DIR"
+
+TEMP_IMAGE_TAG="tagmem-release-validate:$VERSION"
+log_status "Building local runtime image validation target"
+docker build --build-arg TARGETARCH=amd64 --build-arg TAGMEM_VERSION="$VERSION" -f "$REPO_ROOT/docker/Dockerfile.runtime" -t "$TEMP_IMAGE_TAG" "$REPO_ROOT"
+validate_runtime_image "$TEMP_IMAGE_TAG"
+docker image rm "$TEMP_IMAGE_TAG" >/dev/null 2>&1 || true
 
 git -C "$REPO_ROOT" add VERSION
 if ! git -C "$REPO_ROOT" diff --cached --quiet; then
@@ -96,7 +153,7 @@ log_status "Pushing git commit and tag"
 git -C "$REPO_ROOT" push origin main
 git -C "$REPO_ROOT" push origin "$TAG_NAME"
 
-log_status "Building and pushing multi-arch runtime image"
+log_status "Building and pushing runtime image"
 docker buildx build \
   --platform "$IMAGE_PLATFORMS" \
   -f "$REPO_ROOT/docker/Dockerfile.runtime" \
@@ -105,6 +162,8 @@ docker buildx build \
   -t "$IMAGE_REPO:latest" \
   --push \
   "$REPO_ROOT"
+
+validate_runtime_image "$IMAGE_REPO:$VERSION"
 
 log_success "Published $IMAGE_REPO:$VERSION and :latest"
 
