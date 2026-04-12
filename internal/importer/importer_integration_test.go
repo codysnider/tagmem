@@ -38,7 +38,7 @@ func TestRunFilesModeRespectsGitignoreAndIncludeIgnored(t *testing.T) {
 	if err != nil {
 		t.Fatalf("List() error = %v", err)
 	}
-	assertNoSource(t, entries, "ignored/secret.md")
+	assertNoOrigin(t, entries, "ignored/secret.md")
 
 	result, err = Run(repo, Options{
 		SourceDir:        projectDir,
@@ -59,7 +59,7 @@ func TestRunFilesModeRespectsGitignoreAndIncludeIgnored(t *testing.T) {
 	if err != nil {
 		t.Fatalf("List() error = %v", err)
 	}
-	assertHasSource(t, entries, "ignored/secret.md")
+	assertHasOrigin(t, entries, "ignored/secret.md")
 	assertTagPresent(t, entries, "degree")
 	assertTagPresent(t, entries, "business-administration")
 	assertTagPresent(t, entries, "ignored")
@@ -93,8 +93,11 @@ func TestRunConversationModeCreatesSearchableChunks(t *testing.T) {
 	if len(results) == 0 {
 		t.Fatal("expected conversation search result")
 	}
-	if results[0].Source != "session.md" {
-		t.Fatalf("results[0].Source = %q, want session.md", results[0].Source)
+	if results[0].Origin != "session.md" {
+		t.Fatalf("results[0].Origin = %q, want session.md", results[0].Origin)
+	}
+	if !strings.Contains(results[0].Source, "Business Administration") {
+		t.Fatalf("results[0].Source should contain full source material")
 	}
 	assertTagPresent(t, results, "business-administration")
 	assertTagPresent(t, results, "lgbtq")
@@ -126,6 +129,97 @@ func TestRunConversationModeGeneralExtractsTypedMemories(t *testing.T) {
 		t.Fatalf("List() error = %v", err)
 	}
 	assertAnyBodyContains(t, entries, []string{"[decisions]", "[preferences]", "[milestones]", "[problems]", "[emotional]"})
+}
+
+func TestRunFilesModeSearchReturnsFullDocumentSource(t *testing.T) {
+	t.Parallel()
+
+	repo := newTestRepo(t)
+	libraryDir := filepath.Join("testdata", "library")
+	result, err := Run(repo, Options{
+		SourceDir:        libraryDir,
+		Mode:             ModeFiles,
+		Depth:            1,
+		RespectGitignore: false,
+		SkipExisting:     true,
+	})
+	if err != nil {
+		t.Fatalf("Run() error = %v", err)
+	}
+	if result.FilesProcessed != 5 {
+		t.Fatalf("FilesProcessed = %d, want 5", result.FilesProcessed)
+	}
+
+	type storyCheck struct {
+		origin  string
+		queries []string
+	}
+	checks := []storyCheck{
+		{origin: "moonlit-harbor.txt", queries: []string{
+			"The first customers were always fishermen with damp boots, but Mira loved the quiet moment before they arrived, when the harbor smelled like rainwater and rope and new paper.",
+			"Inside the box lay a key carved from driftwood and a glass marble full of swirling blue light.",
+			"Some were warnings. Some were riddles. One simply read, \"The harbor trusts your patience more than your hurry.\"",
+		}},
+		{origin: "wren-and-the-clock-garden.txt", queries: []string{
+			"At the edge of the village stood the clock garden, a fenced enclosure full of stone flowerbeds and rusting metal stems where timepieces had once been grown for the royal observatory.",
+			"The village blacksmith forged new supports for the lens ceiling.",
+			"Because this place grows memory into rhythm, and rhythm into time.",
+		}},
+		{origin: "pip-and-the-paper-bridge.txt", queries: []string{
+			"Her mother, who repaired books in the library cellar, used to say there had once been a paper bridge stretched over the narrow gorge behind the archives, folded from map scraps, theater posters, receipts, and letters never delivered.",
+			"It was now a civic inconvenience everyone secretly adored.",
+			"\"It began,\" she would say, \"when people decided that scraps were not leftovers but instructions waiting for one another.\"",
+		}},
+		{origin: "elio-and-the-rain-museum.txt", queries: []string{
+			"At the center of town stood the Rain Museum, a long glass building with slate eaves and a copper weathervane shaped like a heron.",
+			"We are giving the sky directions.",
+			"Rain is never only falling water. It is route, memory, invitation, and reply.",
+		}},
+		{origin: "nora-and-the-pocket-orchard.txt", queries: []string{
+			"But if someone entered through the side gate carrying an empty pocket and a patient mood, the orchard expanded.",
+			"Gathering honest wishes turned out to be harder than collecting ordinary ones.",
+			"Empty pockets are invitations if you know how to notice them.",
+		}},
+	}
+
+	for _, check := range checks {
+		content, err := os.ReadFile(filepath.Join(libraryDir, check.origin))
+		if err != nil {
+			t.Fatalf("ReadFile(%s) error = %v", check.origin, err)
+		}
+		expectedSource := strings.TrimSpace(string(content))
+		for _, query := range check.queries {
+			results, err := repo.Search(store.Query{Text: query, Limit: 5})
+			if err != nil {
+				t.Fatalf("Search(%q) error = %v", query, err)
+			}
+			if len(results) == 0 {
+				t.Fatalf("Search(%q) returned no results", query)
+			}
+			matched := false
+			for _, result := range results {
+				if result.Origin != check.origin {
+					continue
+				}
+				matched = true
+				if strings.TrimSpace(result.Source) != expectedSource {
+					t.Fatalf("result.Source for %s did not match full document", check.origin)
+				}
+				if !strings.Contains(result.Source, query) {
+					t.Fatalf("result.Source for %s missing query text %q", check.origin, query)
+				}
+				for _, expectedFragment := range check.queries {
+					if !strings.Contains(result.Source, expectedFragment) {
+						t.Fatalf("result.Source for %s missing expected fragment %q", check.origin, expectedFragment)
+					}
+				}
+				break
+			}
+			if !matched {
+				t.Fatalf("Search(%q) did not return origin %s", query, check.origin)
+			}
+		}
+	}
 }
 
 func newTestRepo(t *testing.T) *store.Repository {
@@ -169,23 +263,23 @@ func copyFile(t *testing.T, src, dst string) {
 	}
 }
 
-func assertNoSource(t *testing.T, entries []store.Entry, source string) {
+func assertNoOrigin(t *testing.T, entries []store.Entry, origin string) {
 	t.Helper()
 	for _, entry := range entries {
-		if entry.Source == source {
-			t.Fatalf("unexpected source %q found", source)
+		if entry.Origin == origin {
+			t.Fatalf("unexpected origin %q found", origin)
 		}
 	}
 }
 
-func assertHasSource(t *testing.T, entries []store.Entry, source string) {
+func assertHasOrigin(t *testing.T, entries []store.Entry, origin string) {
 	t.Helper()
 	for _, entry := range entries {
-		if entry.Source == source {
+		if entry.Origin == origin {
 			return
 		}
 	}
-	t.Fatalf("expected source %q not found", source)
+	t.Fatalf("expected origin %q not found", origin)
 }
 
 func assertTagPresent(t *testing.T, entries []store.Entry, tag string) {

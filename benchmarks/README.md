@@ -29,3 +29,8 @@ Recommended default after these runs:
 
 - GPU default: `bge-small-en-v1.5`
 - CPU fallback: `all-MiniLM-L6-v2`
+
+Current release guardrail:
+
+- `just release-check` runs focused Go tests plus `LongMemEval` for `bge-small-en-v1.5`
+- the LongMemEval run must stay within `0.01` of the checked-in baseline in `benchmarks/guards/`

@@ -11,7 +11,7 @@ docker compose -f "$COMPOSE_FILE" run --rm dev bash -lc '
 mkdir -p "$TAGMEM_BENCH_ROOT/longmemeval" &&
 TAGMEM_EMBED_PROVIDER=embedded \
 TAGMEM_EMBED_MODEL="'"$MODEL"'" \
-go run ./cmd/tagmem bench longmemeval \
+go run -tags tagmem_onnx ./cmd/tagmem bench longmemeval \
   --out "$TAGMEM_BENCH_ROOT/longmemeval/'"$MODEL"'.json" \
   "$TAGMEM_DATASET_ROOT/longmemeval_s_cleaned.json"'
 log_success "LongMemEval completed"

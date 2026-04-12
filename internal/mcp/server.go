@@ -152,6 +152,7 @@ func (s *Server) registerTools() {
 		Body   string   `json:"body"`
 		Tags   []string `json:"tags,omitempty"`
 		Source string   `json:"source,omitempty"`
+		Origin string   `json:"origin,omitempty"`
 	}
 	sdk.AddTool(s.server, &sdk.Tool{Name: "tagmem_add_entry", Description: "Add a new memory entry."}, func(ctx context.Context, _ *sdk.CallToolRequest, in addArgs) (*sdk.CallToolResult, map[string]any, error) {
 		depth := 1
@@ -161,7 +162,7 @@ func (s *Server) registerTools() {
 		if depth == 0 {
 			depth = 1
 		}
-		entry, err := s.repo.Add(store.AddEntry{Depth: depth, Title: in.Title, Body: in.Body, Tags: in.Tags, Source: in.Source})
+		entry, err := s.repo.Add(store.AddEntry{Depth: depth, Title: in.Title, Body: in.Body, Tags: in.Tags, Source: in.Source, Origin: in.Origin})
 		if err != nil {
 			return nil, nil, err
 		}

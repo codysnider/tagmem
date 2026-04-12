@@ -6,5 +6,5 @@ source "$REPO_ROOT/scripts/common/banner.sh"
 parse_verbose_flag "$@"
 print_header
 log_status "Running doctor in Docker"
-docker compose -f "$COMPOSE_FILE" run --rm dev bash -lc 'TAGMEM_EMBED_PROVIDER=embedded go run ./cmd/tagmem doctor'
+docker compose -f "$COMPOSE_FILE" run --rm dev bash -lc 'TAGMEM_EMBED_PROVIDER=embedded go run -tags tagmem_onnx ./cmd/tagmem doctor'
 log_success "Doctor completed"

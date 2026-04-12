@@ -51,6 +51,14 @@ TAGMEM_EMBED_MODEL=bge-small-en-v1.5 just bench-longmemeval
 TAGMEM_EMBED_MODEL=bge-base-en-v1.5 just bench-longmemeval
 ```
 
+### Release guardrail
+
+```bash
+just release-check
+```
+
+This command runs focused Go tests and a guarded `LongMemEval` rerun for `bge-small-en-v1.5`, then compares the result against `benchmarks/guards/longmemeval-bge-small-en-v1.5.json` with a `0.01` tolerance on the tracked quality metrics.
+
 ## Dataset Sources
 
 ### LongMemEval

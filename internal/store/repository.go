@@ -15,6 +15,7 @@ import (
 	chromem "github.com/philippgille/chromem-go"
 
 	"github.com/codysnider/tagmem/internal/retrieval"
+	"github.com/codysnider/tagmem/internal/tagging"
 	"github.com/codysnider/tagmem/internal/vector"
 )
 
@@ -29,6 +30,7 @@ type Entry struct {
 	Body      string    `json:"body"`
 	Tags      []string  `json:"tags,omitempty"`
 	Source    string    `json:"source,omitempty"`
+	Origin    string    `json:"origin,omitempty"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -45,6 +47,7 @@ type AddEntry struct {
 	Body      string
 	Tags      []string
 	Source    string
+	Origin    string
 	CreatedAt *time.Time
 	UpdatedAt *time.Time
 }
@@ -182,8 +185,9 @@ func (r *Repository) AddMany(requests []AddEntry) ([]Entry, error) {
 			Depth:     req.Depth,
 			Title:     title,
 			Body:      body,
-			Tags:      normalizeTags(req.Tags),
-			Source:    strings.TrimSpace(req.Source),
+			Tags:      r.tagsForEntry(title, body, req.Tags, req.Source, req.Origin),
+			Source:    sourceText(body, req.Source),
+			Origin:    strings.TrimSpace(req.Origin),
 			CreatedAt: createdAt,
 			UpdatedAt: updatedAt,
 		}
@@ -269,8 +273,9 @@ func (r *Repository) Update(id int, req AddEntry) (Entry, bool, error) {
 		snapshot.Entries[i].Depth = req.Depth
 		snapshot.Entries[i].Title = title
 		snapshot.Entries[i].Body = body
-		snapshot.Entries[i].Tags = normalizeTags(req.Tags)
-		snapshot.Entries[i].Source = strings.TrimSpace(req.Source)
+		snapshot.Entries[i].Tags = r.tagsForEntry(title, body, req.Tags, req.Source, req.Origin)
+		snapshot.Entries[i].Source = sourceText(body, req.Source)
+		snapshot.Entries[i].Origin = strings.TrimSpace(req.Origin)
 		snapshot.Entries[i].UpdatedAt = now
 		updated = snapshot.Entries[i]
 		break
@@ -410,7 +415,7 @@ func (r *Repository) Search(q Query) ([]Entry, error) {
 	support := make(map[int]supportInfo, len(scored))
 	for i := range scored {
 		entryI := scored[i].entry
-		sources := map[string]struct{}{sourceKind(entryI.Source): {}}
+		sources := map[string]struct{}{sourceKind(entryI.Origin): {}}
 		supportCount := 1
 		conflicts := 0
 		for j := range scored {
@@ -420,7 +425,7 @@ func (r *Repository) Search(q Query) ([]Entry, error) {
 			entryJ := scored[j].entry
 			if corroborates(scored[i], scored[j]) {
 				supportCount++
-				sources[sourceKind(entryJ.Source)] = struct{}{}
+				sources[sourceKind(entryJ.Origin)] = struct{}{}
 			}
 			if contradicts(scored[i], scored[j]) {
 				conflicts++
@@ -770,6 +775,9 @@ func (r *Repository) load() (Snapshot, error) {
 	if snapshot.Entries == nil {
 		snapshot.Entries = []Entry{}
 	}
+	for i := range snapshot.Entries {
+		snapshot.Entries[i] = normalizeLoadedEntry(snapshot.Entries[i])
+	}
 
 	r.mu.Lock()
 	r.snapshot = snapshot
@@ -987,7 +995,7 @@ func normalizeTags(tags []string) []string {
 func scoreEntry(entry Entry, tokens []string) int {
 	title := strings.ToLower(entry.Title)
 	body := strings.ToLower(entry.Body)
-	source := strings.ToLower(entry.Source)
+	origin := strings.ToLower(entry.Origin)
 	tags := strings.Join(entry.Tags, " ")
 
 	total := 0
@@ -1001,7 +1009,7 @@ func scoreEntry(entry Entry, tokens []string) int {
 		if strings.Contains(tags, token) {
 			total += 3
 		}
-		if strings.Contains(source, token) {
+		if strings.Contains(origin, token) {
 			total += 1
 		}
 	}
@@ -1010,8 +1018,59 @@ func scoreEntry(entry Entry, tokens []string) int {
 }
 
 func entrySearchText(entry Entry) string {
-	parts := []string{entry.Title, entry.Body, strings.Join(entry.Tags, " "), entry.Source}
+	parts := []string{entry.Title, entry.Body, strings.Join(entry.Tags, " "), entry.Origin}
 	return strings.Join(parts, " ")
+}
+
+func (r *Repository) tagsForEntry(title, body string, explicitTags []string, source, origin string) []string {
+	if len(explicitTags) > 0 {
+		return normalizeTags(explicitTags)
+	}
+	content := sourceText(body, source)
+	if content == "" {
+		content = body
+	}
+	return tagging.BuildTags(originOrTitle(origin, title), content, tagging.ModeFiles, &r.provider)
+}
+
+func sourceText(body, source string) string {
+	source = strings.TrimSpace(source)
+	if source != "" {
+		return source
+	}
+	return strings.TrimSpace(body)
+}
+
+func originOrTitle(origin, title string) string {
+	origin = strings.TrimSpace(origin)
+	if origin != "" {
+		return origin
+	}
+	return strings.TrimSpace(title)
+}
+
+func normalizeLoadedEntry(entry Entry) Entry {
+	entry.Source = strings.TrimSpace(entry.Source)
+	entry.Origin = strings.TrimSpace(entry.Origin)
+	if entry.Origin == "" && looksLikeLegacyOrigin(entry.Source) {
+		entry.Origin = entry.Source
+		entry.Source = strings.TrimSpace(entry.Body)
+	}
+	if entry.Source == "" {
+		entry.Source = strings.TrimSpace(entry.Body)
+	}
+	return entry
+}
+
+func looksLikeLegacyOrigin(value string) bool {
+	if value == "" {
+		return false
+	}
+	if value == "manual" || value == "clipboard" {
+		return true
+	}
+	value = filepath.ToSlash(value)
+	return !strings.ContainsAny(value, "\n\r") && (strings.Contains(value, "/") || strings.Contains(value, "."))
 }
 
 func hasTag(tags []string, target string) bool {

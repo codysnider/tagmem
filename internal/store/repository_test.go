@@ -22,7 +22,8 @@ func TestRepositoryAddAndGet(t *testing.T) {
 		Title:  "Identity",
 		Body:   "Always load this first.",
 		Tags:   []string{" Core ", "core", "identity"},
-		Source: "manual",
+		Source: "Original scratchpad note: Always load this first.",
+		Origin: "manual",
 	})
 	if err != nil {
 		t.Fatalf("Add() error = %v", err)
@@ -44,6 +45,34 @@ func TestRepositoryAddAndGet(t *testing.T) {
 	}
 	if stored.Title != entry.Title {
 		t.Fatalf("stored.Title = %q, want %q", stored.Title, entry.Title)
+	}
+	if stored.Source != "Original scratchpad note: Always load this first." {
+		t.Fatalf("stored.Source = %q, want verbatim source", stored.Source)
+	}
+	if stored.Origin != "manual" {
+		t.Fatalf("stored.Origin = %q, want manual", stored.Origin)
+	}
+}
+
+func TestRepositoryAddDefaultsSourceAndDerivesTags(t *testing.T) {
+	t.Parallel()
+
+	root := t.TempDir()
+	repo := NewRepository(filepath.Join(root, "store.json"), filepath.Join(root, "vector"), vector.EmbeddedHashProvider())
+
+	entry, err := repo.Add(AddEntry{
+		Depth: 1,
+		Title: "Auth migration",
+		Body:  "We migrated authentication to bearer tokens for the API gateway.",
+	})
+	if err != nil {
+		t.Fatalf("Add() error = %v", err)
+	}
+	if entry.Source != entry.Body {
+		t.Fatalf("entry.Source = %q, want body fallback %q", entry.Source, entry.Body)
+	}
+	if len(entry.Tags) == 0 {
+		t.Fatal("expected derived tags for untagged entry")
 	}
 }
 

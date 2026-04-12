@@ -118,7 +118,8 @@ func (a *App) runAdd(repo *store.Repository, args []string) int {
 	title := fs.String("title", "", "entry title")
 	body := fs.String("body", "", "entry body")
 	tags := fs.String("tags", "", "comma-separated tags")
-	source := fs.String("source", "", "entry source")
+	source := fs.String("source", "", "verbatim source material")
+	origin := fs.String("origin", "", "source provenance or path")
 
 	if err := fs.Parse(args); err != nil {
 		return 1
@@ -135,6 +136,7 @@ func (a *App) runAdd(repo *store.Repository, args []string) int {
 		Body:      *body,
 		Tags:      parseCSV(*tags),
 		Source:    *source,
+		Origin:    *origin,
 		CreatedAt: parseEnvTime("TAGMEM_IMPORT_CREATED_AT"),
 		UpdatedAt: parseEnvTime("TAGMEM_IMPORT_UPDATED_AT"),
 	})
@@ -218,13 +220,19 @@ func (a *App) runShow(repo *store.Repository, args []string) int {
 	if len(entry.Tags) > 0 {
 		fmt.Fprintf(a.stdout, "Tags: %s\n", strings.Join(entry.Tags, ", "))
 	}
-	if entry.Source != "" {
-		fmt.Fprintf(a.stdout, "Source: %s\n", entry.Source)
+	if entry.Origin != "" {
+		fmt.Fprintf(a.stdout, "Origin: %s\n", entry.Origin)
 	}
 	fmt.Fprintf(a.stdout, "Created: %s\n", entry.CreatedAt.Format(timeFormat))
 	fmt.Fprintf(a.stdout, "Updated: %s\n", entry.UpdatedAt.Format(timeFormat))
 	fmt.Fprintln(a.stdout, "")
+	fmt.Fprintln(a.stdout, "Body:")
 	fmt.Fprintln(a.stdout, entry.Body)
+	if entry.Source != "" {
+		fmt.Fprintln(a.stdout, "")
+		fmt.Fprintln(a.stdout, "Source:")
+		fmt.Fprintln(a.stdout, entry.Source)
+	}
 	return 0
 }
 
@@ -340,6 +348,10 @@ func formatEntryLine(entry store.Entry) string {
 
 	if len(entry.Tags) > 0 {
 		parts = append(parts, "tags="+strings.Join(entry.Tags, ","))
+	}
+
+	if entry.Origin != "" {
+		parts = append(parts, "origin="+entry.Origin)
 	}
 
 	return strings.Join(parts, "  ")

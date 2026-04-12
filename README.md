@@ -18,24 +18,17 @@ Install `tagmem` with one command:
 curl -fsSL https://raw.githubusercontent.com/codysnider/tagmem/main/scripts/install.sh | bash
 ```
 
-The installer is:
-
-- interactive by default
-- Docker-first
-- release-binary fallback when Docker is unavailable
-- able to detect and patch OpenCode safely with backups
-
 For a detailed installation guide, see [`INSTALL.md`](INSTALL.md).
 
 ## Why tagmem
 
 `tagmem` is built for teams and individuals who want memory behavior they can inspect, reproduce, and trust.
 
-- **Verbatim storage**: original text stays intact
+- **Verbatim source retrieval**: original source material stays retrievable with each memory ([verification](VERBATIM_SOURCE.md))
 - **Deterministic retrieval**: hybrid semantic + keyword ranking with predictable behavior
 - **Local-first**: runs locally with Docker or a release binary
 - **Clear organization**: tags are primary, depth is secondary
-- **Reproducible evaluation**: benchmark methodology and raw outputs are published in the repo
+- **Reproducible evaluation**: benchmark methodology and raw outputs are published in the repo ([report](benchmarks/REPORT.md))
 
 ## OpenCode
 
@@ -86,7 +79,7 @@ tagmem search --tag auth "token refresh"
 
 `tagmem` uses a simple memory model:
 
-- **entries** store verbatim text
+- **entries** store searchable body text plus retrievable verbatim source material
 - **tags** provide primary organization and filtering
 - **depth** acts as a closeness and retrieval-priority signal
 - **facts** store structured knowledge
@@ -166,6 +159,8 @@ Current benchmark snapshot:
 
 ### LongMemEval
 
+Latest release-check confirmation for the default embedded model (`bge-small-en-v1.5`, ONNX/CUDA):
+
 ```mermaid
 xychart-beta
     title "LongMemEval Recall@5"
@@ -177,6 +172,8 @@ xychart-beta
 - `tagmem` (`bge-small-en-v1.5`): `Recall@1 0.924`, `Recall@5 0.990`, `MRR 0.955`
 - `tagmem` (`bge-base-en-v1.5`): `Recall@1 0.922`, `Recall@5 0.992`, `MRR 0.953`
 - MemPalace raw baseline: `Recall@5 0.966`
+
+The latest guarded rerun for `bge-small-en-v1.5` also recorded `Recall@10 0.996`, `NDCG@10 0.951`, and `Time 23.4s`.
 
 ### FalseMemBench
 

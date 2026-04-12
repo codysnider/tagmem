@@ -23,6 +23,7 @@ type benchmarkFixtures struct {
 		Depth  int      `json:"depth"`
 		Tags   []string `json:"tags"`
 		Source string   `json:"source"`
+		Origin string   `json:"origin"`
 	} `json:"entries"`
 	Queries []struct {
 		Query       string `json:"query"`
@@ -78,7 +79,7 @@ func TestMCPMemoryFlowWithBenchmarkFixtures(t *testing.T) {
 				Title string `json:"title"`
 			} `json:"entry"`
 		}
-		callTool(t, session, "tagmem_add_entry", map[string]any{"depth": entry.Depth, "title": entry.Title, "body": entry.Body, "tags": entry.Tags, "source": entry.Source}, &added)
+		callTool(t, session, "tagmem_add_entry", map[string]any{"depth": entry.Depth, "title": entry.Title, "body": entry.Body, "tags": entry.Tags, "source": entry.Source, "origin": entry.Origin}, &added)
 		if added.Entry.Title != entry.Title {
 			t.Fatalf("added title = %q, want %q", added.Entry.Title, entry.Title)
 		}

@@ -1,6 +1,6 @@
 # Benchmark Report
 
-Date: 2026-04-08
+Date: 2026-04-11
 
 ## Executive Summary
 
@@ -11,6 +11,11 @@ Date: 2026-04-08
 - `bge-base-en-v1.5`
 
 All runs used the same benchmark corpora and the same Dockerized execution workflow.
+
+Release note:
+
+- `just release-check` now reruns `LongMemEval` for `bge-small-en-v1.5` on the ONNX/CUDA path and enforces a `0.01` regression tolerance against a checked-in baseline.
+- Latest release-check confirmation: `Recall@1 0.924`, `Recall@5 0.990`, `Recall@10 0.996`, `MRR 0.955`, `NDCG@10 0.951`, `Time 23.4s`.
 
 Main conclusion:
 
@@ -26,6 +31,8 @@ This report is organized around two evidence classes:
 ## Measured By Us
 
 ### Cross-Benchmark Comparison
+
+These table values are the published suite snapshot from the raw artifacts in `benchmarks/raw/`. The release-check rerun above is a targeted guardrail pass rather than a full matrix refresh.
 
 | Model | LongMemEval R@5 | LongMemEval Time | LoCoMo Avg Recall | LoCoMo Time | MemBench R@5 | MemBench Time | ConvoMem Avg Recall | ConvoMem Time | Add Avg ms | Search Avg ms |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|

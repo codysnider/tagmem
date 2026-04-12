@@ -11,7 +11,7 @@ docker compose -f "$COMPOSE_FILE" run --rm dev bash -lc '
 mkdir -p "$TAGMEM_BENCH_ROOT/'"$MODEL"'" &&
 TAGMEM_EMBED_PROVIDER=embedded \
 TAGMEM_EMBED_MODEL="'"$MODEL"'" \
-go run ./cmd/tagmem bench suite \
+go run -tags tagmem_onnx ./cmd/tagmem bench suite \
   --longmemeval "$TAGMEM_DATASET_ROOT/longmemeval_s_cleaned.json" \
   --locomo "$TAGMEM_DATASET_ROOT/locomo/data/locomo10.json" \
   --membench "$TAGMEM_DATASET_ROOT/membench/MemData/FirstAgent" \

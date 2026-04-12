@@ -77,8 +77,8 @@ func Run(repo *store.Repository, options Options) (Result, error) {
 			return Result{}, err
 		}
 		for _, entry := range existing {
-			if entry.Source != "" {
-				seenSources[entry.Source] = struct{}{}
+			if entry.Origin != "" {
+				seenSources[entry.Origin] = struct{}{}
 			}
 		}
 	}
@@ -141,7 +141,7 @@ func Run(repo *store.Repository, options Options) (Result, error) {
 		}
 		batch := make([]store.AddEntry, 0, len(chunks))
 		for index, chunk := range chunks {
-			batch = append(batch, store.AddEntry{Depth: options.Depth, Title: makeTitle(rel, index, len(chunks)), Body: chunk, Tags: tags, Source: rel})
+			batch = append(batch, store.AddEntry{Depth: options.Depth, Title: makeTitle(rel, index, len(chunks)), Body: chunk, Tags: tags, Source: content, Origin: rel})
 		}
 		added, err := repo.AddMany(batch)
 		if err != nil {

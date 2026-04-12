@@ -18,7 +18,7 @@ func (a *App) runIngest(repo *store.Repository, provider vector.Provider, args [
 	depth := fs.Int("depth", 1, "target depth")
 	limit := fs.Int("limit", 0, "max files to process")
 	dryRun := fs.Bool("dry-run", false, "scan without writing")
-	skipExisting := fs.Bool("skip-existing", true, "skip files already represented by source path")
+	skipExisting := fs.Bool("skip-existing", true, "skip files already represented by origin path")
 	noGitignore := fs.Bool("no-gitignore", false, "do not respect .gitignore while scanning files")
 	includeIgnored := fs.String("include-ignored", "", "comma-separated project-relative paths to include even if ignored")
 	if err := fs.Parse(args); err != nil {

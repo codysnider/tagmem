@@ -35,3 +35,6 @@ bench-suite:
 
 e2e-smoke:
 	./scripts/cmd/docker-e2e-smoke/run.sh
+
+release-check:
+	./scripts/cmd/release-check/run.sh
