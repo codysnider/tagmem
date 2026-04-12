@@ -1,6 +1,10 @@
 package retrieval
 
-import "strings"
+import (
+	"math"
+	"strings"
+	"time"
+)
 
 const HybridWeight = 0.30
 
@@ -56,4 +60,62 @@ func KeywordOverlap(queryKeywords []string, document string) float64 {
 
 func FuseSimilarity(similarity float32, overlap float64) float64 {
 	return (1 - float64(similarity)) * (1 - HybridWeight*overlap)
+}
+
+func RecencyPenalty(updatedAt time.Time, now time.Time) float64 {
+	if updatedAt.IsZero() || now.IsZero() {
+		return 1.0
+	}
+	nowMicros := now.UnixMicro()
+	updatedMicros := updatedAt.UnixMicro()
+	if updatedMicros <= 0 || nowMicros <= updatedMicros {
+		return 1.0
+	}
+	ageDays := float64(nowMicros-updatedMicros) / float64(24*time.Hour/time.Microsecond)
+	penalty := 1.0 + 0.08*(1-math.Exp(-ageDays/120.0))
+	if penalty < 1.0 {
+		return 1.0
+	}
+	if penalty > 1.08 {
+		return 1.08
+	}
+	return penalty
+}
+
+func ReinforcementPenalty(supportCount int, sourceDiversity int) float64 {
+	if supportCount <= 1 {
+		return 1.0
+	}
+	boost := 0.0
+	if supportCount >= 2 {
+		boost += 0.04
+	}
+	if supportCount >= 3 {
+		boost += 0.03
+	}
+	if supportCount >= 5 {
+		boost += 0.03
+	}
+	if sourceDiversity >= 2 {
+		boost += 0.03
+	}
+	if sourceDiversity >= 3 {
+		boost += 0.02
+	}
+	penalty := 1.0 - boost
+	if penalty < 0.82 {
+		return 0.82
+	}
+	return penalty
+}
+
+func ContradictionPenalty(conflictCount int) float64 {
+	if conflictCount <= 0 {
+		return 1.0
+	}
+	penalty := 1.0 + 0.05*float64(conflictCount)
+	if penalty > 1.18 {
+		return 1.18
+	}
+	return penalty
 }

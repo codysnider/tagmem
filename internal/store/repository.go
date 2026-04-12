@@ -40,11 +40,13 @@ type Snapshot struct {
 }
 
 type AddEntry struct {
-	Depth  int
-	Title  string
-	Body   string
-	Tags   []string
-	Source string
+	Depth     int
+	Title     string
+	Body      string
+	Tags      []string
+	Source    string
+	CreatedAt *time.Time
+	UpdatedAt *time.Time
 }
 
 type Query struct {
@@ -57,6 +59,19 @@ type Query struct {
 type DuplicateMatch struct {
 	Entry      Entry   `json:"entry"`
 	Similarity float64 `json:"similarity"`
+}
+
+type searchScoredResult struct {
+	entry        Entry
+	rawText      string
+	distance     float64
+	overlap      float64
+	similarity   float32
+	updatedAtUTC time.Time
+	features     retrieval.ClaimFeatures
+	supportCount int
+	sourceKinds  int
+	conflicts    int
 }
 
 type DepthSummary struct {
@@ -152,6 +167,16 @@ func (r *Repository) AddMany(requests []AddEntry) ([]Entry, error) {
 		if body == "" {
 			return nil, fmt.Errorf("body is required")
 		}
+		createdAt := now
+		updatedAt := now
+		if req.CreatedAt != nil {
+			createdAt = req.CreatedAt.UTC()
+		}
+		if req.UpdatedAt != nil {
+			updatedAt = req.UpdatedAt.UTC()
+		} else if req.CreatedAt != nil {
+			updatedAt = createdAt
+		}
 		entry := Entry{
 			ID:        snapshot.NextID,
 			Depth:     req.Depth,
@@ -159,8 +184,8 @@ func (r *Repository) AddMany(requests []AddEntry) ([]Entry, error) {
 			Body:      body,
 			Tags:      normalizeTags(req.Tags),
 			Source:    strings.TrimSpace(req.Source),
-			CreatedAt: now,
-			UpdatedAt: now,
+			CreatedAt: createdAt,
+			UpdatedAt: updatedAt,
 		}
 		snapshot.NextID++
 		snapshot.Entries = append(snapshot.Entries, entry)
@@ -315,7 +340,10 @@ func (r *Repository) Search(q Query) ([]Entry, error) {
 	if count == 0 {
 		return nil, nil
 	}
-	candidateLimit := limit
+	candidateLimit := limit * 4
+	if candidateLimit < limit {
+		candidateLimit = limit
+	}
 	if candidateLimit > count {
 		candidateLimit = count
 	}
@@ -339,15 +367,8 @@ func (r *Repository) Search(q Query) ([]Entry, error) {
 		entriesByID[strconv.Itoa(entry.ID)] = entry
 	}
 
-	type scoredResult struct {
-		entry        Entry
-		distance     float64
-		overlap      float64
-		similarity   float32
-		updatedAtUTC time.Time
-	}
-
-	scored := make([]scoredResult, 0, len(results))
+	queryFeatures := retrieval.ExtractClaimFeatures(text)
+	scored := make([]searchScoredResult, 0, len(results))
 	for _, result := range results {
 		entry, ok := entriesByID[result.ID]
 		if !ok {
@@ -363,17 +384,59 @@ func (r *Repository) Search(q Query) ([]Entry, error) {
 			fusedDistance *= depthPenalty(entry.Depth)
 		}
 
-		scored = append(scored, scoredResult{
+		rawText := entry.Title + "\n\n" + entry.Body
+		features := retrieval.ExtractClaimFeatures(rawText)
+		fusedDistance *= claimDistancePenalty(queryFeatures, features, strings.ToLower(rawText))
+		scored = append(scored, searchScoredResult{
 			entry:        entry,
+			rawText:      strings.ToLower(rawText),
 			distance:     fusedDistance,
 			overlap:      overlap,
 			similarity:   result.Similarity,
 			updatedAtUTC: entry.UpdatedAt.UTC(),
+			features:     features,
 		})
 	}
 
 	if len(scored) == 0 {
 		return r.searchFallback(snapshot, q), nil
+	}
+
+	type supportInfo struct {
+		supportCount int
+		sourceKinds  int
+		conflicts    int
+	}
+	support := make(map[int]supportInfo, len(scored))
+	for i := range scored {
+		entryI := scored[i].entry
+		sources := map[string]struct{}{sourceKind(entryI.Source): {}}
+		supportCount := 1
+		conflicts := 0
+		for j := range scored {
+			if i == j {
+				continue
+			}
+			entryJ := scored[j].entry
+			if corroborates(scored[i], scored[j]) {
+				supportCount++
+				sources[sourceKind(entryJ.Source)] = struct{}{}
+			}
+			if contradicts(scored[i], scored[j]) {
+				conflicts++
+			}
+		}
+		support[entryI.ID] = supportInfo{supportCount: supportCount, sourceKinds: len(sources), conflicts: conflicts}
+	}
+	now := r.now().UTC()
+	for i := range scored {
+		info := support[scored[i].entry.ID]
+		scored[i].supportCount = info.supportCount
+		scored[i].sourceKinds = info.sourceKinds
+		scored[i].conflicts = info.conflicts
+		scored[i].distance *= retrieval.RecencyPenalty(scored[i].entry.UpdatedAt.UTC(), now)
+		scored[i].distance *= retrieval.ReinforcementPenalty(info.supportCount, info.sourceKinds)
+		scored[i].distance *= retrieval.ContradictionPenalty(info.conflicts)
 	}
 
 	sort.Slice(scored, func(i, j int) bool {
@@ -387,7 +450,7 @@ func (r *Repository) Search(q Query) ([]Entry, error) {
 	})
 
 	bestDistance := scored[0].distance
-	filtered := make([]scoredResult, 0, len(scored))
+	filtered := make([]searchScoredResult, 0, len(scored))
 	for i, result := range scored {
 		if i == 0 || result.overlap > 0 || result.distance <= bestDistance+semanticTailSlack {
 			filtered = append(filtered, result)
@@ -403,6 +466,187 @@ func (r *Repository) Search(q Query) ([]Entry, error) {
 	}
 
 	return limitEntries(entries, q.Limit), nil
+}
+
+func sourceKind(source string) string {
+	source = strings.TrimSpace(source)
+	if source == "" {
+		return "unknown"
+	}
+	if source == "clipboard" || source == "manual" {
+		return source
+	}
+	parts := strings.Split(filepath.ToSlash(source), "/")
+	if len(parts) == 0 {
+		return source
+	}
+	return parts[0]
+}
+
+func corroborates(a, b searchScoredResult) bool {
+	if a.entry.ID == b.entry.ID {
+		return false
+	}
+	if len(sharedTags(a.entry.Tags, b.entry.Tags)) == 0 {
+		return false
+	}
+	if retrieval.EntityOverlap(a.features, b.features) == 0 && retrieval.KeywordSetOverlap(a.features, b.features) < 0.5 {
+		return false
+	}
+	if len(a.features.Values) > 0 && len(b.features.Values) > 0 && retrieval.ValueOverlap(a.features, b.features) == 0 {
+		return false
+	}
+	return retrieval.KeywordSetOverlap(a.features, b.features) >= 0.5 || retrieval.ValueOverlap(a.features, b.features) >= 0.5
+}
+
+func contradicts(a, b searchScoredResult) bool {
+	if a.entry.ID == b.entry.ID {
+		return false
+	}
+	shared := sharedTags(a.entry.Tags, b.entry.Tags)
+	if len(shared) == 0 {
+		return false
+	}
+	if retrieval.EntityOverlap(a.features, b.features) == 0 && retrieval.KeywordSetOverlap(a.features, b.features) < 0.5 {
+		return false
+	}
+	if len(a.features.Values) == 0 || len(b.features.Values) == 0 {
+		return false
+	}
+	if retrieval.ValueOverlap(a.features, b.features) > 0 {
+		return false
+	}
+	return true
+}
+
+func claimDistancePenalty(query, candidate retrieval.ClaimFeatures, candidateText string) float64 {
+	penalty := 1.0
+	if query.Environment != "" {
+		if candidate.Environment == query.Environment {
+			penalty *= 0.88
+		} else if candidate.Environment != "" {
+			penalty *= 1.10
+		}
+	}
+	if query.Speaker != "" {
+		if candidate.Speaker == query.Speaker {
+			penalty *= 0.88
+		} else if candidate.Speaker != "" {
+			penalty *= 1.12
+		}
+	}
+	if entity := retrieval.EntityOverlap(query, candidate); entity > 0 {
+		penalty *= 1.0 - 0.12*entity
+	}
+	if values := retrieval.ValueOverlap(query, candidate); values > 0 {
+		penalty *= 1.0 - 0.15*values
+	}
+	if kinds := retrieval.KeywordSetOverlap(retrieval.ClaimFeatures{Keywords: query.ValueKinds}, retrieval.ClaimFeatures{Keywords: candidate.ValueKinds}); kinds > 0 {
+		penalty *= 1.0 - 0.08*kinds
+	} else if len(query.ValueKinds) > 0 && len(candidate.ValueKinds) > 0 {
+		penalty *= 1.08
+	}
+	if query.ExactWanted {
+		penalty *= 1.0 - 0.10*candidate.Precision
+		if candidate.Approximate {
+			penalty *= 1.08
+		}
+	}
+	if keywords := retrieval.KeywordSetOverlap(query, candidate); keywords > 0 {
+		penalty *= 1.0 - 0.06*keywords
+	}
+	penalty *= intentPenalty(query, candidate, candidateText)
+	if penalty < 0.70 {
+		return 0.70
+	}
+	return penalty
+}
+
+func intentPenalty(query, candidate retrieval.ClaimFeatures, text string) float64 {
+	penalty := 1.0
+	switch query.Intent {
+	case "suggestion":
+		if strings.Contains(text, "you suggested") || strings.Contains(text, "you recommended") {
+			penalty *= 0.72
+		}
+		if strings.Contains(text, "i suggested") || strings.Contains(text, "i recommended") {
+			penalty *= 1.18
+		}
+		if strings.Contains(text, "we discussed") || strings.Contains(text, "follow-up") || strings.Contains(text, "notes") {
+			penalty *= 1.14
+		}
+		if candidate.Assertion == "suggestion" {
+			penalty *= 0.82
+		}
+	case "preference":
+		if strings.Contains(text, "prefer") || strings.Contains(text, "favorite") || strings.Contains(text, "likes") || strings.Contains(text, "enjoys") {
+			penalty *= 0.80
+		}
+		if strings.Contains(text, "sometimes") || strings.Contains(text, "also") {
+			penalty *= 1.08
+		}
+		if candidate.Assertion == "preference" {
+			penalty *= 0.84
+		}
+	case "current-state":
+		if strings.Contains(text, "current") || strings.Contains(text, "is ") || strings.Contains(text, "defaults to") {
+			penalty *= 0.86
+		}
+		if strings.Contains(text, "used to") || strings.Contains(text, "previously") || strings.Contains(text, "formerly") {
+			penalty *= 1.18
+		}
+		switch candidate.State {
+		case "asserted":
+			penalty *= 0.82
+		case "historical":
+			penalty *= 1.18
+		case "planned":
+			penalty *= 1.10
+		}
+	case "temporal-event":
+		if strings.Contains(text, "discussed") || strings.Contains(text, "planned") {
+			penalty *= 1.10
+		}
+		if candidate.Assertion == "event" {
+			penalty *= 0.84
+		}
+		if candidate.State == "planned" {
+			penalty *= 1.12
+		}
+	case "value-lookup":
+		if strings.Contains(text, "is ") || strings.Contains(text, "uses ") || strings.Contains(text, "runs ") || strings.Contains(text, "defaults to") {
+			penalty *= 0.90
+		}
+		if candidate.State == "asserted" {
+			penalty *= 0.90
+		}
+		if candidate.State == "historical" {
+			penalty *= 1.10
+		}
+	}
+	if query.Assertion != "" && candidate.Assertion != "" {
+		if query.Assertion == candidate.Assertion {
+			penalty *= 0.90
+		} else {
+			penalty *= 1.04
+		}
+	}
+	return penalty
+}
+
+func sharedTags(a, b []string) []string {
+	set := map[string]struct{}{}
+	for _, tag := range a {
+		set[strings.ToLower(strings.TrimSpace(tag))] = struct{}{}
+	}
+	out := []string{}
+	for _, tag := range b {
+		tag = strings.ToLower(strings.TrimSpace(tag))
+		if _, ok := set[tag]; ok {
+			out = append(out, tag)
+		}
+	}
+	return out
 }
 
 func (r *Repository) queryEmbedding(text string) ([]float32, error) {

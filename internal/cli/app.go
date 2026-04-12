@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -129,11 +130,13 @@ func (a *App) runAdd(repo *store.Repository, args []string) int {
 	}
 
 	entry, err := repo.Add(store.AddEntry{
-		Depth:  *depth,
-		Title:  *title,
-		Body:   *body,
-		Tags:   parseCSV(*tags),
-		Source: *source,
+		Depth:     *depth,
+		Title:     *title,
+		Body:      *body,
+		Tags:      parseCSV(*tags),
+		Source:    *source,
+		CreatedAt: parseEnvTime("TAGMEM_IMPORT_CREATED_AT"),
+		UpdatedAt: parseEnvTime("TAGMEM_IMPORT_UPDATED_AT"),
 	})
 	if err != nil {
 		fmt.Fprintf(a.stderr, "add entry: %v\n", err)
@@ -343,3 +346,15 @@ func formatEntryLine(entry store.Entry) string {
 }
 
 const timeFormat = time.RFC3339
+
+func parseEnvTime(key string) *time.Time {
+	value := strings.TrimSpace(os.Getenv(key))
+	if value == "" {
+		return nil
+	}
+	parsed, err := time.Parse(time.RFC3339, value)
+	if err != nil {
+		return nil
+	}
+	return &parsed
+}

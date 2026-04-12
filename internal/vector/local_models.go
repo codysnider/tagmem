@@ -46,6 +46,15 @@ func EmbeddedProvider(paths xdg.Paths, modelName, accel string) (Provider, error
 	}
 	modelDir := filepath.Join(paths.ModelDir, spec.Name)
 	state := &embeddedRuntimeState{executionDevice: "pending"}
+	if !localBERTSupported() {
+		state.executionDevice = "unsupported"
+		provider := EmbeddedHashProvider()
+		provider.Description = provider.Description + " (fallback from unsupported local ONNX runtime)"
+		provider.Details = func() map[string]string {
+			return map[string]string{"execution_device": state.executionDevice, "runtime_library": state.runtimeLibrary}
+		}
+		return provider, nil
+	}
 	var (
 		once        sync.Once
 		embedder    *miniLMEmbedder
