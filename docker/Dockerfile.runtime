@@ -1,7 +1,8 @@
+ARG RUNTIME_BASE=debian:bookworm-slim
 FROM golang:1.25-bookworm AS build
 
 ARG TAGMEM_VERSION=dev
-ARG TARGETARCH
+ARG TARGETARCH=amd64
 
 WORKDIR /src
 
@@ -10,13 +11,15 @@ RUN go mod download
 
 COPY . .
 
-RUN if [ "$TARGETARCH" = "amd64" ]; then \
-      CGO_ENABLED=1 GOOS=linux GOARCH=$TARGETARCH go build -tags tagmem_onnx -buildvcs=false -trimpath -ldflags="-s -w -X github.com/codysnider/tagmem/internal/buildinfo.Version=${TAGMEM_VERSION}" -o /out/tagmem ./cmd/tagmem; \
-    else \
-      CGO_ENABLED=0 GOOS=linux GOARCH=$TARGETARCH go build -buildvcs=false -trimpath -ldflags="-s -w -X github.com/codysnider/tagmem/internal/buildinfo.Version=${TAGMEM_VERSION}" -o /out/tagmem ./cmd/tagmem; \
-    fi
+RUN if [ "$TARGETARCH" != "amd64" ]; then \
+      echo "linux/$TARGETARCH is not supported for runtime images" >&2; \
+      exit 1; \
+    fi && \
+    CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -tags tagmem_onnx -buildvcs=false -trimpath -ldflags="-s -w -X github.com/codysnider/tagmem/internal/buildinfo.Version=${TAGMEM_VERSION}" -o /out/tagmem ./cmd/tagmem
 
-FROM debian:bookworm-slim
+FROM ${RUNTIME_BASE}
+
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \

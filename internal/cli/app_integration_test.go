@@ -10,8 +10,6 @@ import (
 )
 
 func TestAppIngestStatusAndContextFlow(t *testing.T) {
-	t.Parallel()
-
 	root := t.TempDir()
 	projectDir := copyCLIProject(t, root)
 	xdgConfig := filepath.Join(root, ".config")
@@ -29,6 +27,9 @@ func TestAppIngestStatusAndContextFlow(t *testing.T) {
 		"XDG_CONFIG_HOME=" + xdgConfig,
 		"XDG_DATA_HOME=" + xdgData,
 		"XDG_CACHE_HOME=" + xdgCache,
+		"TAGMEM_DATA_ROOT=",
+		"TAGMEM_CONFIG_ROOT=",
+		"TAGMEM_CACHE_ROOT=",
 		"TAGMEM_EMBED_PROVIDER=embedded-hash",
 	}
 
@@ -74,8 +75,6 @@ func TestAppIngestStatusAndContextFlow(t *testing.T) {
 }
 
 func TestAppSearchExplainShowsComputedSignals(t *testing.T) {
-	t.Parallel()
-
 	root := t.TempDir()
 	xdgConfig := filepath.Join(root, ".config")
 	xdgData := filepath.Join(root, ".local", "share")
@@ -88,6 +87,9 @@ func TestAppSearchExplainShowsComputedSignals(t *testing.T) {
 		"XDG_CONFIG_HOME=" + xdgConfig,
 		"XDG_DATA_HOME=" + xdgData,
 		"XDG_CACHE_HOME=" + xdgCache,
+		"TAGMEM_DATA_ROOT=",
+		"TAGMEM_CONFIG_ROOT=",
+		"TAGMEM_CACHE_ROOT=",
 		"TAGMEM_EMBED_PROVIDER=embedded-hash",
 	}
 	tags := "staging,database,config"

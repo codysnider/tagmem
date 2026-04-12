@@ -27,23 +27,39 @@ For a detailed installation guide, see [`INSTALL.md`](INSTALL.md).
 - **Verbatim source retrieval**: original source material stays retrievable with each memory ([verification](VERBATIM_SOURCE.md))
 - **Deterministic retrieval**: hybrid semantic + keyword ranking with predictable behavior
 - **Structured facts and timelines**: a small knowledge graph supports exact current-state and historical queries ([details](KNOWLEDGE_GRAPH.md))
-- **Local-first**: runs locally with Docker, with a native linux/amd64 binary fallback
+- **Local-first**: runs locally with Docker using dedicated CPU and GPU images
 - **Clear organization**: tags are primary, depth is secondary
 - **Reproducible evaluation**: benchmark methodology and raw outputs are published in the repo ([report](benchmarks/REPORT.md))
 
 ## Install
 
-Published image:
+Published images:
 
 ```bash
-ghcr.io/codysnider/tagmem:latest
+ghcr.io/codysnider/tagmem:latest-cpu
+ghcr.io/codysnider/tagmem:latest-gpu
 ```
 
 After installation, just use `tagmem`.
 
 Local storage is created automatically on first use.
 
+The installer chooses `latest-gpu` when the GPU image validates successfully on an NVIDIA host. Otherwise it installs wrappers for `latest-cpu`.
+
 If OpenCode is detected during an interactive install and its config is patchable, the installer can offer to add the `tagmem` MCP entry.
+
+## Compatibility
+
+| Environment | Docker CPU | Docker GPU | Source build | Status |
+|---|---|---|---|---|
+| Linux amd64 with NVIDIA GPU | ✓ | ✓ | ✓ | Supported |
+| Linux amd64 without NVIDIA GPU | ✓ | X | ✓ | Supported |
+| Linux arm64 | Planned | X | Planned | Planned |
+| macOS Intel | Planned | X | Planned | Planned |
+| macOS Apple Silicon | Planned | X | Planned | Planned |
+| Windows x86_64 | Planned | X | Planned | Planned |
+
+`Source build` means compiling from the repository yourself. The simple installer path is Docker-only for now.
 
 Add an entry:
 

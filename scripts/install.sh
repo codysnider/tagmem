@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-TAGMEM_IMAGE_REF="${TAGMEM_IMAGE_REF:-ghcr.io/codysnider/tagmem:latest}"
-TAGMEM_RELEASES_URL="${TAGMEM_RELEASES_URL:-https://api.github.com/repos/codysnider/tagmem/releases/latest}"
+TAGMEM_CPU_IMAGE_REF="${TAGMEM_CPU_IMAGE_REF:-ghcr.io/codysnider/tagmem:latest-cpu}"
+TAGMEM_GPU_IMAGE_REF="${TAGMEM_GPU_IMAGE_REF:-ghcr.io/codysnider/tagmem:latest-gpu}"
 TAGMEM_RAW_BASE="${TAGMEM_RAW_BASE:-https://raw.githubusercontent.com/codysnider/tagmem/main}"
 TAGMEM_PATCH_OPENCODE="ask"
 TAGMEM_YES=0
@@ -114,20 +114,16 @@ require_command() {
   fi
 }
 
-supports_release_binary() {
-  local os="$1" arch="$2"
-  [[ "$os" == "linux" && "$arch" == "amd64" ]]
-}
-
 render_with_python() {
   local path="$1"
   local template="$2"
   local data_root="$3"
   local config_root="$4"
   local cache_root="$5"
-  local gpu_snippet="$6"
-  local default_accel="$7"
-  python3 - <<'PY' "$path" "$template" "$data_root" "$config_root" "$cache_root" "$TAGMEM_IMAGE_REF" "$gpu_snippet" "$default_accel"
+  local image_ref="$6"
+  local gpu_snippet="$7"
+  local default_accel="$8"
+  python3 - <<'PY' "$path" "$template" "$data_root" "$config_root" "$cache_root" "$image_ref" "$gpu_snippet" "$default_accel"
 from pathlib import Path
 import sys
 path, template, data_root, config_root, cache_root, image_ref, gpu_snippet, default_accel = sys.argv[1:9]
@@ -142,16 +138,16 @@ PY
   chmod +x "$path"
 }
 
-docker_gpu_snippet='GPU_ARGS=()
-if [[ "${TAGMEM_DOCKER_GPU:-auto}" == "on" ]]; then
-  GPU_ARGS=(--gpus all)
-elif [[ "${TAGMEM_DOCKER_GPU:-auto}" == "auto" ]] && command -v nvidia-smi >/dev/null 2>&1; then
-  GPU_ARGS=(--gpus all)
-fi'
+docker_cpu_snippet='GPU_ARGS=()'
+docker_gpu_snippet='GPU_ARGS=(--gpus all)'
 
 write_docker_wrapper() {
-  local path="$1" data_root="$2" config_root="$3" cache_root="$4" default_accel="$5"
+  local path="$1" image_ref="$2" gpu_mode="$3" data_root="$4" config_root="$5" cache_root="$6" default_accel="$7"
   local template
+  local gpu_snippet="$docker_cpu_snippet"
+  if [[ "$gpu_mode" == "gpu" ]]; then
+    gpu_snippet="$docker_gpu_snippet"
+  fi
   template=$(cat <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -178,12 +174,16 @@ exec docker run --rm \
   "$IMAGE_REF" "$@"
 EOF
 )
-  render_with_python "$path" "$template" "$data_root" "$config_root" "$cache_root" "$docker_gpu_snippet" "$default_accel"
+  render_with_python "$path" "$template" "$data_root" "$config_root" "$cache_root" "$image_ref" "$gpu_snippet" "$default_accel"
 }
 
 write_docker_mcp_wrapper() {
-  local path="$1" data_root="$2" config_root="$3" cache_root="$4" default_accel="$5"
+  local path="$1" image_ref="$2" gpu_mode="$3" data_root="$4" config_root="$5" cache_root="$6" default_accel="$7"
   local template
+  local gpu_snippet="$docker_cpu_snippet"
+  if [[ "$gpu_mode" == "gpu" ]]; then
+    gpu_snippet="$docker_gpu_snippet"
+  fi
   template=$(cat <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -210,69 +210,7 @@ exec docker run -i --rm --init \
   "$IMAGE_REF" mcp
 EOF
 )
-  render_with_python "$path" "$template" "$data_root" "$config_root" "$cache_root" "$docker_gpu_snippet" "$default_accel"
-}
-
-write_binary_wrapper() {
-  local path="$1" real_bin="$2" data_root="$3" config_root="$4" cache_root="$5"
-  cat >"$path" <<EOF
-#!/usr/bin/env bash
-set -euo pipefail
-DATA_ROOT="\${TAGMEM_DATA_ROOT:-$data_root}"
-CONFIG_ROOT="\${TAGMEM_CONFIG_ROOT:-$config_root}"
-CACHE_ROOT="\${TAGMEM_CACHE_ROOT:-$cache_root}"
-mkdir -p "\$DATA_ROOT" "\$CONFIG_ROOT" "\$CACHE_ROOT"
-export TAGMEM_DATA_ROOT="\$DATA_ROOT"
-export TAGMEM_CONFIG_ROOT="\$CONFIG_ROOT"
-export TAGMEM_CACHE_ROOT="\$CACHE_ROOT"
-exec "$real_bin" "\$@"
-EOF
-  chmod +x "$path"
-}
-
-write_binary_mcp_wrapper() {
-  local path="$1" real_bin="$2" data_root="$3" config_root="$4" cache_root="$5"
-  cat >"$path" <<EOF
-#!/usr/bin/env bash
-set -euo pipefail
-DATA_ROOT="\${TAGMEM_DATA_ROOT:-$data_root}"
-CONFIG_ROOT="\${TAGMEM_CONFIG_ROOT:-$config_root}"
-CACHE_ROOT="\${TAGMEM_CACHE_ROOT:-$cache_root}"
-mkdir -p "\$DATA_ROOT" "\$CONFIG_ROOT" "\$CACHE_ROOT"
-export TAGMEM_DATA_ROOT="\$DATA_ROOT"
-export TAGMEM_CONFIG_ROOT="\$CONFIG_ROOT"
-export TAGMEM_CACHE_ROOT="\$CACHE_ROOT"
-exec "$real_bin" mcp
-EOF
-  chmod +x "$path"
-}
-
-latest_version() {
-  python3 - <<'PY' "$TAGMEM_RELEASES_URL"
-import json, sys, urllib.request
-with urllib.request.urlopen(sys.argv[1]) as resp:
-    data = json.load(resp)
-print(data['tag_name'].lstrip('v'))
-PY
-}
-
-download_release_binary() {
-  local os="$1" arch="$2" install_root="$3"
-  local version asset url tmpdir target
-  require_command curl
-  require_command tar
-  version="$(latest_version)"
-  asset="tagmem_${version}_${os}_${arch}.tar.gz"
-  url="https://github.com/codysnider/tagmem/releases/download/v${version}/${asset}"
-  tmpdir="$(mktemp -d)"
-  target="$install_root/bin/tagmem"
-  curl -fsSL "$url" -o "$tmpdir/$asset"
-  tar -C "$install_root/bin" -xzf "$tmpdir/$asset"
-  rm -rf "$tmpdir"
-  if [[ ! -x "$target" ]]; then
-    printf 'Extracted release binary not found: %s\n' "$target" >&2
-    return 1
-  fi
+  render_with_python "$path" "$template" "$data_root" "$config_root" "$cache_root" "$image_ref" "$gpu_snippet" "$default_accel"
 }
 
 validate_doctor_output() {
@@ -284,15 +222,30 @@ validate_doctor_output() {
   fi
 }
 
-validate_release_binary() {
-  local real_bin="$1" data_root="$2" config_root="$3" cache_root="$4"
+validate_docker_image() {
+  local subject="$1" image_ref="$2" accel="$3" gpu_mode="$4"
   local output
-  printf 'Validating release binary...\n'
-  if ! output="$(TAGMEM_DATA_ROOT="$data_root" TAGMEM_CONFIG_ROOT="$config_root" TAGMEM_CACHE_ROOT="$cache_root" "$real_bin" doctor 2>&1)"; then
+  local cmd=(docker run --rm)
+  if [[ "$gpu_mode" == "gpu" ]]; then
+    cmd+=(--gpus all)
+  fi
+  cmd+=(
+    -e TAGMEM_EMBED_PROVIDER=embedded
+    -e TAGMEM_EMBED_MODEL="${TAGMEM_EMBED_MODEL:-bge-small-en-v1.5}"
+    -e TAGMEM_EMBED_ACCEL="$accel"
+    "$image_ref"
+    doctor
+  )
+  if ! output="$("${cmd[@]}" 2>&1)"; then
     printf '%s\n' "$output" >&2
     return 1
   fi
-  validate_doctor_output "Release binary" "$output"
+  if ! validate_doctor_output "$subject" "$output"; then
+    return 1
+  fi
+  if [[ "$gpu_mode" == "gpu" ]] && ! grep -q 'device:[[:space:]]*cuda' <<<"$output"; then
+    return 1
+  fi
 }
 
 patch_opencode() {
@@ -390,7 +343,7 @@ patch_opencode() {
 }
 
 main() {
-  local os arch data_root config_root cache_root bin_dir install_root backend real_bin docker_ok=0 default_accel=auto
+  local os arch data_root config_root cache_root bin_dir docker_ok=0 selected_image_ref selected_accel selected_mode
   require_command python3
   require_command grep
   os="$(detect_os)"
@@ -399,9 +352,8 @@ main() {
   config_root="${TAGMEM_CONFIG_ROOT:-$(default_config_root)}"
   cache_root="${TAGMEM_CACHE_ROOT:-$(default_cache_root)}"
   bin_dir="${TAGMEM_BIN_DIR:-$(detect_bin_dir)}"
-  install_root="$data_root/install"
 
-  mkdir -p "$data_root" "$config_root" "$cache_root" "$bin_dir" "$install_root/bin"
+  mkdir -p "$data_root" "$config_root" "$cache_root" "$bin_dir"
 
   if command -v docker >/dev/null 2>&1; then
     docker_ok=1
@@ -415,15 +367,10 @@ main() {
   printf '  Config root:   %s\n' "$config_root"
   printf '  Cache root:    %s\n' "$cache_root"
   printf '  Bin dir:       %s\n' "$bin_dir"
+  printf '  CPU image:     %s\n' "$TAGMEM_CPU_IMAGE_REF"
+  printf '  GPU image:     %s\n' "$TAGMEM_GPU_IMAGE_REF"
   printf '  Dry run:       %s\n' "$( [[ "$TAGMEM_DRY_RUN" == 1 ]] && printf yes || printf no )"
-
-  if [[ "$docker_ok" == 1 ]]; then
-    backend="docker"
-    printf '  Install mode:  docker image\n'
-  else
-    backend="binary"
-    printf '  Install mode:  release tarball\n'
-  fi
+  printf '  Install mode:  docker image\n'
 
   if ! ask "Proceed with installation?" yes; then
     printf 'Installation cancelled.\n'
@@ -435,58 +382,55 @@ main() {
     exit 0
   fi
 
-  if [[ "$backend" == "docker" ]]; then
-    require_command docker
-    printf 'Pulling %s\n' "$TAGMEM_IMAGE_REF"
-    docker pull "$TAGMEM_IMAGE_REF"
-    printf 'Running Docker smoke test...\n'
-    if [[ "${TAGMEM_DOCKER_GPU:-auto}" == "on" ]] || ([[ "${TAGMEM_DOCKER_GPU:-auto}" == "auto" ]] && command -v nvidia-smi >/dev/null 2>&1); then
-      if ! probe_output="$(docker run --rm --gpus all -e TAGMEM_EMBED_PROVIDER=embedded -e TAGMEM_EMBED_MODEL="${TAGMEM_EMBED_MODEL:-bge-small-en-v1.5}" -e TAGMEM_EMBED_ACCEL=auto "$TAGMEM_IMAGE_REF" doctor 2>&1)"; then
-        printf '%s\n' "$probe_output" >&2
-        exit 1
-      fi
-      if ! validate_doctor_output "Docker image" "$probe_output"; then
-        exit 1
-      fi
-      if grep -q 'device:[[:space:]]*cuda' <<<"$probe_output"; then
-        default_accel=auto
+  if [[ "$docker_ok" != 1 ]]; then
+    printf 'Docker is required for the installer.\n' >&2
+    printf 'Use Docker on %s/%s, or build tagmem from source manually on linux/amd64.\n' "$os" "$arch" >&2
+    exit 1
+  fi
+
+  require_command docker
+  selected_image_ref="$TAGMEM_CPU_IMAGE_REF"
+  selected_accel="cpu"
+  selected_mode="cpu"
+
+  if command -v nvidia-smi >/dev/null 2>&1; then
+    printf 'Pulling %s\n' "$TAGMEM_GPU_IMAGE_REF"
+    if docker pull "$TAGMEM_GPU_IMAGE_REF" >/dev/null 2>&1; then
+      printf 'Running Docker GPU smoke test...\n'
+      if validate_docker_image "Docker GPU image" "$TAGMEM_GPU_IMAGE_REF" cuda gpu; then
+        selected_image_ref="$TAGMEM_GPU_IMAGE_REF"
+        selected_accel="cuda"
+        selected_mode="gpu"
         printf '  Docker GPU probe: usable\n'
       else
-        default_accel=cpu
-        printf '  Docker GPU probe: failed, falling back to CPU wrappers\n'
+        printf '  Docker GPU probe: failed, falling back to CPU image\n'
       fi
     else
-      default_accel=cpu
-      if ! probe_output="$(docker run --rm -e TAGMEM_EMBED_PROVIDER=embedded -e TAGMEM_EMBED_MODEL="${TAGMEM_EMBED_MODEL:-bge-small-en-v1.5}" -e TAGMEM_EMBED_ACCEL=cpu "$TAGMEM_IMAGE_REF" doctor 2>&1)"; then
-        printf '%s\n' "$probe_output" >&2
-        exit 1
-      fi
-      if ! validate_doctor_output "Docker image" "$probe_output"; then
-        exit 1
-      fi
-      printf '  Docker GPU probe: skipped, using CPU wrappers\n'
+      printf '  Docker GPU probe: could not pull GPU image, falling back to CPU image\n'
     fi
-    write_docker_wrapper "$bin_dir/tagmem" "$data_root" "$config_root" "$cache_root" "$default_accel"
-    write_docker_mcp_wrapper "$bin_dir/tagmem-mcp" "$data_root" "$config_root" "$cache_root" "$default_accel"
   else
-    if ! supports_release_binary "$os" "$arch"; then
-      printf 'Release binary fallback is currently supported only on linux/amd64.\n' >&2
-      printf 'Use Docker on %s/%s or wait for native ONNX support on this platform.\n' "$os" "$arch" >&2
+    printf '  Docker GPU probe: skipped, no NVIDIA GPU detected\n'
+  fi
+
+  if [[ "$selected_mode" == "cpu" ]]; then
+    printf 'Pulling %s\n' "$TAGMEM_CPU_IMAGE_REF"
+    docker pull "$TAGMEM_CPU_IMAGE_REF"
+    printf 'Running Docker CPU smoke test...\n'
+    if ! validate_docker_image "Docker CPU image" "$TAGMEM_CPU_IMAGE_REF" cpu cpu; then
+      printf 'Docker CPU image validation failed.\n' >&2
       exit 1
     fi
-    printf 'Downloading release binary for %s/%s\n' "$os" "$arch"
-    download_release_binary "$os" "$arch" "$install_root"
-    real_bin="$install_root/bin/tagmem"
-    validate_release_binary "$real_bin" "$data_root" "$config_root" "$cache_root"
-    write_binary_wrapper "$bin_dir/tagmem" "$real_bin" "$data_root" "$config_root" "$cache_root"
-    write_binary_mcp_wrapper "$bin_dir/tagmem-mcp" "$real_bin" "$data_root" "$config_root" "$cache_root"
   fi
+
+  write_docker_wrapper "$bin_dir/tagmem" "$selected_image_ref" "$selected_mode" "$data_root" "$config_root" "$cache_root" "$selected_accel"
+  write_docker_mcp_wrapper "$bin_dir/tagmem-mcp" "$selected_image_ref" "$selected_mode" "$data_root" "$config_root" "$cache_root" "$selected_accel"
 
   patch_opencode "$bin_dir/tagmem-mcp"
 
-  printf '\nInstalled tagmem via %s\n' "$backend"
+  printf '\nInstalled tagmem via docker (%s image)\n' "$selected_mode"
   printf '  tagmem:     %s\n' "$bin_dir/tagmem"
   printf '  tagmem-mcp: %s\n' "$bin_dir/tagmem-mcp"
+  printf '  image:      %s\n' "$selected_image_ref"
   if path_contains "$bin_dir"; then
     printf '\n%s is already on your PATH.\n' "$bin_dir"
   else

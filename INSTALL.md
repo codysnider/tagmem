@@ -1,13 +1,13 @@
 # Install
 
-`tagmem` supports a Docker-first installation path.
+`tagmem` currently installs through Docker.
 
 The installer is interactive by default and will:
 
 - detect your operating system and architecture
-- check whether Docker is available
-- choose Docker first when possible
-- fall back to a native linux/amd64 release binary tarball when Docker is unavailable
+- require Docker for the simple install path
+- detect whether the GPU image is usable on NVIDIA hosts
+- fall back to the CPU image when GPU validation fails
 - install local wrapper commands
 - detect and optionally patch OpenCode configuration
 - create a backup before modifying any config file
@@ -30,6 +30,11 @@ After installation, just use `tagmem`.
 
 Local storage is created automatically on first use. `tagmem init` is available as an optional bootstrap command if you want to precreate storage and print the resolved paths.
 
+Published images:
+
+- `ghcr.io/codysnider/tagmem:latest-cpu`
+- `ghcr.io/codysnider/tagmem:latest-gpu`
+
 ## What gets installed
 
 The installer creates:
@@ -45,27 +50,35 @@ in a local bin directory, typically:
 
 ## Install modes
 
-### Docker-first
+### Docker CPU image
 
-If Docker is available, the installer will:
+If GPU validation is skipped or fails, the installer will:
 
-1. pull `ghcr.io/codysnider/tagmem:latest`
-2. probe whether the Docker runtime can use the embedded model successfully
-3. use GPU-backed wrappers when the probe succeeds
-4. fall back to CPU-safe wrappers when the probe fails
-5. install a `tagmem` wrapper
-6. install a `tagmem-mcp` wrapper
+1. pull `ghcr.io/codysnider/tagmem:latest-cpu`
+2. validate that the embedded model works on CPU
+3. install a `tagmem` wrapper
+4. install a `tagmem-mcp` wrapper
 
-### Release binary fallback
+### Docker GPU image
 
-If Docker is not available on linux/amd64, the installer will:
+If an NVIDIA GPU is detected and the GPU image validates successfully, the installer will:
 
-1. detect the current OS and architecture
-2. download the matching release tarball
-3. extract the binary into the local install root
-4. install `tagmem` and `tagmem-mcp` wrapper scripts
+1. pull `ghcr.io/codysnider/tagmem:latest-gpu`
+2. validate that the embedded model runs on CUDA
+3. install a `tagmem` wrapper
+4. install a `tagmem-mcp` wrapper
 
-On other platforms, the installer requires Docker until native ONNX binaries are available.
+## Manual source build
+
+If you want a non-Docker setup, build from source manually.
+
+Current native ONNX source-build support is `linux/amd64`.
+
+```bash
+CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -tags tagmem_onnx -o tagmem ./cmd/tagmem
+```
+
+Source builds are an advanced path. The supported simple install path is Docker.
 
 ## Optional OpenCode setup
 
@@ -87,8 +100,8 @@ If `jq` is unavailable, the config is invalid, or the config path is not patchab
 
 Optional installer overrides:
 
-- `TAGMEM_IMAGE_REF`
-- `TAGMEM_RELEASES_URL`
+- `TAGMEM_CPU_IMAGE_REF`
+- `TAGMEM_GPU_IMAGE_REF`
 - `TAGMEM_DATA_ROOT`
 - `TAGMEM_CONFIG_ROOT`
 - `TAGMEM_CACHE_ROOT`
@@ -112,4 +125,16 @@ curl -fsSL https://raw.githubusercontent.com/codysnider/tagmem/main/scripts/inst
 
 ```bash
 TAGMEM_DATA_ROOT=/path/to/tagmem-data curl -fsSL https://raw.githubusercontent.com/codysnider/tagmem/main/scripts/install.sh | bash
+```
+
+### Override CPU image ref
+
+```bash
+TAGMEM_CPU_IMAGE_REF=ghcr.io/codysnider/tagmem:latest-cpu curl -fsSL https://raw.githubusercontent.com/codysnider/tagmem/main/scripts/install.sh | bash
+```
+
+### Override GPU image ref
+
+```bash
+TAGMEM_GPU_IMAGE_REF=ghcr.io/codysnider/tagmem:latest-gpu curl -fsSL https://raw.githubusercontent.com/codysnider/tagmem/main/scripts/install.sh | bash
 ```
