@@ -43,7 +43,7 @@ require_env TAGMEM_ARM64_REMOTE_HOST
 require_env TAGMEM_ARM64_REMOTE_USER
 
 log_status "Syncing repository to remote arm64 host"
-ssh "${ssh_args[@]}" "$REMOTE_USER@$REMOTE_HOST" "mkdir -p '$REMOTE_WORKDIR' && rm -rf '$REMOTE_WORKDIR'/*"
+ssh "${ssh_args[@]}" "$REMOTE_USER@$REMOTE_HOST" "/bin/bash -lc 'rm -rf \"$REMOTE_WORKDIR\" && mkdir -p \"$REMOTE_WORKDIR\"'"
 tar --exclude=.git --exclude=dist --exclude=.opencode -C "$REPO_ROOT" -cf - . | ssh "${ssh_args[@]}" "$REMOTE_USER@$REMOTE_HOST" "tar -C '$REMOTE_WORKDIR' -xf -"
 
 log_status "Building, validating, and pushing linux/arm64 CPU image on remote host"
