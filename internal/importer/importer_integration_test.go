@@ -131,7 +131,7 @@ func TestRunConversationModeGeneralExtractsTypedMemories(t *testing.T) {
 	assertAnyBodyContains(t, entries, []string{"[decisions]", "[preferences]", "[milestones]", "[problems]", "[emotional]"})
 }
 
-func TestRunFilesModeSearchReturnsFullDocumentSource(t *testing.T) {
+func TestRunFilesModeSearchReturnsFullDocumentSourceAcrossLanguages(t *testing.T) {
 	t.Parallel()
 
 	repo := newTestRepo(t)
@@ -146,8 +146,8 @@ func TestRunFilesModeSearchReturnsFullDocumentSource(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Run() error = %v", err)
 	}
-	if result.FilesProcessed != 5 {
-		t.Fatalf("FilesProcessed = %d, want 5", result.FilesProcessed)
+	if result.FilesProcessed != 7 {
+		t.Fatalf("FilesProcessed = %d, want 7", result.FilesProcessed)
 	}
 
 	type storyCheck struct {
@@ -180,6 +180,16 @@ func TestRunFilesModeSearchReturnsFullDocumentSource(t *testing.T) {
 			"Gathering honest wishes turned out to be harder than collecting ordinary ones.",
 			"Empty pockets are invitations if you know how to notice them.",
 		}},
+		{origin: "anya-i-fonar-biblioteki.txt", queries: []string{
+			"Каждый вечер Аня зажигала фонарь в читальном зале раньше, чем часы на площади успевали пробить шесть.",
+			"Внутри лежала карточка с аккуратной надписью: \"Самые тихие истории слышно дальше всего.\"",
+			"Потому что память любит не громкость, а точность.",
+		}},
+		{origin: "lin-he-xingguang-tushuguan.txt", queries: []string{
+			"从那以后，她把借书证夹在木窗上，让阳光替她记住页码。",
+			"纸条上写着：\"先把风读完，再翻下一页。\"",
+			"因为图书馆保存的从来不只是故事，还包括人们寻找故事时的脚步声。",
+		}},
 	}
 
 	for _, check := range checks {
@@ -189,7 +199,7 @@ func TestRunFilesModeSearchReturnsFullDocumentSource(t *testing.T) {
 		}
 		expectedSource := strings.TrimSpace(string(content))
 		for _, query := range check.queries {
-			results, err := repo.Search(store.Query{Text: query, Limit: 5})
+			results, err := repo.Search(store.Query{Text: query, Limit: len(checks)})
 			if err != nil {
 				t.Fatalf("Search(%q) error = %v", query, err)
 			}

@@ -26,6 +26,7 @@ For a detailed installation guide, see [`INSTALL.md`](INSTALL.md).
 
 - **Verbatim source retrieval**: original source material stays retrievable with each memory ([verification](VERBATIM_SOURCE.md))
 - **Deterministic retrieval**: hybrid semantic + keyword ranking with predictable behavior
+- **Multilingual retrieval**: tested English and Russian queries over Russian documents, plus English and Chinese queries over Chinese documents ([details](MULTILINGUAL_RETRIEVAL.md))
 - **Structured facts and timelines**: a small knowledge graph supports exact current-state and historical queries ([details](KNOWLEDGE_GRAPH.md))
 - **Local-first**: runs locally with Docker using dedicated CPU and GPU images
 - **Clear organization**: tags are primary, depth is secondary
