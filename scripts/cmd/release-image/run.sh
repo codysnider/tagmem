@@ -13,6 +13,7 @@ GPU_PLATFORMS="${TAGMEM_GPU_IMAGE_PLATFORMS:-linux/amd64}"
 CPU_RUNTIME_BASE="${TAGMEM_CPU_RUNTIME_BASE:-debian:bookworm-slim}"
 GPU_RUNTIME_BASE="${TAGMEM_GPU_RUNTIME_BASE:-nvidia/cuda:13.0.0-cudnn-runtime-ubuntu24.04}"
 PUBLISH_CPU_ALIASES="${TAGMEM_PUBLISH_CPU_ALIASES:-1}"
+RELEASE_DOCKER_CONFIG=""
 
 require_command() {
   local name="$1"
@@ -98,10 +99,8 @@ build_local_image() {
 }
 
 login_ghcr() {
-  local tmpcfg
-  tmpcfg="$(mktemp -d)"
-  trap 'rm -rf "$tmpcfg"' EXIT
-  export DOCKER_CONFIG="$tmpcfg"
+  RELEASE_DOCKER_CONFIG="$(mktemp -d)"
+  export DOCKER_CONFIG="$RELEASE_DOCKER_CONFIG"
   printf '%s' "$GH_TOKEN" | docker login ghcr.io -u codysnider --password-stdin >/dev/null
 }
 
@@ -158,5 +157,8 @@ log_status "Publishing CPU manifest tags"
 publish_cpu_manifest
 
 docker image rm "$cpu_local_image" "$gpu_local_image" >/dev/null 2>&1 || true
+if [[ -n "$RELEASE_DOCKER_CONFIG" ]]; then
+  rm -rf "$RELEASE_DOCKER_CONFIG"
+fi
 
 log_success "Published CPU and GPU runtime images for $VERSION_TAG"

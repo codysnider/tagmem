@@ -65,10 +65,6 @@ if ! git -C "$REPO_ROOT" rev-parse "$TAG_NAME" >/dev/null 2>&1; then
   git -C "$REPO_ROOT" tag "$TAG_NAME"
 fi
 
-log_status "Pushing git commit and tag"
-git -C "$REPO_ROOT" push origin main
-git -C "$REPO_ROOT" push origin "$TAG_NAME"
-
 log_status "Publishing CPU and GPU runtime images"
 TAGMEM_IMAGE_REPO="$IMAGE_REPO" TAGMEM_IMAGE_TAG="$VERSION" "$REPO_ROOT/scripts/cmd/release-image/run.sh"
 
@@ -78,6 +74,10 @@ log_status "Validating released images on release hosts"
 TAGMEM_RELEASE_VERSION="$VERSION" TAGMEM_IMAGE_REPO="$IMAGE_REPO" "$REPO_ROOT/scripts/cmd/release-host-validate/run.sh"
 
 log_success "Release host validation completed"
+
+log_status "Pushing git commit and tag"
+git -C "$REPO_ROOT" push origin main
+git -C "$REPO_ROOT" push origin "$TAG_NAME"
 
 log_status "Publishing GitHub release $TAG_NAME"
 gh release create "$TAG_NAME" --title "$TAG_NAME" --generate-notes --latest

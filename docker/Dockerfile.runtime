@@ -1,3 +1,5 @@
+ARG BUILDPLATFORM=linux/amd64
+ARG TARGETPLATFORM=linux/amd64
 ARG RUNTIME_BASE=debian:bookworm-slim
 FROM --platform=$BUILDPLATFORM golang:1.25-bookworm AS build
 
