@@ -1,8 +1,9 @@
 ARG RUNTIME_BASE=debian:bookworm-slim
-FROM golang:1.25-bookworm AS build
+FROM --platform=$BUILDPLATFORM golang:1.25-bookworm AS build
 
 ARG TAGMEM_VERSION=dev
-ARG TARGETARCH=amd64
+ARG TARGETOS
+ARG TARGETARCH
 
 WORKDIR /src
 
@@ -18,9 +19,9 @@ RUN case "$TARGETARCH" in \
         exit 1; \
         ;; \
     esac && \
-    CGO_ENABLED=1 GOOS=linux GOARCH=$TARGETARCH go build -tags tagmem_onnx -buildvcs=false -trimpath -ldflags="-s -w -X github.com/codysnider/tagmem/internal/buildinfo.Version=${TAGMEM_VERSION}" -o /out/tagmem ./cmd/tagmem
+    CGO_ENABLED=1 GOOS=${TARGETOS:-linux} GOARCH=$TARGETARCH go build -tags tagmem_onnx -buildvcs=false -trimpath -ldflags="-s -w -X github.com/codysnider/tagmem/internal/buildinfo.Version=${TAGMEM_VERSION}" -o /out/tagmem ./cmd/tagmem
 
-FROM ${RUNTIME_BASE}
+FROM --platform=$TARGETPLATFORM ${RUNTIME_BASE}
 
 ENV DEBIAN_FRONTEND=noninteractive
 

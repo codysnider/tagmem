@@ -22,6 +22,23 @@ require_command() {
   fi
 }
 
+require_builder_platforms() {
+  local label="$1"
+  local platforms_csv="$2"
+  local inspect_output supported requested
+  inspect_output="$(docker buildx inspect --bootstrap)"
+  supported="$(awk '/Platforms:/ {$1=""; sub(/^ /, ""); print}' <<<"$inspect_output" | tr ',' '\n' | sed 's/^ *//;s/ *$//' | sort -u)"
+  IFS=',' read -r -a requested <<< "$platforms_csv"
+  for platform in "${requested[@]}"; do
+    platform="$(printf '%s' "$platform" | sed 's/^ *//;s/ *$//')"
+    if ! grep -Fxq "$platform" <<<"$supported"; then
+      log_error "$label requires buildx support for $platform, but the active builder does not advertise it."
+      printf '%s\n' "$inspect_output"
+      exit 1
+    fi
+  done
+}
+
 validate_doctor_output() {
   local subject="$1"
   local output="$2"
@@ -112,6 +129,9 @@ for platform in "${gpu_platform_list[@]}"; do
     exit 1
   fi
 done
+
+require_builder_platforms "CPU image publish" "$CPU_PLATFORMS"
+require_builder_platforms "GPU image publish" "$GPU_PLATFORMS"
 
 cpu_local_image="tagmem-release-cpu:${VERSION_TAG}"
 gpu_local_image="tagmem-release-gpu:${VERSION_TAG}"
