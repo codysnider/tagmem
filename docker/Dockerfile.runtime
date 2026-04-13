@@ -11,11 +11,14 @@ RUN go mod download
 
 COPY . .
 
-RUN if [ "$TARGETARCH" != "amd64" ]; then \
-      echo "linux/$TARGETARCH is not supported for runtime images" >&2; \
-      exit 1; \
-    fi && \
-    CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -tags tagmem_onnx -buildvcs=false -trimpath -ldflags="-s -w -X github.com/codysnider/tagmem/internal/buildinfo.Version=${TAGMEM_VERSION}" -o /out/tagmem ./cmd/tagmem
+RUN case "$TARGETARCH" in \
+      amd64|arm64) ;; \
+      *) \
+        echo "linux/$TARGETARCH is not supported for runtime images" >&2; \
+        exit 1; \
+        ;; \
+    esac && \
+    CGO_ENABLED=1 GOOS=linux GOARCH=$TARGETARCH go build -tags tagmem_onnx -buildvcs=false -trimpath -ldflags="-s -w -X github.com/codysnider/tagmem/internal/buildinfo.Version=${TAGMEM_VERSION}" -o /out/tagmem ./cmd/tagmem
 
 FROM ${RUNTIME_BASE}
 

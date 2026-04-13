@@ -1,5 +1,6 @@
 dist/
 coverage.out
+/AGENTS.md
 /tagmem
 /tagmem.exe
 /tiered-memory

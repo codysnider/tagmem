@@ -1,4 +1,4 @@
-//go:build linux && amd64 && tagmem_onnx
+//go:build linux && tagmem_onnx
 
 package vector
 
@@ -24,10 +24,16 @@ const (
 	ortVersion           = "1.24.1"
 	ortLinuxAMD64CPUURL  = "https://github.com/microsoft/onnxruntime/releases/download/v1.24.1/onnxruntime-linux-x64-1.24.1.tgz"
 	ortLinuxAMD64GPUURL  = "https://github.com/microsoft/onnxruntime/releases/download/v1.24.1/onnxruntime-linux-x64-gpu_cuda13-1.24.1.tgz"
-	ortLinuxAMD64URL     = "https://github.com/microsoft/onnxruntime/releases/download/v1.24.1/onnxruntime-linux-x64-1.24.1.tgz"
+	ortLinuxARM64CPUURL  = "https://github.com/microsoft/onnxruntime/releases/download/v1.24.1/onnxruntime-linux-aarch64-1.24.1.tgz"
 	ortLibraryLinuxAMD64 = "libonnxruntime.so.1.24.1"
+	ortLibraryLinuxARM64 = "libonnxruntime.so.1.24.1"
 	miniLMMicroBatchSize = 32
 )
+
+type ortRuntimeSpec struct {
+	url         string
+	libraryName string
+}
 
 type miniLMEmbedder struct {
 	modelDir  string
@@ -38,7 +44,9 @@ type miniLMEmbedder struct {
 var ortInitOnce sync.Once
 var ortInitErr error
 
-func localBERTSupported() bool { return true }
+func localBERTSupported() bool {
+	return runtime.GOARCH == "amd64" || runtime.GOARCH == "arm64"
+}
 
 func loadLocalBERTEmbedder(modelDir string, spec localModelSpec, accel string, state *embeddedRuntimeState) (*miniLMEmbedder, error) {
 	if _, err := loadBERTTokenizer(filepath.Join(modelDir, "vocab.txt")); err != nil {
@@ -70,7 +78,11 @@ func loadLocalBERTEmbedderWithRuntime(modelDir string, spec localModelSpec, useG
 	if err != nil {
 		return nil, err
 	}
-	runtimePath := filepath.Join(modelDir, runtimeSubdir(useGPU), ortLibraryName())
+	runtimeSpec, err := currentORTRuntimeSpec(useGPU)
+	if err != nil {
+		return nil, err
+	}
+	runtimePath := filepath.Join(modelDir, runtimeSubdir(useGPU), runtimeSpec.libraryName)
 	if err := initializeORT(runtimePath); err != nil {
 		return nil, err
 	}
@@ -312,11 +324,15 @@ func ensureLocalModelAssets(modelDir string, spec localModelSpec, useGPU bool) e
 			return err
 		}
 	}
-	libPath := filepath.Join(modelDir, runtimeSubdir(useGPU), ortLibraryName())
+	runtimeSpec, err := currentORTRuntimeSpec(useGPU)
+	if err != nil {
+		return err
+	}
+	libPath := filepath.Join(modelDir, runtimeSubdir(useGPU), runtimeSpec.libraryName)
 	if _, err := os.Stat(libPath); err == nil {
 		return nil
 	}
-	return downloadAndExtractORT(filepath.Join(modelDir, runtimeSubdir(useGPU)), useGPU)
+	return downloadAndExtractORT(filepath.Join(modelDir, runtimeSubdir(useGPU)), runtimeSpec)
 }
 
 func initializeORT(libraryPath string) error {
@@ -327,22 +343,32 @@ func initializeORT(libraryPath string) error {
 	return ortInitErr
 }
 
-func ortLibraryName() string {
-	if runtime.GOOS == "linux" && runtime.GOARCH == "amd64" {
-		return ortLibraryLinuxAMD64
-	}
-	return ""
+func currentORTRuntimeSpec(useGPU bool) (ortRuntimeSpec, error) {
+	return ortRuntimeSpecForPlatform(runtime.GOOS, runtime.GOARCH, useGPU)
 }
 
-func downloadAndExtractORT(runtimeDir string, useGPU bool) error {
-	if runtime.GOOS != "linux" || runtime.GOARCH != "amd64" {
-		return fmt.Errorf("embedded ONNX runtime currently supports linux/amd64 only")
+func ortRuntimeSpecForPlatform(goos, goarch string, useGPU bool) (ortRuntimeSpec, error) {
+	if goos != "linux" {
+		return ortRuntimeSpec{}, fmt.Errorf("embedded ONNX runtime currently supports linux containers only")
 	}
-	url := ortLinuxAMD64CPUURL
-	if useGPU {
-		url = ortLinuxAMD64GPUURL
+	switch goarch {
+	case "amd64":
+		if useGPU {
+			return ortRuntimeSpec{url: ortLinuxAMD64GPUURL, libraryName: ortLibraryLinuxAMD64}, nil
+		}
+		return ortRuntimeSpec{url: ortLinuxAMD64CPUURL, libraryName: ortLibraryLinuxAMD64}, nil
+	case "arm64":
+		if useGPU {
+			return ortRuntimeSpec{}, fmt.Errorf("embedded CUDA runtime is currently supported on linux/amd64 only")
+		}
+		return ortRuntimeSpec{url: ortLinuxARM64CPUURL, libraryName: ortLibraryLinuxARM64}, nil
+	default:
+		return ortRuntimeSpec{}, fmt.Errorf("embedded ONNX runtime currently supports linux/amd64 and linux/arm64 only")
 	}
-	response, err := http.Get(url)
+}
+
+func downloadAndExtractORT(runtimeDir string, spec ortRuntimeSpec) error {
+	response, err := http.Get(spec.url)
 	if err != nil {
 		return err
 	}
@@ -391,7 +417,7 @@ func downloadAndExtractORT(runtimeDir string, useGPU bool) error {
 		}
 		libFiles[name] = struct{}{}
 	}
-	if _, ok := libFiles[ortLibraryLinuxAMD64]; !ok {
+	if _, ok := libFiles[spec.libraryName]; !ok {
 		return fmt.Errorf("onnxruntime library not found in archive")
 	}
 	return nil

@@ -1,4 +1,4 @@
-//go:build !tagmem_onnx || !linux || !amd64
+//go:build !tagmem_onnx || !linux
 
 package vector
 
@@ -16,13 +16,13 @@ func loadLocalBERTEmbedder(modelDir string, spec localModelSpec, accel string, s
 		state.executionDevice = "unsupported"
 		state.runtimeLibrary = ""
 	}
-	return nil, fmt.Errorf("embedded ONNX models are currently supported on linux/amd64 only; use Docker or an OpenAI-compatible backend on this platform")
+	return nil, fmt.Errorf("embedded ONNX models are currently supported in linux containers only; use Docker or an OpenAI-compatible backend on this platform")
 }
 
 func (e *miniLMEmbedder) Embed(text string) ([]float32, error) {
-	return nil, fmt.Errorf("embedded ONNX models are currently supported on linux/amd64 only")
+	return nil, fmt.Errorf("embedded ONNX models are currently supported in linux containers only")
 }
 
 func (e *miniLMEmbedder) EmbedBatch(_ context.Context, texts []string) ([][]float32, error) {
-	return nil, fmt.Errorf("embedded ONNX models are currently supported on linux/amd64 only")
+	return nil, fmt.Errorf("embedded ONNX models are currently supported in linux containers only")
 }

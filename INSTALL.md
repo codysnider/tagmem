@@ -72,7 +72,7 @@ If an NVIDIA GPU is detected and the GPU image validates successfully, the insta
 
 If you want a non-Docker setup, build from source manually.
 
-Current native ONNX source-build support is `linux/amd64`.
+Current native ONNX source-build support is `linux/amd64` and `linux/arm64` for CPU, with CUDA support limited to `linux/amd64`.
 
 ```bash
 CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -tags tagmem_onnx -o tagmem ./cmd/tagmem

@@ -121,34 +121,26 @@ render_with_python() {
   local config_root="$4"
   local cache_root="$5"
   local image_ref="$6"
-  local gpu_snippet="$7"
-  local default_accel="$8"
-  python3 - <<'PY' "$path" "$template" "$data_root" "$config_root" "$cache_root" "$image_ref" "$gpu_snippet" "$default_accel"
+  local default_accel="$7"
+  python3 - <<'PY' "$path" "$template" "$data_root" "$config_root" "$cache_root" "$image_ref" "$default_accel"
 from pathlib import Path
 import sys
-path, template, data_root, config_root, cache_root, image_ref, gpu_snippet, default_accel = sys.argv[1:9]
+path, template, data_root, config_root, cache_root, image_ref, default_accel = sys.argv[1:8]
 text = template.replace('@DATA_ROOT@', data_root)
 text = text.replace('@CONFIG_ROOT@', config_root)
 text = text.replace('@CACHE_ROOT@', cache_root)
 text = text.replace('@IMAGE_REF@', image_ref)
-text = text.replace('@GPU_SNIPPET@', gpu_snippet)
 text = text.replace('@DEFAULT_ACCEL@', default_accel)
 Path(path).write_text(text)
 PY
   chmod +x "$path"
 }
 
-docker_cpu_snippet='GPU_ARGS=()'
-docker_gpu_snippet='GPU_ARGS=(--gpus all)'
-
 write_docker_wrapper() {
   local path="$1" image_ref="$2" gpu_mode="$3" data_root="$4" config_root="$5" cache_root="$6" default_accel="$7"
   local template
-  local gpu_snippet="$docker_cpu_snippet"
   if [[ "$gpu_mode" == "gpu" ]]; then
-    gpu_snippet="$docker_gpu_snippet"
-  fi
-  template=$(cat <<'EOF'
+    template=$(cat <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 DATA_ROOT="${TAGMEM_DATA_ROOT:-@DATA_ROOT@}"
@@ -156,9 +148,8 @@ CONFIG_ROOT="${TAGMEM_CONFIG_ROOT:-@CONFIG_ROOT@}"
 CACHE_ROOT="${TAGMEM_CACHE_ROOT:-@CACHE_ROOT@}"
 IMAGE_REF="${TAGMEM_IMAGE_REF:-@IMAGE_REF@}"
 mkdir -p "$DATA_ROOT" "$CONFIG_ROOT" "$CACHE_ROOT"
-@GPU_SNIPPET@
 exec docker run --rm \
-  "${GPU_ARGS[@]}" \
+  --gpus all \
   -v "$DATA_ROOT:$DATA_ROOT" \
   -v "$CONFIG_ROOT:$CONFIG_ROOT" \
   -v "$CACHE_ROOT:$CACHE_ROOT" \
@@ -174,17 +165,8 @@ exec docker run --rm \
   "$IMAGE_REF" "$@"
 EOF
 )
-  render_with_python "$path" "$template" "$data_root" "$config_root" "$cache_root" "$image_ref" "$gpu_snippet" "$default_accel"
-}
-
-write_docker_mcp_wrapper() {
-  local path="$1" image_ref="$2" gpu_mode="$3" data_root="$4" config_root="$5" cache_root="$6" default_accel="$7"
-  local template
-  local gpu_snippet="$docker_cpu_snippet"
-  if [[ "$gpu_mode" == "gpu" ]]; then
-    gpu_snippet="$docker_gpu_snippet"
-  fi
-  template=$(cat <<'EOF'
+  else
+    template=$(cat <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 DATA_ROOT="${TAGMEM_DATA_ROOT:-@DATA_ROOT@}"
@@ -192,9 +174,40 @@ CONFIG_ROOT="${TAGMEM_CONFIG_ROOT:-@CONFIG_ROOT@}"
 CACHE_ROOT="${TAGMEM_CACHE_ROOT:-@CACHE_ROOT@}"
 IMAGE_REF="${TAGMEM_IMAGE_REF:-@IMAGE_REF@}"
 mkdir -p "$DATA_ROOT" "$CONFIG_ROOT" "$CACHE_ROOT"
-@GPU_SNIPPET@
+exec docker run --rm \
+  -v "$DATA_ROOT:$DATA_ROOT" \
+  -v "$CONFIG_ROOT:$CONFIG_ROOT" \
+  -v "$CACHE_ROOT:$CACHE_ROOT" \
+  -e TAGMEM_DATA_ROOT="$DATA_ROOT" \
+  -e TAGMEM_CONFIG_ROOT="$CONFIG_ROOT" \
+  -e TAGMEM_CACHE_ROOT="$CACHE_ROOT" \
+  -e XDG_CONFIG_HOME="$CONFIG_ROOT" \
+  -e XDG_DATA_HOME="$DATA_ROOT" \
+  -e XDG_CACHE_HOME="$CACHE_ROOT" \
+  -e TAGMEM_EMBED_PROVIDER="${TAGMEM_EMBED_PROVIDER:-embedded}" \
+  -e TAGMEM_EMBED_MODEL="${TAGMEM_EMBED_MODEL:-bge-small-en-v1.5}" \
+  -e TAGMEM_EMBED_ACCEL="${TAGMEM_EMBED_ACCEL:-@DEFAULT_ACCEL@}" \
+  "$IMAGE_REF" "$@"
+EOF
+)
+  fi
+  render_with_python "$path" "$template" "$data_root" "$config_root" "$cache_root" "$image_ref" "$default_accel"
+}
+
+write_docker_mcp_wrapper() {
+  local path="$1" image_ref="$2" gpu_mode="$3" data_root="$4" config_root="$5" cache_root="$6" default_accel="$7"
+  local template
+  if [[ "$gpu_mode" == "gpu" ]]; then
+    template=$(cat <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+DATA_ROOT="${TAGMEM_DATA_ROOT:-@DATA_ROOT@}"
+CONFIG_ROOT="${TAGMEM_CONFIG_ROOT:-@CONFIG_ROOT@}"
+CACHE_ROOT="${TAGMEM_CACHE_ROOT:-@CACHE_ROOT@}"
+IMAGE_REF="${TAGMEM_IMAGE_REF:-@IMAGE_REF@}"
+mkdir -p "$DATA_ROOT" "$CONFIG_ROOT" "$CACHE_ROOT"
 exec docker run -i --rm --init \
-  "${GPU_ARGS[@]}" \
+  --gpus all \
   -v "$DATA_ROOT:$DATA_ROOT" \
   -v "$CONFIG_ROOT:$CONFIG_ROOT" \
   -v "$CACHE_ROOT:$CACHE_ROOT" \
@@ -210,7 +223,33 @@ exec docker run -i --rm --init \
   "$IMAGE_REF" mcp
 EOF
 )
-  render_with_python "$path" "$template" "$data_root" "$config_root" "$cache_root" "$image_ref" "$gpu_snippet" "$default_accel"
+  else
+    template=$(cat <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+DATA_ROOT="${TAGMEM_DATA_ROOT:-@DATA_ROOT@}"
+CONFIG_ROOT="${TAGMEM_CONFIG_ROOT:-@CONFIG_ROOT@}"
+CACHE_ROOT="${TAGMEM_CACHE_ROOT:-@CACHE_ROOT@}"
+IMAGE_REF="${TAGMEM_IMAGE_REF:-@IMAGE_REF@}"
+mkdir -p "$DATA_ROOT" "$CONFIG_ROOT" "$CACHE_ROOT"
+exec docker run -i --rm --init \
+  -v "$DATA_ROOT:$DATA_ROOT" \
+  -v "$CONFIG_ROOT:$CONFIG_ROOT" \
+  -v "$CACHE_ROOT:$CACHE_ROOT" \
+  -e TAGMEM_DATA_ROOT="$DATA_ROOT" \
+  -e TAGMEM_CONFIG_ROOT="$CONFIG_ROOT" \
+  -e TAGMEM_CACHE_ROOT="$CACHE_ROOT" \
+  -e XDG_CONFIG_HOME="$CONFIG_ROOT" \
+  -e XDG_DATA_HOME="$DATA_ROOT" \
+  -e XDG_CACHE_HOME="$CACHE_ROOT" \
+  -e TAGMEM_EMBED_PROVIDER="${TAGMEM_EMBED_PROVIDER:-embedded}" \
+  -e TAGMEM_EMBED_MODEL="${TAGMEM_EMBED_MODEL:-bge-small-en-v1.5}" \
+  -e TAGMEM_EMBED_ACCEL="${TAGMEM_EMBED_ACCEL:-@DEFAULT_ACCEL@}" \
+  "$IMAGE_REF" mcp
+EOF
+)
+  fi
+  render_with_python "$path" "$template" "$data_root" "$config_root" "$cache_root" "$image_ref" "$default_accel"
 }
 
 validate_doctor_output() {
@@ -248,11 +287,20 @@ validate_docker_image() {
   fi
 }
 
+ensure_docker_image() {
+  local image_ref="$1"
+  if docker image inspect "$image_ref" >/dev/null 2>&1; then
+    printf 'Using local image %s\n' "$image_ref"
+    return 0
+  fi
+  printf 'Pulling %s\n' "$image_ref"
+  docker pull "$image_ref"
+}
+
 patch_opencode() {
   local mcp_wrapper="$1"
-  local cfg created=0 opencode_dir remember_url remember_compact_url
-  local default_global_linux="$HOME/.config/opencode/opencode.json"
-  local default_global_macos="$HOME/Library/Application Support/opencode/opencode.json"
+  local cfg created=0 opencode_dir remember_url remember_compact_url config_dir
+  local default_config_path="$HOME/.config/opencode/opencode.json"
   remember_url="$TAGMEM_RAW_BASE/assets/opencode/commands/remember.md"
   remember_compact_url="$TAGMEM_RAW_BASE/assets/opencode/commands/remember-compact.md"
 
@@ -264,10 +312,10 @@ patch_opencode() {
 
   if [[ -n "${OPENCODE_CONFIG:-}" ]]; then
     cfg="$OPENCODE_CONFIG"
-  elif [[ "$(detect_os)" == "darwin" ]]; then
-    cfg="$default_global_macos"
+  elif config_dir="$(opencode debug paths 2>/dev/null | awk '$1 == "config" { print $2 }')" && [[ -n "$config_dir" ]]; then
+    cfg="$config_dir/opencode.json"
   else
-    cfg="$default_global_linux"
+    cfg="$default_config_path"
   fi
 
   printf 'OpenCode detected: %s\n' "$(command -v opencode)"
@@ -394,8 +442,7 @@ main() {
   selected_mode="cpu"
 
   if command -v nvidia-smi >/dev/null 2>&1; then
-    printf 'Pulling %s\n' "$TAGMEM_GPU_IMAGE_REF"
-    if docker pull "$TAGMEM_GPU_IMAGE_REF" >/dev/null 2>&1; then
+    if ensure_docker_image "$TAGMEM_GPU_IMAGE_REF" >/dev/null 2>&1; then
       printf 'Running Docker GPU smoke test...\n'
       if validate_docker_image "Docker GPU image" "$TAGMEM_GPU_IMAGE_REF" cuda gpu; then
         selected_image_ref="$TAGMEM_GPU_IMAGE_REF"
@@ -413,8 +460,7 @@ main() {
   fi
 
   if [[ "$selected_mode" == "cpu" ]]; then
-    printf 'Pulling %s\n' "$TAGMEM_CPU_IMAGE_REF"
-    docker pull "$TAGMEM_CPU_IMAGE_REF"
+    ensure_docker_image "$TAGMEM_CPU_IMAGE_REF"
     printf 'Running Docker CPU smoke test...\n'
     if ! validate_docker_image "Docker CPU image" "$TAGMEM_CPU_IMAGE_REF" cpu cpu; then
       printf 'Docker CPU image validation failed.\n' >&2

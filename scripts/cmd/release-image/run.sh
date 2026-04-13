@@ -8,7 +8,8 @@ print_header
 
 IMAGE_REPO="${TAGMEM_IMAGE_REPO:-ghcr.io/codysnider/tagmem}"
 VERSION_TAG="${TAGMEM_IMAGE_TAG:-$(git -C "$REPO_ROOT" rev-parse --short HEAD)}"
-PLATFORMS="${TAGMEM_IMAGE_PLATFORMS:-linux/amd64}"
+CPU_PLATFORMS="${TAGMEM_CPU_IMAGE_PLATFORMS:-linux/amd64,linux/arm64}"
+GPU_PLATFORMS="${TAGMEM_GPU_IMAGE_PLATFORMS:-linux/amd64}"
 CPU_RUNTIME_BASE="${TAGMEM_CPU_RUNTIME_BASE:-debian:bookworm-slim}"
 GPU_RUNTIME_BASE="${TAGMEM_GPU_RUNTIME_BASE:-nvidia/cuda:13.0.0-cudnn-runtime-ubuntu24.04}"
 PUBLISH_CPU_ALIASES="${TAGMEM_PUBLISH_CPU_ALIASES:-1}"
@@ -74,10 +75,12 @@ build_local_image() {
 }
 
 push_image() {
-  local runtime_base="$1"
+  local platforms="$1"
+  local runtime_base="$2"
+  shift
   shift
   local args=(
-    --platform "$PLATFORMS"
+    --platform "$platforms"
     -f "$REPO_ROOT/docker/Dockerfile.runtime"
     --build-arg TAGMEM_VERSION="$VERSION_TAG"
     --build-arg RUNTIME_BASE="$runtime_base"
@@ -91,10 +94,21 @@ push_image() {
   docker buildx build "${args[@]}"
 }
 
-IFS=',' read -r -a platform_list <<< "$PLATFORMS"
-for platform in "${platform_list[@]}"; do
+IFS=',' read -r -a cpu_platform_list <<< "$CPU_PLATFORMS"
+for platform in "${cpu_platform_list[@]}"; do
+  case "$platform" in
+    linux/amd64|linux/arm64) ;;
+    *)
+      log_error "CPU image platform $platform is not supported. Only linux/amd64 and linux/arm64 are currently allowed."
+      exit 1
+      ;;
+  esac
+done
+
+IFS=',' read -r -a gpu_platform_list <<< "$GPU_PLATFORMS"
+for platform in "${gpu_platform_list[@]}"; do
   if [[ "$platform" != "linux/amd64" ]]; then
-    log_error "Image platform $platform is not supported for published runtime images yet. Only linux/amd64 is currently allowed."
+    log_error "GPU image platform $platform is not supported. Only linux/amd64 is currently allowed."
     exit 1
   fi
 done
@@ -116,10 +130,10 @@ build_local_image "$gpu_local_image" "$GPU_RUNTIME_BASE"
 validate_gpu_image "$gpu_local_image"
 
 log_status "Publishing CPU runtime image tags"
-push_image "$CPU_RUNTIME_BASE" "${cpu_tags[@]}"
+push_image "$CPU_PLATFORMS" "$CPU_RUNTIME_BASE" "${cpu_tags[@]}"
 
 log_status "Publishing GPU runtime image tags"
-push_image "$GPU_RUNTIME_BASE" "${gpu_tags[@]}"
+push_image "$GPU_PLATFORMS" "$GPU_RUNTIME_BASE" "${gpu_tags[@]}"
 
 docker image rm "$cpu_local_image" "$gpu_local_image" >/dev/null 2>&1 || true
 

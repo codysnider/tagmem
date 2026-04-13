@@ -56,10 +56,12 @@ If OpenCode is detected during an interactive install and its config is patchabl
 | Linux amd64 without NVIDIA GPU | ✓ | X | ✓ | Supported |
 | Linux arm64 | Planned | X | Planned | Planned |
 | macOS Intel | Planned | X | Planned | Planned |
-| macOS Apple Silicon | Planned | X | Planned | Planned |
+| macOS Apple Silicon | ✓ | X | Planned | Supported |
 | Windows x86_64 | Planned | X | Planned | Planned |
 
 `Source build` means compiling from the repository yourself. The simple installer path is Docker-only for now.
+
+## Quick Usage
 
 Add an entry:
 
