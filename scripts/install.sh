@@ -289,7 +289,7 @@ validate_docker_image() {
 
 ensure_docker_image() {
   local image_ref="$1"
-  if docker image inspect "$image_ref" >/dev/null 2>&1; then
+  if [[ "$image_ref" != */* ]] && docker image inspect "$image_ref" >/dev/null 2>&1; then
     printf 'Using local image %s\n' "$image_ref"
     return 0
   fi
