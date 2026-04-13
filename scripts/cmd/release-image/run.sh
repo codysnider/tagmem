@@ -22,21 +22,26 @@ require_command() {
   fi
 }
 
-require_builder_platforms() {
-  local label="$1"
-  local platforms_csv="$2"
-  local inspect_output supported requested
-  inspect_output="$(docker buildx inspect --bootstrap)"
-  supported="$(awk '/Platforms:/ {$1=""; sub(/^ /, ""); print}' <<<"$inspect_output" | tr ',' '\n' | sed 's/^ *//;s/ *$//' | sort -u)"
-  IFS=',' read -r -a requested <<< "$platforms_csv"
-  for platform in "${requested[@]}"; do
+require_env() {
+  local name="$1"
+  if [[ -z "${!name:-}" ]]; then
+    log_error "Required environment variable missing: $name"
+    exit 1
+  fi
+}
+
+contains_platform() {
+  local platforms_csv="$1"
+  local needle="$2"
+  local platform
+  IFS=',' read -r -a platform_list <<< "$platforms_csv"
+  for platform in "${platform_list[@]}"; do
     platform="$(printf '%s' "$platform" | sed 's/^ *//;s/ *$//')"
-    if ! grep -Fxq "$platform" <<<"$supported"; then
-      log_error "$label requires buildx support for $platform, but the active builder does not advertise it."
-      printf '%s\n' "$inspect_output"
-      exit 1
+    if [[ "$platform" == "$needle" ]]; then
+      return 0
     fi
   done
+  return 1
 }
 
 validate_doctor_output() {
@@ -58,7 +63,7 @@ validate_cpu_image() {
     exit 1
   fi
   validate_doctor_output "CPU runtime image" "$output"
-  log_success "Validated CPU runtime image"
+  log_success "Validated amd64 CPU runtime image"
 }
 
 validate_gpu_image() {
@@ -76,13 +81,14 @@ validate_gpu_image() {
     log_error "GPU runtime image did not report a CUDA execution device"
     exit 1
   fi
-  log_success "Validated GPU runtime image"
+  log_success "Validated amd64 GPU runtime image"
 }
 
 build_local_image() {
   local image_ref="$1"
   local runtime_base="$2"
   docker build \
+    --build-arg TARGETOS=linux \
     --build-arg TARGETARCH=amd64 \
     --build-arg TAGMEM_VERSION="$VERSION_TAG" \
     --build-arg RUNTIME_BASE="$runtime_base" \
@@ -91,71 +97,66 @@ build_local_image() {
     "$REPO_ROOT"
 }
 
-push_image() {
-  local platforms="$1"
-  local runtime_base="$2"
-  shift
-  shift
-  local args=(
-    --platform "$platforms"
-    -f "$REPO_ROOT/docker/Dockerfile.runtime"
-    --build-arg TAGMEM_VERSION="$VERSION_TAG"
-    --build-arg RUNTIME_BASE="$runtime_base"
-    --push
-  )
-  local tag
-  for tag in "$@"; do
-    args+=( -t "$tag" )
-  done
-  args+=( "$REPO_ROOT" )
-  docker buildx build "${args[@]}"
+login_ghcr() {
+  local tmpcfg
+  tmpcfg="$(mktemp -d)"
+  trap 'rm -rf "$tmpcfg"' EXIT
+  export DOCKER_CONFIG="$tmpcfg"
+  printf '%s' "$GH_TOKEN" | docker login ghcr.io -u codysnider --password-stdin >/dev/null
 }
 
-IFS=',' read -r -a cpu_platform_list <<< "$CPU_PLATFORMS"
-for platform in "${cpu_platform_list[@]}"; do
-  case "$platform" in
-    linux/amd64|linux/arm64) ;;
-    *)
-      log_error "CPU image platform $platform is not supported. Only linux/amd64 and linux/arm64 are currently allowed."
-      exit 1
-      ;;
-  esac
-done
+publish_cpu_manifest() {
+  local tags=("$IMAGE_REPO:${VERSION_TAG}-cpu" "$IMAGE_REPO:latest-cpu")
+  local create_args=()
+  if [[ "$PUBLISH_CPU_ALIASES" == "1" ]]; then
+    tags+=("$IMAGE_REPO:${VERSION_TAG}" "$IMAGE_REPO:latest")
+  fi
+  for tag in "${tags[@]}"; do
+    create_args+=( -t "$tag" )
+  done
+  docker buildx imagetools create "${create_args[@]}" "$IMAGE_REPO:${VERSION_TAG}-cpu-amd64" "$IMAGE_REPO:${VERSION_TAG}-cpu-arm64"
+}
 
-IFS=',' read -r -a gpu_platform_list <<< "$GPU_PLATFORMS"
-for platform in "${gpu_platform_list[@]}"; do
-  if [[ "$platform" != "linux/amd64" ]]; then
-    log_error "GPU image platform $platform is not supported. Only linux/amd64 is currently allowed."
-    exit 1
+require_command docker
+require_env GH_TOKEN
+
+for platform in linux/amd64 linux/arm64; do
+  if contains_platform "$CPU_PLATFORMS" "$platform"; then
+    log_verbose "CPU publish includes $platform"
   fi
 done
+if ! contains_platform "$GPU_PLATFORMS" "linux/amd64"; then
+  log_error "GPU image publish must include linux/amd64"
+  exit 1
+fi
 
-require_builder_platforms "CPU image publish" "$CPU_PLATFORMS"
-require_builder_platforms "GPU image publish" "$GPU_PLATFORMS"
+login_ghcr
 
 cpu_local_image="tagmem-release-cpu:${VERSION_TAG}"
 gpu_local_image="tagmem-release-gpu:${VERSION_TAG}"
-cpu_tags=("$IMAGE_REPO:${VERSION_TAG}-cpu" "$IMAGE_REPO:latest-cpu")
-if [[ "$PUBLISH_CPU_ALIASES" == "1" ]]; then
-  cpu_tags+=("$IMAGE_REPO:${VERSION_TAG}" "$IMAGE_REPO:latest")
-fi
-gpu_tags=("$IMAGE_REPO:${VERSION_TAG}-gpu" "$IMAGE_REPO:latest-gpu")
 
-log_status "Building local CPU runtime validation image"
+log_status "Building local amd64 CPU runtime validation image"
 build_local_image "$cpu_local_image" "$CPU_RUNTIME_BASE"
 validate_cpu_image "$cpu_local_image"
 
-log_status "Building local GPU runtime validation image"
+log_status "Building local amd64 GPU runtime validation image"
 build_local_image "$gpu_local_image" "$GPU_RUNTIME_BASE"
 validate_gpu_image "$gpu_local_image"
 
-log_status "Publishing CPU runtime image tags"
-push_image "$CPU_PLATFORMS" "$CPU_RUNTIME_BASE" "${cpu_tags[@]}"
+log_status "Publishing linux/amd64 CPU image"
+docker buildx build --platform linux/amd64 --build-arg TAGMEM_VERSION="$VERSION_TAG" --build-arg RUNTIME_BASE="$CPU_RUNTIME_BASE" -f "$REPO_ROOT/docker/Dockerfile.runtime" -t "$IMAGE_REPO:${VERSION_TAG}-cpu-amd64" --push "$REPO_ROOT"
 
-log_status "Publishing GPU runtime image tags"
-push_image "$GPU_PLATFORMS" "$GPU_RUNTIME_BASE" "${gpu_tags[@]}"
+log_status "Publishing linux/amd64 GPU image"
+docker buildx build --platform linux/amd64 --build-arg TAGMEM_VERSION="$VERSION_TAG" --build-arg RUNTIME_BASE="$GPU_RUNTIME_BASE" -f "$REPO_ROOT/docker/Dockerfile.runtime" -t "$IMAGE_REPO:${VERSION_TAG}-gpu" -t "$IMAGE_REPO:latest-gpu" --push "$REPO_ROOT"
+
+if contains_platform "$CPU_PLATFORMS" "linux/arm64"; then
+  log_status "Publishing linux/arm64 CPU image on remote arm64 host"
+  TAGMEM_IMAGE_REPO="$IMAGE_REPO" TAGMEM_IMAGE_TAG="$VERSION_TAG" TAGMEM_CPU_RUNTIME_BASE="$CPU_RUNTIME_BASE" "$REPO_ROOT/scripts/cmd/release-image-arm64-remote/run.sh"
+fi
+
+log_status "Publishing CPU manifest tags"
+publish_cpu_manifest
 
 docker image rm "$cpu_local_image" "$gpu_local_image" >/dev/null 2>&1 || true
 
-log_success "Published CPU tags: ${cpu_tags[*]}"
-log_success "Published GPU tags: ${gpu_tags[*]}"
+log_success "Published CPU and GPU runtime images for $VERSION_TAG"

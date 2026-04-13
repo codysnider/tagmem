@@ -37,8 +37,7 @@ if [[ -n "$PART" ]]; then
     patch) PATCH=$((PATCH + 1)) ;;
   esac
   VERSION="$MAJOR.$MINOR.$PATCH"
-  printf '%s\n' "$VERSION" > "$REPO_ROOT/VERSION"
-  log_status "Version bumped: $CURRENT -> $VERSION"
+  log_status "Version bump planned: $CURRENT -> $VERSION"
 else
   VERSION="${TAGMEM_RELEASE_VERSION:-$VERSION_FROM_FILE}"
   if [[ -z "$VERSION" ]]; then
@@ -48,6 +47,14 @@ fi
 
 IMAGE_REPO="${TAGMEM_IMAGE_REPO:-ghcr.io/codysnider/tagmem}"
 TAG_NAME="v$VERSION"
+
+log_status "Running release preflight"
+TAGMEM_RELEASE_VERSION="$VERSION" "$REPO_ROOT/scripts/cmd/release-check/run.sh"
+
+if [[ -n "$PART" ]]; then
+  printf '%s\n' "$VERSION" > "$REPO_ROOT/VERSION"
+  log_status "Version bumped: $CURRENT -> $VERSION"
+fi
 
 git -C "$REPO_ROOT" add VERSION
 if ! git -C "$REPO_ROOT" diff --cached --quiet; then
@@ -66,6 +73,11 @@ log_status "Publishing CPU and GPU runtime images"
 TAGMEM_IMAGE_REPO="$IMAGE_REPO" TAGMEM_IMAGE_TAG="$VERSION" "$REPO_ROOT/scripts/cmd/release-image/run.sh"
 
 log_success "Published runtime images for $IMAGE_REPO"
+
+log_status "Validating released images on release hosts"
+TAGMEM_RELEASE_VERSION="$VERSION" TAGMEM_IMAGE_REPO="$IMAGE_REPO" "$REPO_ROOT/scripts/cmd/release-host-validate/run.sh"
+
+log_success "Release host validation completed"
 
 log_status "Publishing GitHub release $TAG_NAME"
 gh release create "$TAG_NAME" --title "$TAG_NAME" --generate-notes --latest

@@ -10,9 +10,16 @@ MODEL="${TAGMEM_EMBED_MODEL:-bge-small-en-v1.5}"
 BASELINE_PATH="$REPO_ROOT/benchmarks/guards/longmemeval-${MODEL}.json"
 RESULT_PATH="$TAGMEM_DATA_ROOT/bench-results/longmemeval/${MODEL}.json"
 
-log_status "Running focused Go tests"
-rtk go test ./internal/store ./internal/importer ./internal/cli ./internal/mcp
-log_success "Focused Go tests passed"
+log_status "Running secret and internal-host guard"
+"$REPO_ROOT/scripts/cmd/release-secret-check/run.sh"
+
+log_status "Running full Go test suite"
+rtk go test ./...
+log_success "Full Go test suite passed"
+
+log_status "Running tagged ONNX vector tests"
+rtk go test -tags tagmem_onnx ./internal/vector
+log_success "Tagged ONNX vector tests passed"
 
 log_status "Preparing benchmark datasets"
 "$REPO_ROOT/scripts/cmd/docker-datasets/run.sh"

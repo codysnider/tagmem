@@ -56,14 +56,14 @@ func TestProviderFromEnvRejectsUnknownProvider(t *testing.T) {
 func TestProviderFromEnvFallsBackToOllamaHost(t *testing.T) {
 	t.Setenv("TAGMEM_EMBED_PROVIDER", "openai")
 	t.Setenv("TAGMEM_OPENAI_BASE_URL", "")
-	t.Setenv("OLLAMA_HOST", "http://10.20.0.2:11434")
+	t.Setenv("OLLAMA_HOST", "http://localhost:11434")
 
 	provider, err := ProviderFromEnv(testPaths())
 	if err != nil {
 		t.Fatalf("ProviderFromEnv() error = %v", err)
 	}
-	if provider.BaseURL != "http://10.20.0.2:11434/v1" {
-		t.Fatalf("provider.BaseURL = %q, want %q", provider.BaseURL, "http://10.20.0.2:11434/v1")
+	if provider.BaseURL != "http://localhost:11434/v1" {
+		t.Fatalf("provider.BaseURL = %q, want %q", provider.BaseURL, "http://localhost:11434/v1")
 	}
 }
 

@@ -3,6 +3,9 @@ set shell := ["bash", "-cu"]
 build:
 	./scripts/cmd/docker-build/run.sh
 
+release-secret-check:
+	./scripts/cmd/release-secret-check/run.sh
+
 release:
 	./scripts/cmd/release/run.sh
 
@@ -16,7 +19,13 @@ release-major:
 	./scripts/cmd/release/run.sh major
 
 release-image:
-	./scripts/cmd/release/run.sh
+	./scripts/cmd/release-image/run.sh
+
+release-image-arm64-remote:
+	./scripts/cmd/release-image-arm64-remote/run.sh
+
+release-host-validate:
+	./scripts/cmd/release-host-validate/run.sh
 
 shell:
 	./scripts/cmd/docker-shell/run.sh
