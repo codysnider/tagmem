@@ -252,15 +252,6 @@ EOF
   render_with_python "$path" "$template" "$data_root" "$config_root" "$cache_root" "$image_ref" "$default_accel"
 }
 
-validate_doctor_output() {
-  local subject="$1" output="$2"
-  if grep -q 'embedded hash fallback' <<<"$output"; then
-    printf '%s\n' "$output" >&2
-    printf '%s validation failed: embedded hash fallback is not supported for installer installs.\n' "$subject" >&2
-    return 1
-  fi
-}
-
 validate_docker_image() {
   local subject="$1" image_ref="$2" accel="$3" gpu_mode="$4"
   local output
@@ -279,10 +270,9 @@ validate_docker_image() {
     printf '%s\n' "$output" >&2
     return 1
   fi
-  if ! validate_doctor_output "$subject" "$output"; then
-    return 1
-  fi
   if [[ "$gpu_mode" == "gpu" ]] && ! grep -q 'device:[[:space:]]*cuda' <<<"$output"; then
+    printf '%s\n' "$output" >&2
+    printf '%s validation failed: expected CUDA execution device.\n' "$subject" >&2
     return 1
   fi
 }

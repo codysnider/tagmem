@@ -45,16 +45,6 @@ contains_platform() {
   return 1
 }
 
-validate_doctor_output() {
-  local subject="$1"
-  local output="$2"
-  if grep -q 'embedded hash fallback' <<<"$output"; then
-    printf '%s\n' "$output"
-    log_error "$subject fell back to embedded hash embeddings"
-    exit 1
-  fi
-}
-
 validate_cpu_image() {
   local image_ref="$1"
   local output
@@ -63,7 +53,6 @@ validate_cpu_image() {
     log_error "CPU runtime image failed doctor validation"
     exit 1
   fi
-  validate_doctor_output "CPU runtime image" "$output"
   log_success "Validated amd64 CPU runtime image"
 }
 
@@ -76,7 +65,6 @@ validate_gpu_image() {
     log_error "GPU runtime image failed doctor validation"
     exit 1
   fi
-  validate_doctor_output "GPU runtime image" "$output"
   if ! grep -q 'device:[[:space:]]*cuda' <<<"$output"; then
     printf '%s\n' "$output"
     log_error "GPU runtime image did not report a CUDA execution device"

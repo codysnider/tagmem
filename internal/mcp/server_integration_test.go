@@ -3,16 +3,20 @@ package mcp
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"net"
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 
+	"github.com/codysnider/tagmem/internal/daemon"
 	"github.com/codysnider/tagmem/internal/diary"
 	"github.com/codysnider/tagmem/internal/kg"
 	"github.com/codysnider/tagmem/internal/store"
-	"github.com/codysnider/tagmem/internal/vector"
+	"github.com/codysnider/tagmem/internal/testutil/fakeembed"
 	"github.com/codysnider/tagmem/internal/xdg"
 )
 
@@ -64,6 +68,148 @@ func TestMCPStartupSequence(t *testing.T) {
 	}
 	if len(prompts.Prompts) != 0 {
 		t.Fatalf("expected no prompts, got %d", len(prompts.Prompts))
+	}
+}
+
+func TestMCPUsesDaemonBackend(t *testing.T) {
+	t.Parallel()
+	_, writerSession, shared := newDaemonBackedTestSessions(t)
+	readerServer := newDaemonBackedServer(t, shared)
+	readerSession := connectTestSession(t, readerServer, "test-client-reader")
+
+	callTool(t, writerSession, "tagmem_add_entry", map[string]any{
+		"depth": 1,
+		"title": "daemon-backed entry",
+		"body":  "stored through daemon backend",
+		"tags":  []string{"daemon", "graph"},
+	}, nil)
+
+	var status struct {
+		TotalEntries float64 `json:"total_entries"`
+	}
+	callTool(t, readerSession, "tagmem_status", map[string]any{}, &status)
+	if int(status.TotalEntries) != 3 {
+		t.Fatalf("status.TotalEntries = %v, want 3", status.TotalEntries)
+	}
+
+	var readEntries struct {
+		Entries []struct {
+			Title string `json:"title"`
+			Body  string `json:"body"`
+		} `json:"entries"`
+	}
+	callTool(t, readerSession, "tagmem_list_entries", map[string]any{"limit": 10}, &readEntries)
+	if len(readEntries.Entries) != 3 {
+		t.Fatalf("len(readEntries.Entries) = %d, want 3", len(readEntries.Entries))
+	}
+	foundSharedEntry := false
+	for _, entry := range readEntries.Entries {
+		if entry.Title == "daemon-backed entry" && entry.Body == "stored through daemon backend" {
+			foundSharedEntry = true
+			break
+		}
+	}
+	if !foundSharedEntry {
+		t.Fatalf("reader session entries = %+v, want daemon-backed entry written by writer session", readEntries.Entries)
+	}
+
+	var graph struct {
+		Tags float64 `json:"tags"`
+	}
+	callTool(t, readerSession, "tagmem_graph_stats", map[string]any{}, &graph)
+	if int(graph.Tags) < 2 {
+		t.Fatalf("graph.Tags = %v, want at least 2", graph.Tags)
+	}
+
+	var addedFact struct {
+		Fact struct {
+			Subject string `json:"subject"`
+			Object  string `json:"object"`
+		} `json:"fact"`
+	}
+	callTool(t, writerSession, "tagmem_kg_add", map[string]any{"subject": "daemon-user", "predicate": "uses", "object": "daemon backend", "source_entry": "entry:1"}, &addedFact)
+	if addedFact.Fact.Subject != "daemon-user" || addedFact.Fact.Object != "daemon backend" {
+		t.Fatalf("addedFact = %+v", addedFact.Fact)
+	}
+
+	var queriedFacts struct {
+		Count float64 `json:"count"`
+		Facts []struct {
+			Object string `json:"object"`
+		} `json:"facts"`
+	}
+	callTool(t, readerSession, "tagmem_kg_query", map[string]any{"entity": "daemon-user", "direction": "outgoing"}, &queriedFacts)
+	if int(queriedFacts.Count) != 2 {
+		t.Fatalf("queriedFacts.Count = %v, want 2", queriedFacts.Count)
+	}
+
+	callTool(t, writerSession, "tagmem_diary_write", map[string]any{"agent_name": "daemon-agent", "entry": "daemon-backed diary write", "topic": "daemon"}, nil)
+	var diaryRead struct {
+		Showing float64 `json:"showing"`
+		Entries []struct {
+			Topic string `json:"topic"`
+		} `json:"entries"`
+	}
+	callTool(t, readerSession, "tagmem_diary_read", map[string]any{"agent_name": "daemon-agent", "last_n": 5}, &diaryRead)
+	if int(diaryRead.Showing) != 2 || diaryRead.Entries[0].Topic != "daemon" {
+		t.Fatalf("diaryRead = %+v", diaryRead)
+	}
+}
+
+func TestMCPUsesDaemonBackendForDuplicateCheck(t *testing.T) {
+	t.Parallel()
+	_, session := newDaemonBackedTestSession(t)
+
+	callTool(t, session, "tagmem_add_entry", map[string]any{
+		"depth": 1,
+		"title": "duplicate source",
+		"body":  "daemon duplicate body",
+	}, nil)
+
+	var matches struct {
+		Matches []struct {
+			Entry struct {
+				Title string `json:"title"`
+			} `json:"entry"`
+		} `json:"matches"`
+	}
+	callTool(t, session, "tagmem_check_duplicate", map[string]any{"content": "daemon duplicate body", "threshold": 0.1}, &matches)
+	if len(matches.Matches) == 0 {
+		t.Fatal("matches.Matches = empty, want duplicate matches")
+	}
+	if matches.Matches[0].Entry.Title != "duplicate source" {
+		t.Fatalf("matches.Matches[0].Entry.Title = %q, want %q", matches.Matches[0].Entry.Title, "duplicate source")
+	}
+}
+
+func TestMCPUsesDaemonBackendForCrossClientSemanticSearch(t *testing.T) {
+	t.Parallel()
+	_, writerSession, shared := newDaemonBackedTestSessions(t)
+	readerServer := newDaemonBackedServer(t, shared)
+	readerSession := connectTestSession(t, readerServer, "test-client-search-reader")
+
+	callTool(t, writerSession, "tagmem_add_entry", map[string]any{
+		"depth": 1,
+		"title": "nebula orchard ledger",
+		"body":  "Nebula orchard ledger handshake sequence for daemon-backed semantic search.",
+		"tags":  []string{"semantic", "daemon"},
+	}, nil)
+
+	var results struct {
+		Entries []struct {
+			Title string `json:"title"`
+			Body  string `json:"body"`
+		} `json:"entries"`
+	}
+	callTool(t, readerSession, "tagmem_search", map[string]any{"query": "nebula orchard ledger handshake", "limit": 5}, &results)
+	if len(results.Entries) == 0 {
+		t.Fatal("semantic search entries = empty, want cross-client daemon-backed result")
+	}
+	if results.Entries[0].Title != "nebula orchard ledger" {
+		t.Fatalf("semantic search first title = %q, want %q", results.Entries[0].Title, "nebula orchard ledger")
+	}
+	if results.Entries[0].Body != "Nebula orchard ledger handshake sequence for daemon-backed semantic search." {
+		t.Fatalf("semantic search first body = %q", results.Entries[0].Body)
 	}
 }
 
@@ -304,11 +450,11 @@ func newTestSession(t *testing.T) (*Server, *sdk.ClientSession) {
 	if err := paths.Ensure(); err != nil {
 		t.Fatalf("paths.Ensure() error = %v", err)
 	}
-	repo := store.NewRepository(paths.StorePath, filepath.Join(paths.IndexDir, "test"), vector.EmbeddedHashProvider())
+	repo := store.NewRepository(paths.StorePath, filepath.Join(paths.IndexDir, "test"), fakeembed.Provider())
 	if err := repo.Init(); err != nil {
 		t.Fatalf("repo.Init() error = %v", err)
 	}
-	server := New(nil, nil, nil, repo, kg.New(paths.KGPath), diary.New(paths.DiaryDir), paths, vector.EmbeddedHashProvider())
+	server := New(nil, nil, nil, repo, kg.New(paths.KGPath), diary.New(paths.DiaryDir), paths, fakeembed.Provider())
 	client := sdk.NewClient(&sdk.Implementation{Name: "test-client", Version: "0.0.1"}, nil)
 	t1, t2 := sdk.NewInMemoryTransports()
 	if _, err := server.server.Connect(context.Background(), t1, nil); err != nil {
@@ -320,6 +466,115 @@ func newTestSession(t *testing.T) (*Server, *sdk.ClientSession) {
 	}
 	t.Cleanup(func() { _ = session.Close() })
 	return server, session
+}
+
+func newDaemonBackedTestSession(t *testing.T) (*Server, *sdk.ClientSession) {
+	t.Helper()
+	server, writerSession, _ := newDaemonBackedTestSessions(t)
+	return server, writerSession
+}
+
+type daemonBackedSessionShared struct {
+	SocketPath string
+}
+
+func newDaemonBackedTestSessions(t *testing.T) (*Server, *sdk.ClientSession, daemonBackedSessionShared) {
+	t.Helper()
+
+	daemonProvider := fakeembed.Provider()
+	daemonRoot := t.TempDir()
+	daemonPaths := xdg.Paths{ConfigDir: filepath.Join(daemonRoot, "config"), DataDir: filepath.Join(daemonRoot, "data"), CacheDir: filepath.Join(daemonRoot, "cache"), IndexDir: filepath.Join(daemonRoot, "data", "vector"), ModelDir: filepath.Join(daemonRoot, "data", "models"), DiaryDir: filepath.Join(daemonRoot, "data", "diaries"), StorePath: filepath.Join(daemonRoot, "data", "store.json"), KGPath: filepath.Join(daemonRoot, "data", "knowledge.json"), SocketPath: filepath.Join(daemonRoot, "runtime", "tagmem.sock")}
+	if err := daemonPaths.Ensure(); err != nil {
+		t.Fatalf("daemonPaths.Ensure() error = %v", err)
+	}
+	daemonRepo := store.NewRepository(daemonPaths.StorePath, daemonProvider.IndexPath(daemonPaths.IndexDir), daemonProvider)
+	if err := daemonRepo.Init(); err != nil {
+		t.Fatalf("daemonRepo.Init() error = %v", err)
+	}
+	if _, err := daemonRepo.Add(store.AddEntry{Depth: 1, Title: "daemon seed", Body: "entry already owned by daemon"}); err != nil {
+		t.Fatalf("daemonRepo.Add() error = %v", err)
+	}
+	if _, err := daemonRepo.Add(store.AddEntry{Depth: 1, Title: "daemon graph seed", Body: "graph seed body", Tags: []string{"daemon", "graph"}}); err != nil {
+		t.Fatalf("daemonRepo.Add() graph seed error = %v", err)
+	}
+	daemonKG := kg.New(daemonPaths.KGPath)
+	if _, err := daemonKG.Add("daemon-user", "uses", "seed daemon", "", "entry:0"); err != nil {
+		t.Fatalf("daemonKG.Add() error = %v", err)
+	}
+	daemonDiary := diary.New(daemonPaths.DiaryDir)
+	if _, err := daemonDiary.Write("daemon-agent", "existing daemon diary entry", "daemon"); err != nil {
+		t.Fatalf("daemonDiary.Write() error = %v", err)
+	}
+	daemonBackend := daemon.NewBackend(daemonRepo, daemonKG, daemonDiary, daemonPaths, daemonProvider)
+	daemonServer := daemon.NewServer(daemonPaths.SocketPath, daemonBackend)
+	daemonCtx, cancelDaemon := context.WithCancel(context.Background())
+	daemonErr := make(chan error, 1)
+	go func() {
+		daemonErr <- daemonServer.Run(daemonCtx)
+	}()
+	waitForDaemonSocket(t, daemonPaths.SocketPath)
+	t.Cleanup(func() {
+		cancelDaemon()
+		if err := <-daemonErr; err != nil && !errors.Is(err, context.Canceled) {
+			t.Fatalf("daemonServer.Run() error = %v", err)
+		}
+	})
+
+	mcpProvider := fakeembed.Provider()
+	mcpRoot := t.TempDir()
+	mcpPaths := xdg.Paths{ConfigDir: filepath.Join(mcpRoot, "config"), DataDir: filepath.Join(mcpRoot, "data"), CacheDir: filepath.Join(mcpRoot, "cache"), IndexDir: filepath.Join(mcpRoot, "data", "vector"), ModelDir: filepath.Join(mcpRoot, "data", "models"), DiaryDir: filepath.Join(mcpRoot, "data", "diaries"), StorePath: filepath.Join(mcpRoot, "data", "store.json"), KGPath: filepath.Join(mcpRoot, "data", "knowledge.json"), SocketPath: daemonPaths.SocketPath}
+	if err := mcpPaths.Ensure(); err != nil {
+		t.Fatalf("mcpPaths.Ensure() error = %v", err)
+	}
+	mcpRepo := store.NewRepository(mcpPaths.StorePath, mcpProvider.IndexPath(mcpPaths.IndexDir), mcpProvider)
+	server := NewWithDaemonSocket(nil, nil, nil, daemonPaths.SocketPath, mcpRepo, kg.New(mcpPaths.KGPath), diary.New(mcpPaths.DiaryDir), mcpPaths, mcpProvider)
+	writerSession := connectTestSession(t, server, "test-client-writer")
+	return server, writerSession, daemonBackedSessionShared{SocketPath: daemonPaths.SocketPath}
+}
+
+func newDaemonBackedServer(t *testing.T, shared daemonBackedSessionShared) *Server {
+	t.Helper()
+
+	mcpProvider := fakeembed.Provider()
+	mcpRoot := t.TempDir()
+	mcpPaths := xdg.Paths{ConfigDir: filepath.Join(mcpRoot, "config"), DataDir: filepath.Join(mcpRoot, "data"), CacheDir: filepath.Join(mcpRoot, "cache"), IndexDir: filepath.Join(mcpRoot, "data", "vector"), ModelDir: filepath.Join(mcpRoot, "data", "models"), DiaryDir: filepath.Join(mcpRoot, "data", "diaries"), StorePath: filepath.Join(mcpRoot, "data", "store.json"), KGPath: filepath.Join(mcpRoot, "data", "knowledge.json"), SocketPath: shared.SocketPath}
+	if err := mcpPaths.Ensure(); err != nil {
+		t.Fatalf("mcpPaths.Ensure() error = %v", err)
+	}
+	mcpRepo := store.NewRepository(mcpPaths.StorePath, mcpProvider.IndexPath(mcpPaths.IndexDir), mcpProvider)
+	return NewWithDaemonSocket(nil, nil, nil, shared.SocketPath, mcpRepo, kg.New(mcpPaths.KGPath), diary.New(mcpPaths.DiaryDir), mcpPaths, mcpProvider)
+}
+
+func connectTestSession(t *testing.T, server *Server, clientName string) *sdk.ClientSession {
+	t.Helper()
+
+	client := sdk.NewClient(&sdk.Implementation{Name: clientName, Version: "0.0.1"}, nil)
+	t1, t2 := sdk.NewInMemoryTransports()
+	if _, err := server.server.Connect(context.Background(), t1, nil); err != nil {
+		t.Fatalf("server.Connect() error = %v", err)
+	}
+	session, err := client.Connect(context.Background(), t2, nil)
+	if err != nil {
+		t.Fatalf("client.Connect() error = %v", err)
+	}
+	t.Cleanup(func() { _ = session.Close() })
+	return session
+}
+
+func waitForDaemonSocket(t *testing.T, socketPath string) {
+	t.Helper()
+
+	deadline := time.Now().Add(2 * time.Second)
+	for time.Now().Before(deadline) {
+		conn, err := net.DialTimeout("unix", socketPath, 50*time.Millisecond)
+		if err == nil {
+			_ = conn.Close()
+			return
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+
+	t.Fatalf("socket %q did not become ready", socketPath)
 }
 
 func callTool(t *testing.T, session *sdk.ClientSession, name string, args map[string]any, out any) {

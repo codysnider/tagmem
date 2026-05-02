@@ -45,6 +45,10 @@ type LongMemEvalResult struct {
 	Items           []LongMemEvalItemResult `json:"items,omitempty"`
 }
 
+type LongMemEvalInterfaceOptions struct {
+	CorpusCacheDir string
+}
+
 type LongMemEvalItemResult struct {
 	Question          string   `json:"question"`
 	QuestionType      string   `json:"question_type"`
@@ -170,6 +174,144 @@ func RunLongMemEval(ctx context.Context, dataFile string, limit int, provider ve
 		}
 		items[result.index] = result.item
 	}
+	return summarizeLongMemEval(len(entries), started, items), nil
+}
+
+func RunLongMemEvalInterface(ctx context.Context, dataFile string, limit int, provider vector.Provider) (LongMemEvalResult, error) {
+	return RunLongMemEvalInterfaceWithOptions(ctx, dataFile, limit, provider, LongMemEvalInterfaceOptions{})
+}
+
+func RunLongMemEvalInterfaceWithOptions(ctx context.Context, dataFile string, limit int, provider vector.Provider, options LongMemEvalInterfaceOptions) (LongMemEvalResult, error) {
+	data, err := os.ReadFile(dataFile)
+	if err != nil {
+		return LongMemEvalResult{}, err
+	}
+
+	var entries []LongMemEvalEntry
+	if err := json.Unmarshal(data, &entries); err != nil {
+		return LongMemEvalResult{}, err
+	}
+	if limit > 0 && limit < len(entries) {
+		entries = entries[:limit]
+	}
+
+	started := time.Now()
+	items := make([]LongMemEvalItemResult, len(entries))
+	builder := NewInterfaceCorpusBuilderWithOptions(provider, InterfaceCorpusBuilderOptions{CorpusCacheRoot: strings.TrimSpace(options.CorpusCacheDir)})
+	workerCount := 1
+	if runtime.NumCPU() >= 8 {
+		workerCount = 2
+	}
+	type lmeInterfaceJobResult struct {
+		index int
+		item  LongMemEvalItemResult
+		err   error
+	}
+	jobs := make(chan int)
+	results := make(chan lmeInterfaceJobResult, len(entries))
+	var processed atomic.Int64
+	var wg sync.WaitGroup
+	for worker := 0; worker < workerCount; worker++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for index := range jobs {
+				entry := entries[index]
+				rankedIDs, err := rankLongMemEvalEntryInterface(builder, entry)
+				if err != nil {
+					results <- lmeInterfaceJobResult{index: index, err: err}
+					continue
+				}
+				correct := sliceToSet(entry.AnswerSessionIDs)
+				topResults := make([]string, 0, min(10, len(rankedIDs)))
+				for i, id := range rankedIDs {
+					if i >= 10 {
+						break
+					}
+					topResults = append(topResults, id)
+				}
+				results <- lmeInterfaceJobResult{index: index, item: LongMemEvalItemResult{
+					Question:          entry.Question,
+					QuestionType:      entry.QuestionType,
+					CorrectSessionIDs: entry.AnswerSessionIDs,
+					TopResults:        topResults,
+					RecallAt1:         recallAnyIDsAt(rankedIDs, correct, 1),
+					RecallAt5:         recallAnyIDsAt(rankedIDs, correct, 5),
+					RecallAt10:        recallAnyIDsAt(rankedIDs, correct, 10),
+					ReciprocalRank:    reciprocalRankIDs(rankedIDs, correct),
+					NDCGAt10:          ndcgIDs(rankedIDs, correct, 10),
+				}}
+				count := processed.Add(1)
+				if count%10 == 0 {
+					fmt.Printf("  [LongMemEval interface] %d/%d questions processed (%.1fs)\n", count, len(entries), time.Since(started).Seconds())
+				}
+			}
+		}()
+	}
+	go func() {
+		for index := range entries {
+			jobs <- index
+		}
+		close(jobs)
+		wg.Wait()
+		close(results)
+	}()
+	for result := range results {
+		if result.err != nil {
+			return LongMemEvalResult{}, result.err
+		}
+		items[result.index] = result.item
+	}
+	stats := builder.CacheStats()
+	if options.CorpusCacheDir != "" {
+		fmt.Printf("  [LongMemEval interface] corpus cache hits=%d misses=%d dir=%s\n", stats.Hits, stats.Misses, options.CorpusCacheDir)
+	}
+	return summarizeLongMemEval(len(entries), started, items), nil
+}
+
+func rankLongMemEvalEntryInterface(builder *InterfaceCorpusBuilder, entry LongMemEvalEntry) ([]string, error) {
+	documents := make([]InterfaceDocument, 0, len(entry.HaystackSessions))
+	for i, session := range entry.HaystackSessions {
+		transcript := renderLongMemEvalSession(session)
+		if strings.TrimSpace(transcript) == "" {
+			continue
+		}
+		updatedAt := benchmarkTime(entry.HaystackDates[i])
+		documents = append(documents, InterfaceDocument{
+			ID:        entry.HaystackSessionIDs[i],
+			Content:   transcript,
+			Mode:      "conversations",
+			Extract:   "exchange",
+			Depth:     1,
+			CreatedAt: updatedAt,
+			UpdatedAt: updatedAt,
+		})
+	}
+	corpus, err := builder.NewCorpus(documents)
+	if err != nil {
+		return nil, err
+	}
+	defer corpus.Close()
+	return corpus.Search(entry.Question, len(documents))
+}
+
+func renderLongMemEvalSession(turns []Turn) string {
+	parts := make([]string, 0, len(turns))
+	for _, turn := range turns {
+		text := strings.TrimSpace(turn.Content)
+		if text == "" {
+			continue
+		}
+		if turn.Role == "user" {
+			parts = append(parts, "> User: "+text)
+			continue
+		}
+		parts = append(parts, "Assistant: "+text)
+	}
+	return strings.Join(parts, "\n")
+}
+
+func summarizeLongMemEval(questionCount int, started time.Time, items []LongMemEvalItemResult) LongMemEvalResult {
 	type bucket struct {
 		sum   float64
 		count int
@@ -194,7 +336,7 @@ func RunLongMemEval(ctx context.Context, dataFile string, limit int, provider ve
 	}
 
 	result := LongMemEvalResult{
-		Questions:       len(entries),
+		Questions:       questionCount,
 		ElapsedSeconds:  time.Since(started).Seconds(),
 		PerQuestionType: map[string]float64{},
 		Distribution:    map[string]int{"hit@1": 0, "hit@5": 0, "miss@5": 0},
@@ -229,7 +371,7 @@ func RunLongMemEval(ctx context.Context, dataFile string, limit int, provider ve
 		}
 		result.PerQuestionType[key] = bucket.sum / float64(bucket.count)
 	}
-	return result, nil
+	return result
 }
 
 type lmeCandidate struct {

@@ -7,9 +7,15 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/codysnider/tagmem/internal/testutil/fakeembed"
+	"github.com/codysnider/tagmem/internal/vector"
+	"github.com/codysnider/tagmem/internal/xdg"
 )
 
 func TestAppIngestStatusAndContextFlow(t *testing.T) {
+	useFakeProvider(t)
+
 	root := t.TempDir()
 	projectDir := copyCLIProject(t, root)
 	xdgConfig := filepath.Join(root, ".config")
@@ -30,7 +36,7 @@ func TestAppIngestStatusAndContextFlow(t *testing.T) {
 		"TAGMEM_DATA_ROOT=",
 		"TAGMEM_CONFIG_ROOT=",
 		"TAGMEM_CACHE_ROOT=",
-		"TAGMEM_EMBED_PROVIDER=embedded-hash",
+		"TAGMEM_EMBED_PROVIDER=embedded",
 	}
 
 	stdout, stderr, code := runApp(t, env, "ingest", "--mode", "files", "--depth", "1", filepath.Join(projectDir, "notes"))
@@ -75,6 +81,8 @@ func TestAppIngestStatusAndContextFlow(t *testing.T) {
 }
 
 func TestAppSearchExplainShowsComputedSignals(t *testing.T) {
+	useFakeProvider(t)
+
 	root := t.TempDir()
 	xdgConfig := filepath.Join(root, ".config")
 	xdgData := filepath.Join(root, ".local", "share")
@@ -90,7 +98,7 @@ func TestAppSearchExplainShowsComputedSignals(t *testing.T) {
 		"TAGMEM_DATA_ROOT=",
 		"TAGMEM_CONFIG_ROOT=",
 		"TAGMEM_CACHE_ROOT=",
-		"TAGMEM_EMBED_PROVIDER=embedded-hash",
+		"TAGMEM_EMBED_PROVIDER=embedded",
 	}
 	tags := "staging,database,config"
 
@@ -134,6 +142,17 @@ func runApp(t *testing.T, env []string, args ...string) (string, string, int) {
 	}
 	code := app.Run(args)
 	return stdout.String(), stderr.String(), code
+}
+
+func useFakeProvider(t *testing.T) {
+	t.Helper()
+	original := resolveProviderFunc
+	resolveProviderFunc = func(xdg.Paths) (vector.Provider, error) {
+		return fakeembed.Provider(), nil
+	}
+	t.Cleanup(func() {
+		resolveProviderFunc = original
+	})
 }
 
 func restoreEnv(t *testing.T, env []string) {

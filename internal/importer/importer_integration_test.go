@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/codysnider/tagmem/internal/store"
-	"github.com/codysnider/tagmem/internal/vector"
+	"github.com/codysnider/tagmem/internal/testutil/fakeembed"
 )
 
 func TestRunFilesModeRespectsGitignoreAndIncludeIgnored(t *testing.T) {
@@ -235,7 +235,7 @@ func TestRunFilesModeSearchReturnsFullDocumentSourceAcrossLanguages(t *testing.T
 func newTestRepo(t *testing.T) *store.Repository {
 	t.Helper()
 	root := t.TempDir()
-	repo := store.NewRepository(filepath.Join(root, "store.json"), filepath.Join(root, "vector"), vector.EmbeddedHashProvider())
+	repo := store.NewRepository(filepath.Join(root, "store.json"), filepath.Join(root, "vector"), fakeembed.Provider())
 	if err := repo.Init(); err != nil {
 		t.Fatalf("Init() error = %v", err)
 	}

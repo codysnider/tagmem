@@ -127,6 +127,62 @@ func RunConvoMem(ctx context.Context, categories []string, limitPerCategory, top
 	return result, nil
 }
 
+func RunConvoMemInterface(ctx context.Context, categories []string, limitPerCategory, topK int, cacheDir string, provider vector.Provider) (ConvoMemResult, error) {
+	items, err := loadConvoMemItems(categories, limitPerCategory, cacheDir)
+	if err != nil {
+		return ConvoMemResult{}, err
+	}
+	type bucket struct {
+		sum   float64
+		count int
+	}
+	perCategory := map[string]bucket{}
+	results := make([]ConvoMemItemResult, 0, len(items))
+	var totalRecall float64
+	started := time.Now()
+
+	for _, item := range items {
+		if err := ctx.Err(); err != nil {
+			return ConvoMemResult{}, err
+		}
+		recall, detail, err := retrieveConvoMemItemInterface(item, topK, provider)
+		if err != nil {
+			return ConvoMemResult{}, err
+		}
+		totalRecall += recall
+		bucket := perCategory[item.CategoryKey]
+		bucket.sum += recall
+		bucket.count++
+		perCategory[item.CategoryKey] = bucket
+		results = append(results, ConvoMemItemResult{Question: item.Question, Category: item.CategoryKey, Recall: recall, RetrievedCount: detail.RetrievedCount, EvidenceCount: detail.EvidenceCount, Found: detail.Found})
+		if len(results)%10 == 0 {
+			fmt.Printf("  [ConvoMem interface] %d/%d items processed (%.1fs)\n", len(results), len(items), time.Since(started).Seconds())
+		}
+	}
+
+	result := ConvoMemResult{Items: len(results), ElapsedSeconds: time.Since(started).Seconds(), PerCategory: map[string]float64{}, Distribution: map[string]int{"perfect": 0, "partial": 0, "zero": 0}, Results: results}
+	if len(results) > 0 {
+		result.AverageRecall = totalRecall / float64(len(results))
+	}
+	for key, bucket := range perCategory {
+		if bucket.count == 0 {
+			continue
+		}
+		result.PerCategory[key] = bucket.sum / float64(bucket.count)
+	}
+	for _, item := range results {
+		switch {
+		case item.Recall >= 1:
+			result.Distribution["perfect"]++
+		case item.Recall == 0:
+			result.Distribution["zero"]++
+		default:
+			result.Distribution["partial"]++
+		}
+	}
+	return result, nil
+}
+
 type convoMemDetail struct {
 	RetrievedCount int
 	EvidenceCount  int
@@ -159,6 +215,61 @@ func retrieveConvoMemItem(ctx context.Context, item ConvoMemItem, topK int, prov
 			break
 		}
 		retrievedTexts = append(retrievedTexts, strings.ToLower(strings.TrimSpace(documents[idx])))
+	}
+	evidenceTexts := map[string]struct{}{}
+	for _, evidence := range item.MessageEvidences {
+		text := strings.ToLower(strings.TrimSpace(evidence.Text))
+		if text == "" {
+			continue
+		}
+		evidenceTexts[text] = struct{}{}
+	}
+	found := 0
+	for evidence := range evidenceTexts {
+		for _, retrieved := range retrievedTexts {
+			if strings.Contains(retrieved, evidence) || strings.Contains(evidence, retrieved) {
+				found++
+				break
+			}
+		}
+	}
+	recall := 1.0
+	if len(evidenceTexts) > 0 {
+		recall = float64(found) / float64(len(evidenceTexts))
+	}
+	return recall, convoMemDetail{RetrievedCount: len(retrievedTexts), EvidenceCount: len(evidenceTexts), Found: found}, nil
+}
+
+func retrieveConvoMemItemInterface(item ConvoMemItem, topK int, provider vector.Provider) (float64, convoMemDetail, error) {
+	documents := make([]InterfaceDocument, 0)
+	for conversationIndex, conversation := range item.Conversations {
+		for messageIndex, message := range conversation.Messages {
+			text := strings.TrimSpace(message.Text)
+			if text == "" {
+				continue
+			}
+			documents = append(documents, InterfaceDocument{ID: fmt.Sprintf("c%d_m%d", conversationIndex, messageIndex), Content: text, Mode: "files", Depth: 1})
+		}
+	}
+	if len(documents) == 0 {
+		return 0, convoMemDetail{}, nil
+	}
+	rankedIDs, err := rankInterfaceDocuments(provider, documents, item.Question, len(documents))
+	if err != nil {
+		return 0, convoMemDetail{}, err
+	}
+	retrievedTexts := make([]string, 0, min(topK, len(rankedIDs)))
+	byID := make(map[string]string, len(documents))
+	for _, document := range documents {
+		byID[document.ID] = strings.ToLower(strings.TrimSpace(document.Content))
+	}
+	for i, id := range rankedIDs {
+		if i >= topK {
+			break
+		}
+		if text, ok := byID[id]; ok {
+			retrievedTexts = append(retrievedTexts, text)
+		}
 	}
 	evidenceTexts := map[string]struct{}{}
 	for _, evidence := range item.MessageEvidences {

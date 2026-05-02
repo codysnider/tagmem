@@ -241,7 +241,7 @@ export TAGMEM_OPENAI_API_KEY=
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `TAGMEM_EMBED_PROVIDER` | `embedded` | Selects the embedding backend: `embedded`, `openai`, or `embedded-hash`. |
+| `TAGMEM_EMBED_PROVIDER` | `embedded` | Selects the embedding backend: `embedded` or `openai`. |
 | `TAGMEM_EMBED_MODEL` | `bge-small-en-v1.5` | Selects the embedded local model. |
 | `TAGMEM_EMBED_ACCEL` | `auto` | Embedded acceleration mode: `auto`, `cuda`, or `cpu`. |
 | `TAGMEM_OPENAI_MODEL` | `nomic-embed-text` | Model name for OpenAI-compatible embeddings. |

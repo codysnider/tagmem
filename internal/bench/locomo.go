@@ -125,6 +125,103 @@ func RunLoCoMo(ctx context.Context, dataFile string, limit int, topK int, provid
 	return result, nil
 }
 
+func RunLoCoMoInterface(ctx context.Context, dataFile string, limit int, topK int, provider vector.Provider) (LoCoMoResult, error) {
+	data, err := os.ReadFile(dataFile)
+	if err != nil {
+		return LoCoMoResult{}, err
+	}
+	var samples []map[string]json.RawMessage
+	if err := json.Unmarshal(data, &samples); err != nil {
+		return LoCoMoResult{}, err
+	}
+	if limit > 0 && limit < len(samples) {
+		samples = samples[:limit]
+	}
+
+	started := time.Now()
+	type bucket struct {
+		sum   float64
+		count int
+	}
+	perCategory := map[int]bucket{}
+	var totalRecall float64
+	var totalQuestions int
+	results := make([]LoCoMoItemResult, 0)
+	totalQACount := 0
+	for _, raw := range samples {
+		var qaPairs []LoCoMoQA
+		if err := json.Unmarshal(raw["qa"], &qaPairs); err == nil {
+			totalQACount += len(qaPairs)
+		}
+	}
+
+	for _, raw := range samples {
+		if err := ctx.Err(); err != nil {
+			return LoCoMoResult{}, err
+		}
+		documents, corpusIDs, _, qaPairs, err := buildLoCoMoCorpus(raw)
+		if err != nil {
+			return LoCoMoResult{}, err
+		}
+		interfaceDocs := make([]InterfaceDocument, 0, len(documents))
+		for i, document := range documents {
+			interfaceDocs = append(interfaceDocs, InterfaceDocument{ID: corpusIDs[i], Content: document, Mode: "files", Depth: 1})
+		}
+		corpus, err := newInterfaceCorpus(provider, interfaceDocs)
+		if err != nil {
+			return LoCoMoResult{}, err
+		}
+		for _, qa := range qaPairs {
+			rankedIDs, err := corpus.Search(qa.Question, len(interfaceDocs))
+			if err != nil {
+				_ = corpus.Close()
+				return LoCoMoResult{}, err
+			}
+			retrieved := make([]string, 0, min(topK, len(rankedIDs)))
+			for i, id := range rankedIDs {
+				if i >= topK {
+					break
+				}
+				retrieved = append(retrieved, id)
+			}
+			recall := computeLoCoMoRecall(retrieved, evidenceToSessionIDs(qa.Evidence))
+			totalRecall += recall
+			totalQuestions++
+			b := perCategory[qa.Category]
+			b.sum += recall
+			b.count++
+			perCategory[qa.Category] = b
+			results = append(results, LoCoMoItemResult{Question: qa.Question, Category: qa.Category, Evidence: qa.Evidence, Retrieved: retrieved, Recall: recall})
+			if totalQuestions%100 == 0 {
+				fmt.Printf("  [LoCoMo interface] %d/%d questions processed (%.1fs)\n", totalQuestions, totalQACount, time.Since(started).Seconds())
+			}
+		}
+		_ = corpus.Close()
+	}
+
+	result := LoCoMoResult{Questions: totalQuestions, ElapsedSeconds: time.Since(started).Seconds(), PerCategory: map[int]float64{}, Distribution: map[string]int{"perfect": 0, "partial": 0, "zero": 0}, Results: results}
+	if totalQuestions > 0 {
+		result.AverageRecall = totalRecall / float64(totalQuestions)
+	}
+	for key, bucket := range perCategory {
+		if bucket.count == 0 {
+			continue
+		}
+		result.PerCategory[key] = bucket.sum / float64(bucket.count)
+	}
+	for _, item := range results {
+		switch {
+		case item.Recall >= 1:
+			result.Distribution["perfect"]++
+		case item.Recall == 0:
+			result.Distribution["zero"]++
+		default:
+			result.Distribution["partial"]++
+		}
+	}
+	return result, nil
+}
+
 func buildLoCoMoCorpus(raw map[string]json.RawMessage) ([]string, []string, []map[string]string, []LoCoMoQA, error) {
 	var qaPairs []LoCoMoQA
 	if err := json.Unmarshal(raw["qa"], &qaPairs); err != nil {

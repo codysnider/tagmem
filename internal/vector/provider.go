@@ -16,9 +16,8 @@ import (
 )
 
 const (
-	ProviderEmbedded     = "embedded"
-	ProviderOpenAI       = "openai"
-	ProviderEmbeddedHash = "embedded-hash"
+	ProviderEmbedded = "embedded"
+	ProviderOpenAI   = "openai"
 
 	defaultOpenAIModel   = "nomic-embed-text"
 	defaultEmbeddedModel = "bge-small-en-v1.5"
@@ -59,8 +58,6 @@ func ProviderFromEnv(paths xdg.Paths) (Provider, error) {
 		model := strings.TrimSpace(envOrDefault("TAGMEM_EMBED_MODEL", "", defaultEmbeddedModel))
 		accel := strings.TrimSpace(envOrDefault("TAGMEM_EMBED_ACCEL", "", "auto"))
 		return EmbeddedProvider(paths, model, accel)
-	case ProviderEmbeddedHash, "hash":
-		return EmbeddedHashProvider(), nil
 	case ProviderOpenAI, "openai-compatible", "compat", "ollama":
 		model := strings.TrimSpace(envOrDefault("TAGMEM_OPENAI_MODEL", "", envOrDefault("OPENAI_MODEL", "", defaultOpenAIModel)))
 		baseURL := strings.TrimSpace(envOrDefault("TAGMEM_OPENAI_BASE_URL", "", envOrDefault("OPENAI_BASE_URL", "", envOrDefault("OLLAMA_HOST", "", ""))))

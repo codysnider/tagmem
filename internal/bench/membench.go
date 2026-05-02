@@ -133,6 +133,96 @@ func RunMemBench(ctx context.Context, dataDir string, categories []string, topic
 	return result, nil
 }
 
+func RunMemBenchInterface(ctx context.Context, dataDir string, categories []string, topic string, topK, limit int, provider vector.Provider) (MemBenchResult, error) {
+	items, err := loadMemBench(dataDir, categories, topic, limit)
+	if err != nil {
+		return MemBenchResult{}, err
+	}
+	type bucket struct {
+		hit   int
+		total int
+	}
+	perCategory := map[string]bucket{}
+	results := make([]MemBenchItemResult, 0, len(items))
+	hits := 0
+	started := time.Now()
+
+	for index, item := range items {
+		if err := ctx.Err(); err != nil {
+			return MemBenchResult{}, err
+		}
+		documents, _, stepIDs := memBenchTurns(item.Turns)
+		if len(documents) == 0 {
+			continue
+		}
+		interfaceDocs := make([]InterfaceDocument, 0, len(documents))
+		for i, document := range documents {
+			interfaceDocs = append(interfaceDocs, InterfaceDocument{ID: fmt.Sprintf("%d", stepIDs[i]), Content: document, Mode: "files", Depth: 1})
+		}
+		rankedIDs, err := rankInterfaceDocuments(provider, interfaceDocs, item.Question, len(interfaceDocs))
+		if err != nil {
+			return MemBenchResult{}, err
+		}
+		predicateKeywords := predicateKeywords(item.Question)
+		type scored struct {
+			id    int
+			score float64
+		}
+		byID := make(map[int]string, len(documents))
+		for i, stepID := range stepIDs {
+			byID[stepID] = documents[i]
+		}
+		scoredDocs := make([]scored, 0, len(rankedIDs))
+		for i, rankedID := range rankedIDs {
+			if i >= len(interfaceDocs) {
+				break
+			}
+			stepID := atoiSafe(rankedID)
+			document, ok := byID[stepID]
+			if !ok {
+				continue
+			}
+			overlap := retrieval.KeywordOverlap(predicateKeywords, document)
+			scoredDocs = append(scoredDocs, scored{id: stepID, score: overlap})
+		}
+		sort.SliceStable(scoredDocs, func(i, j int) bool { return scoredDocs[i].score > scoredDocs[j].score })
+		retrieved := make([]int, 0, min(topK, len(scoredDocs)))
+		for i, itemScore := range scoredDocs {
+			if i >= topK {
+				break
+			}
+			retrieved = append(retrieved, itemScore.id)
+		}
+		targets := memBenchTargets(item.TargetStepIDs)
+		hit := intersects(targets, retrieved)
+		if hit {
+			hits++
+		}
+		bucket := perCategory[item.Category]
+		bucket.total++
+		if hit {
+			bucket.hit++
+		}
+		perCategory[item.Category] = bucket
+		results = append(results, MemBenchItemResult{Category: item.Category, Topic: item.Topic, Question: item.Question, GroundTruth: item.GroundTruth, TargetSteps: targets, RetrievedSteps: retrieved, HitAtK: hit})
+		if (index+1)%100 == 0 {
+			fmt.Printf("  [MemBench interface] %d/%d items processed (%.1fs)\n", index+1, len(items), time.Since(started).Seconds())
+		}
+	}
+
+	result := MemBenchResult{Items: len(results), TopK: topK, ElapsedSeconds: time.Since(started).Seconds(), PerCategory: map[string]float64{}, Results: results}
+	if len(results) > 0 {
+		result.RecallAtK = float64(hits) / float64(len(results))
+	}
+	for key, bucket := range perCategory {
+		if bucket.total == 0 {
+			continue
+		}
+		result.PerCategory[key] = float64(bucket.hit) / float64(bucket.total)
+	}
+	return result, nil
+}
+
 func loadMemBench(dataDir string, categories []string, topic string, limit int) ([]MemBenchItem, error) {
 	if len(categories) == 0 {
 		for category := range memBenchFiles {

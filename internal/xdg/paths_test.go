@@ -55,3 +55,33 @@ func TestResolveFallsBackToXDGRoots(t *testing.T) {
 		t.Fatalf("CacheDir = %q", paths.CacheDir)
 	}
 }
+
+func TestResolveUsesRuntimeDirForSocketPath(t *testing.T) {
+	t.Setenv("TAGMEM_DATA_ROOT", "/tmp/tagmem-data")
+	t.Setenv("XDG_RUNTIME_DIR", "/tmp/tagmem-runtime")
+
+	paths, err := Resolve("tagmem")
+	if err != nil {
+		t.Fatalf("Resolve() error = %v", err)
+	}
+
+	want := filepath.Join("/tmp/tagmem-runtime", "tagmem", "tagmem.sock")
+	if paths.SocketPath != want {
+		t.Fatalf("SocketPath = %q, want %q", paths.SocketPath, want)
+	}
+}
+
+func TestResolveFallsBackToDataDirForSocketPath(t *testing.T) {
+	t.Setenv("TAGMEM_DATA_ROOT", "/tmp/tagmem-data")
+	t.Setenv("XDG_RUNTIME_DIR", "")
+
+	paths, err := Resolve("tagmem")
+	if err != nil {
+		t.Fatalf("Resolve() error = %v", err)
+	}
+
+	want := filepath.Join("/tmp/tagmem-data", "tagmem.sock")
+	if paths.SocketPath != want {
+		t.Fatalf("SocketPath = %q, want %q", paths.SocketPath, want)
+	}
+}

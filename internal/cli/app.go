@@ -20,6 +20,8 @@ type App struct {
 	stderr io.Writer
 }
 
+var resolveProviderFunc = vector.ProviderFromEnv
+
 func New(stdout, stderr io.Writer) *App {
 	return &App{stdout: stdout, stderr: stderr}
 }
@@ -36,7 +38,7 @@ func (a *App) Run(args []string) int {
 		return 1
 	}
 
-	provider, err := vector.ProviderFromEnv(paths)
+	provider, err := resolveProviderFunc(paths)
 	if err != nil {
 		fmt.Fprintf(a.stderr, "resolve embedding provider: %v\n", err)
 		return 1
@@ -81,6 +83,8 @@ func (a *App) Run(args []string) int {
 		return a.runPaths(paths, provider)
 	case "doctor":
 		return a.runDoctor(paths, provider)
+	case "serve":
+		return a.runServe(repo, paths, provider)
 	case "repair":
 		return a.runRepair(repo)
 	case "mcp":
@@ -356,6 +360,7 @@ func (a *App) printHelp() {
 	fmt.Fprintln(a.stdout, "  depths               show depth counts")
 	fmt.Fprintln(a.stdout, "  paths                print resolved storage paths")
 	fmt.Fprintln(a.stdout, "  doctor               validate embedding backend")
+	fmt.Fprintln(a.stdout, "  serve                run local daemon over a Unix socket")
 	fmt.Fprintln(a.stdout, "  repair               rebuild the vector index from stored entries")
 	fmt.Fprintln(a.stdout, "  mcp                  run MCP server over stdio")
 	fmt.Fprintln(a.stdout, "  bench                run perf, longmemeval, locomo, convomem, or suite")

@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"sync"
 
+	chromem "github.com/philippgille/chromem-go"
+
 	"github.com/codysnider/tagmem/internal/xdg"
 )
 
@@ -38,6 +40,8 @@ var localModelSpecs = map[string]localModelSpec{
 	},
 }
 
+var loadLocalBERTEmbedderFunc = loadLocalBERTEmbedder
+
 func EmbeddedProvider(paths xdg.Paths, modelName, accel string) (Provider, error) {
 	key := sanitizeLocalModel(modelName)
 	spec, ok := localModelSpecs[key]
@@ -46,15 +50,6 @@ func EmbeddedProvider(paths xdg.Paths, modelName, accel string) (Provider, error
 	}
 	modelDir := filepath.Join(paths.ModelDir, spec.Name)
 	state := &embeddedRuntimeState{executionDevice: "pending"}
-	if !localBERTSupported() {
-		state.executionDevice = "unsupported"
-		provider := EmbeddedHashProvider()
-		provider.Description = provider.Description + " (fallback from unsupported local ONNX runtime)"
-		provider.Details = func() map[string]string {
-			return map[string]string{"execution_device": state.executionDevice, "runtime_library": state.runtimeLibrary}
-		}
-		return provider, nil
-	}
 	var (
 		once        sync.Once
 		embedder    *miniLMEmbedder
@@ -67,7 +62,7 @@ func EmbeddedProvider(paths xdg.Paths, modelName, accel string) (Provider, error
 		Model:       spec.Name,
 		Func: func(ctx context.Context, text string) ([]float32, error) {
 			once.Do(func() {
-				embedder, embedderErr = loadLocalBERTEmbedder(modelDir, spec, accel, state)
+				embedder, embedderErr = loadLocalBERTEmbedderFunc(modelDir, spec, accel, state)
 			})
 			if embedderErr != nil {
 				return nil, embedderErr
@@ -76,7 +71,7 @@ func EmbeddedProvider(paths xdg.Paths, modelName, accel string) (Provider, error
 		},
 		Batch: func(ctx context.Context, texts []string) ([][]float32, error) {
 			once.Do(func() {
-				embedder, embedderErr = loadLocalBERTEmbedder(modelDir, spec, accel, state)
+				embedder, embedderErr = loadLocalBERTEmbedderFunc(modelDir, spec, accel, state)
 			})
 			if embedderErr != nil {
 				return nil, embedderErr
@@ -95,4 +90,10 @@ func sanitizeLocalModel(modelName string) string {
 		return "all-minilm-l6-v2"
 	}
 	return key
+}
+
+func (e *miniLMEmbedder) EmbeddingFunc() chromem.EmbeddingFunc {
+	return func(_ context.Context, text string) ([]float32, error) {
+		return e.Embed(text)
+	}
 }

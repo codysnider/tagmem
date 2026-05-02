@@ -72,7 +72,7 @@ func Run(repo *store.Repository, options Options) (Result, error) {
 	}
 	seenSources := map[string]struct{}{}
 	if options.SkipExisting {
-		existing, err := repo.List(store.Query{Limit: 0})
+		existing, err := repo.ListMetadata(store.Query{Limit: 0})
 		if err != nil {
 			return Result{}, err
 		}
@@ -154,6 +154,33 @@ func Run(repo *store.Repository, options Options) (Result, error) {
 		return Result{}, err
 	}
 	return result, nil
+}
+
+func BuildEntriesFromContent(origin, content string, mode Mode, extract string, depth int, provider *vector.Provider) []store.AddEntry {
+	content = strings.TrimSpace(content)
+	if content == "" {
+		return nil
+	}
+	if mode == ModeConversations {
+		content = normalizeConversation(content)
+	}
+	chunks := chunkContent(content, mode, extract)
+	if len(chunks) == 0 {
+		return nil
+	}
+	tags := tagging.BuildTags(origin, content, tagging.Mode(mode), provider)
+	entries := make([]store.AddEntry, 0, len(chunks))
+	for index, chunk := range chunks {
+		entries = append(entries, store.AddEntry{
+			Depth:  depth,
+			Title:  makeTitle(origin, index, len(chunks)),
+			Body:   chunk,
+			Tags:   tags,
+			Source: content,
+			Origin: origin,
+		})
+	}
+	return entries
 }
 
 var stopWalk = fmt.Errorf("stop walk")

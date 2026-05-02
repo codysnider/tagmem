@@ -9,7 +9,7 @@ import (
 )
 
 func (a *App) runStatus(repo *store.Repository) int {
-	entries, err := repo.List(store.Query{Limit: 0})
+	entries, err := repo.ListMetadata(store.Query{Limit: 0})
 	if err != nil {
 		fmt.Fprintf(a.stderr, "status: %v\n", err)
 		return 1

@@ -12,6 +12,7 @@ type Paths struct {
 	ConfigDir    string
 	DataDir      string
 	CacheDir     string
+	SocketPath   string
 	IndexDir     string
 	ModelDir     string
 	DiaryDir     string
@@ -54,11 +55,17 @@ func Resolve(appName string) (Paths, error) {
 		cacheDir = filepath.Join(cacheRoot, appName)
 	}
 
+	socketPath := filepath.Join(dataDir, "tagmem.sock")
+	if runtimeDir := strings.TrimSpace(os.Getenv("XDG_RUNTIME_DIR")); runtimeDir != "" {
+		socketPath = filepath.Join(runtimeDir, appName, "tagmem.sock")
+	}
+
 	return Paths{
 		AppName:      appName,
 		ConfigDir:    configDir,
 		DataDir:      dataDir,
 		CacheDir:     cacheDir,
+		SocketPath:   socketPath,
 		IndexDir:     filepath.Join(dataDir, "vector"),
 		ModelDir:     filepath.Join(dataDir, "models"),
 		DiaryDir:     filepath.Join(dataDir, "diaries"),
@@ -75,7 +82,7 @@ func appEnvName(appName, suffix string) string {
 }
 
 func (p Paths) Ensure() error {
-	for _, dir := range []string{p.ConfigDir, p.DataDir, p.CacheDir, p.IndexDir, p.ModelDir, p.DiaryDir} {
+	for _, dir := range []string{p.ConfigDir, p.DataDir, p.CacheDir, p.IndexDir, p.ModelDir, p.DiaryDir, filepath.Dir(p.SocketPath)} {
 		if err := os.MkdirAll(dir, 0o755); err != nil {
 			return fmt.Errorf("create %s: %w", dir, err)
 		}
