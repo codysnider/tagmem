@@ -1,6 +1,7 @@
 package store
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -100,6 +101,8 @@ func TestRepositoryIgnoresExternalJSONEditWhenSQLiteExists(t *testing.T) {
 		t.Fatalf("Add() error = %v", err)
 	}
 
+	rebuildJSONMirrorForTest(t, storePath, filepath.Join(root, "vector"))
+
 	mutateStoreJSONEntry(t, storePath, entry.ID, func(stored *Entry) {
 		stored.Body = "External JSON drift should not replace SQLite body."
 		stored.Source = "external json source drift"
@@ -139,6 +142,8 @@ func TestRepositorySearchIgnoresExternalJSONEditWhenSQLiteExists(t *testing.T) {
 		t.Fatalf("Add() error = %v", err)
 	}
 
+	rebuildJSONMirrorForTest(t, storePath, filepath.Join(root, "vector"))
+
 	mutateStoreJSONEntry(t, storePath, entry.ID, func(stored *Entry) {
 		stored.Body = "External JSON drift should not replace SQLite body."
 		stored.Source = "external json source drift"
@@ -163,6 +168,75 @@ func TestRepositorySearchIgnoresExternalJSONEditWhenSQLiteExists(t *testing.T) {
 	}
 }
 
+func TestRepositoryPhaseHookEmitsRepresentativeAddAndSearchPhases(t *testing.T) {
+	t.Parallel()
+
+	root := t.TempDir()
+	repo := NewRepository(filepath.Join(root, "store.json"), filepath.Join(root, "vector"), fakeembed.Provider())
+
+	var addPhases []string
+	repo.SetPhaseHook(func(name string, duration time.Duration) {
+		if duration < 0 {
+			t.Fatalf("phase %q duration = %s, want non-negative", name, duration)
+		}
+		addPhases = append(addPhases, name)
+	})
+
+	entry, err := repo.Add(AddEntry{
+		Depth: 1,
+		Title: "Phase coverage",
+		Body:  "Repository profiling should expose representative phases.",
+		Tags:  []string{"profile"},
+	})
+	if err != nil {
+		t.Fatalf("Add() error = %v", err)
+	}
+	for _, phase := range []string{"sqlite_mutation", "vector_mutation"} {
+		if !containsString(addPhases, phase) {
+			t.Fatalf("add phases = %v, want %q", addPhases, phase)
+		}
+	}
+
+	var searchPhases []string
+	repo.SetPhaseHook(func(name string, duration time.Duration) {
+		if duration < 0 {
+			t.Fatalf("phase %q duration = %s, want non-negative", name, duration)
+		}
+		searchPhases = append(searchPhases, name)
+	})
+
+	results, err := repo.SearchDetailed(Query{Text: "Phase coverage", Limit: 5})
+	if err != nil {
+		t.Fatalf("SearchDetailed() error = %v", err)
+	}
+	if len(results) == 0 {
+		t.Fatal("SearchDetailed() returned no results, want seeded entry")
+	}
+	if results[0].Entry.ID != entry.ID {
+		t.Fatalf("results[0].Entry.ID = %d, want %d", results[0].Entry.ID, entry.ID)
+	}
+	for _, phase := range []string{"query_embedding", "vector_query", "sqlite_candidate_fetch", "rerank", "source_hydration"} {
+		if !containsString(searchPhases, phase) {
+			t.Fatalf("search phases = %v, want %q", searchPhases, phase)
+		}
+	}
+	if containsString(searchPhases, "sqlite_mutation") {
+		t.Fatalf("search phases = %v, did not expect add mutation phase", searchPhases)
+	}
+	if containsString(searchPhases, "vector_mutation") {
+		t.Fatalf("search phases = %v, did not expect add vector phase", searchPhases)
+	}
+}
+
+func containsString(values []string, target string) bool {
+	for _, value := range values {
+		if value == target {
+			return true
+		}
+	}
+	return false
+}
+
 func TestRepositoryLoadLockedIgnoresExternalJSONEditWhenSQLiteExists(t *testing.T) {
 	t.Parallel()
 
@@ -179,6 +253,8 @@ func TestRepositoryLoadLockedIgnoresExternalJSONEditWhenSQLiteExists(t *testing.
 	if err != nil {
 		t.Fatalf("Add() error = %v", err)
 	}
+
+	rebuildJSONMirrorForTest(t, storePath, filepath.Join(root, "vector"))
 
 	mutateStoreJSONEntry(t, storePath, entry.ID, func(stored *Entry) {
 		stored.Body = "External JSON drift should not replace SQLite body."
@@ -239,6 +315,19 @@ func TestRepositoryInitRebuildsMissingJSONMirrorFromSQLite(t *testing.T) {
 	if _, err := os.Stat(storePath); err != nil {
 		t.Fatalf("os.Stat(%q) error = %v, want rebuilt mirror", storePath, err)
 	}
+	rebuilt := readSnapshotFile(t, storePath)
+	if len(rebuilt.Entries) != 1 {
+		t.Fatalf("len(rebuilt.Entries) = %d, want 1", len(rebuilt.Entries))
+	}
+	if rebuilt.Entries[0].ID != entry.ID {
+		t.Fatalf("rebuilt.Entries[0].ID = %d, want %d", rebuilt.Entries[0].ID, entry.ID)
+	}
+	if rebuilt.Entries[0].Body != entry.Body {
+		t.Fatalf("rebuilt.Entries[0].Body = %q, want %q", rebuilt.Entries[0].Body, entry.Body)
+	}
+	if rebuilt.Entries[0].SourceRef == "" {
+		t.Fatal("rebuilt.Entries[0].SourceRef = empty, want SQLite-backed source ref")
+	}
 
 	stored, ok, err := repo.Get(entry.ID)
 	if err != nil {
@@ -278,11 +367,40 @@ func TestRepositoryRebuildIndexRebuildsMissingJSONMirrorFromSQLite(t *testing.T)
 	}
 
 	repo = NewRepository(storePath, indexPath, fakeembed.Provider())
+	updated, found, err := repo.Update(entry.ID, AddEntry{
+		Depth:  entry.Depth,
+		Title:  "Rebuilt from SQLite",
+		Body:   "repairtoken entry body updated while mirror missing",
+		Source: "source note: repairtoken entry body updated while mirror missing",
+	})
+	if err != nil {
+		t.Fatalf("Update() error = %v", err)
+	}
+	if !found {
+		t.Fatal("Update() did not find entry while mirror missing")
+	}
+	if _, err := os.Stat(storePath); !os.IsNotExist(err) {
+		t.Fatalf("os.Stat(%q) error = %v, want mirror to stay missing before RebuildIndex", storePath, err)
+	}
+
 	if err := repo.RebuildIndex(); err != nil {
 		t.Fatalf("RebuildIndex() error = %v", err)
 	}
 	if _, err := os.Stat(storePath); err != nil {
 		t.Fatalf("os.Stat(%q) error = %v, want rebuilt mirror", storePath, err)
+	}
+	rebuilt := readSnapshotFile(t, storePath)
+	if len(rebuilt.Entries) != 1 {
+		t.Fatalf("len(rebuilt.Entries) = %d, want 1", len(rebuilt.Entries))
+	}
+	if rebuilt.Entries[0].Title != updated.Title {
+		t.Fatalf("rebuilt.Entries[0].Title = %q, want %q", rebuilt.Entries[0].Title, updated.Title)
+	}
+	if rebuilt.Entries[0].Body != updated.Body {
+		t.Fatalf("rebuilt.Entries[0].Body = %q, want %q", rebuilt.Entries[0].Body, updated.Body)
+	}
+	if rebuilt.Entries[0].SourceRef == "" {
+		t.Fatal("rebuilt.Entries[0].SourceRef = empty, want SQLite-backed source ref")
 	}
 
 	stored, ok, err := repo.Get(entry.ID)
@@ -292,15 +410,18 @@ func TestRepositoryRebuildIndexRebuildsMissingJSONMirrorFromSQLite(t *testing.T)
 	if !ok {
 		t.Fatal("Get() did not find entry after RebuildIndex mirror rebuild")
 	}
-	if stored.Body != entry.Body {
-		t.Fatalf("stored.Body = %q, want %q", stored.Body, entry.Body)
+	if stored.Title != updated.Title {
+		t.Fatalf("stored.Title = %q, want %q", stored.Title, updated.Title)
 	}
-	if stored.Source != entry.Source {
-		t.Fatalf("stored.Source = %q, want %q", stored.Source, entry.Source)
+	if stored.Body != updated.Body {
+		t.Fatalf("stored.Body = %q, want %q", stored.Body, updated.Body)
+	}
+	if stored.Source != updated.Source {
+		t.Fatalf("stored.Source = %q, want %q", stored.Source, updated.Source)
 	}
 }
 
-func TestRepositoryMutationsDoNotRebuildMissingJSONMirror(t *testing.T) {
+func TestRepositoryMutationsDoNotRewriteJSONMirror(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
@@ -398,6 +519,27 @@ func TestRepositoryMutationsDoNotRebuildMissingJSONMirror(t *testing.T) {
 				t.Fatalf("repo.Add(seed) error = %v", err)
 			}
 
+			poisonMirrorWithSentinelSnapshot(t, storePath)
+			mirrorBeforeMutation := snapshotMirrorFileState(t, storePath)
+
+			mutated := tc.mutate(t, repo, entry)
+
+			assertMirrorFileStateUnchanged(t, storePath, mirrorBeforeMutation, tc.name)
+
+			tc.check(t, repo, entry, mutated)
+		})
+
+		t.Run(tc.name+"_missing_mirror", func(t *testing.T) {
+			root := t.TempDir()
+			storePath := filepath.Join(root, "store.json")
+			indexPath := filepath.Join(root, "vector")
+			repo := NewRepository(storePath, indexPath, fakeembed.Provider())
+
+			entry, err := repo.Add(AddEntry{Depth: 1, Title: "Original entry", Body: "original body"})
+			if err != nil {
+				t.Fatalf("repo.Add(seed) error = %v", err)
+			}
+
 			if err := os.Remove(storePath); err != nil {
 				t.Fatalf("os.Remove(%q) error = %v", storePath, err)
 			}
@@ -417,6 +559,24 @@ func TestRepositoryMutationsDoNotRebuildMissingJSONMirror(t *testing.T) {
 			}
 			if _, err := os.Stat(storePath); err != nil {
 				t.Fatalf("os.Stat(%q) after Init error = %v, want rebuilt mirror", storePath, err)
+			}
+			rebuilt := readSnapshotFile(t, storePath)
+			switch tc.name {
+			case "add":
+				if len(rebuilt.Entries) != 2 {
+					t.Fatalf("len(rebuilt.Entries) = %d, want 2 after add recovery", len(rebuilt.Entries))
+				}
+			case "update":
+				if len(rebuilt.Entries) != 1 {
+					t.Fatalf("len(rebuilt.Entries) = %d, want 1 after update recovery", len(rebuilt.Entries))
+				}
+				if rebuilt.Entries[0].Title != mutated.Title {
+					t.Fatalf("rebuilt.Entries[0].Title = %q, want %q", rebuilt.Entries[0].Title, mutated.Title)
+				}
+			case "delete":
+				if len(rebuilt.Entries) != 0 {
+					t.Fatalf("len(rebuilt.Entries) = %d, want 0 after delete recovery", len(rebuilt.Entries))
+				}
 			}
 			tc.check(t, repo, entry, mutated)
 		})
@@ -440,6 +600,8 @@ func TestRepositoryInitIgnoresDriftedJSONMirrorWhenSQLiteExists(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Add() error = %v", err)
 	}
+
+	rebuildJSONMirrorForTest(t, storePath, indexPath)
 
 	mutateStoreJSONEntry(t, storePath, entry.ID, func(stored *Entry) {
 		stored.Body = "External JSON drift should not replace SQLite body during Init."
@@ -556,6 +718,15 @@ func mutateStoreJSONEntry(t *testing.T, storePath string, id int, mutate func(*E
 	t.Fatalf("entry %d not found in %s", id, storePath)
 }
 
+func rebuildJSONMirrorForTest(t testing.TB, storePath, indexPath string) {
+	t.Helper()
+
+	repo := NewRepository(storePath, indexPath, fakeembed.Provider())
+	if err := repo.RebuildIndex(); err != nil {
+		t.Fatalf("RebuildIndex() error = %v", err)
+	}
+}
+
 func TestSQLiteListEntriesByIDsPreservesRequestedSubset(t *testing.T) {
 	t.Parallel()
 
@@ -602,6 +773,47 @@ func TestSQLiteListEntriesByIDsPreservesRequestedSubset(t *testing.T) {
 	}
 	if len(entries[1].Tags) != 1 || entries[1].Tags[0] != "alpha" {
 		t.Fatalf("entries[1].Tags = %v, want [alpha]", entries[1].Tags)
+	}
+}
+
+func TestSQLiteListEntriesByIDsHandlesLargeRequestedSubset(t *testing.T) {
+	t.Parallel()
+
+	root := t.TempDir()
+	repo := NewRepository(filepath.Join(root, "store.json"), filepath.Join(root, "vector"), fakeembed.Provider())
+
+	entry, err := repo.Add(AddEntry{Depth: 1, Title: "Large subset entry", Body: "body"})
+	if err != nil {
+		t.Fatalf("Add() error = %v", err)
+	}
+
+	const entryCount = 40000
+	ids := make([]int, 0, entryCount)
+	for i := 0; i < entryCount; i++ {
+		ids = append(ids, entry.ID)
+	}
+
+	var entries []Entry
+	err = repo.withSharedLock(func() error {
+		if err := repo.ensureSQLiteReadModelLocked(); err != nil {
+			return err
+		}
+		var err error
+		entries, err = sqliteListEntriesByIDs(repo.metaDB, ids)
+		return err
+	})
+	if err != nil {
+		t.Fatalf("sqliteListEntriesByIDs() error = %v", err)
+	}
+
+	if len(entries) != entryCount {
+		t.Fatalf("len(entries) = %d, want %d", len(entries), entryCount)
+	}
+	if entries[0].ID != entry.ID {
+		t.Fatalf("entries[0].ID = %d, want %d", entries[0].ID, entry.ID)
+	}
+	if entries[len(entries)-1].ID != entry.ID {
+		t.Fatalf("entries[last].ID = %d, want %d", entries[len(entries)-1].ID, entry.ID)
 	}
 }
 
@@ -1587,6 +1799,8 @@ func TestRepositorySearchKeepsSQLiteResultsAfterExternalJSONOnlyEdit(t *testing.
 		t.Fatalf("repo.Search(before) = %+v, want entry %d", beforeResults, entry.ID)
 	}
 
+	rebuildJSONMirrorForTest(t, storePath, indexPath)
+
 	snapshot := readSnapshotFile(t, storePath)
 	if len(snapshot.Entries) != 2 {
 		t.Fatalf("len(snapshot.Entries) = %d, want 2", len(snapshot.Entries))
@@ -1700,13 +1914,13 @@ func TestRepositoryListMetadataIgnoresExternalAddWhenSQLiteExists(t *testing.T) 
 		Version: currentVersion,
 		NextID:  2,
 		Entries: []Entry{{
-		ID:        1,
-		Depth:     1,
-		Title:     "External add",
-		Body:      "alpha external metadata",
-		SourceRef: sourceRef("alpha external metadata"),
-		CreatedAt: createdAt,
-		UpdatedAt: updatedAt,
+			ID:        1,
+			Depth:     1,
+			Title:     "External add",
+			Body:      "alpha external metadata",
+			SourceRef: sourceRef("alpha external metadata"),
+			CreatedAt: createdAt,
+			UpdatedAt: updatedAt,
 		}},
 	})
 
@@ -1740,6 +1954,14 @@ func TestRepositoryGetIgnoresExternalUpdateWhenSQLiteExists(t *testing.T) {
 	}
 	if loaded.Source != "before source" {
 		t.Fatalf("loaded.Source = %q, want %q", loaded.Source, "before source")
+	}
+
+	if err := os.Remove(storePath); err != nil {
+		t.Fatalf("Remove(store) error = %v", err)
+	}
+	repo = NewRepository(storePath, filepath.Join(root, "vector"), fakeembed.Provider())
+	if err := repo.Init(); err != nil {
+		t.Fatalf("Init() error = %v", err)
 	}
 
 	snapshot := readSnapshotFile(t, storePath)
@@ -1841,6 +2063,15 @@ func TestRepositoryExternalizesAndDeduplicatesSourceBlobs(t *testing.T) {
 		}
 	}
 
+	if err := os.Remove(storePath); err != nil {
+		t.Fatalf("Remove(store) error = %v", err)
+	}
+
+	repo = NewRepository(storePath, filepath.Join(root, "vector"), fakeembed.Provider())
+	if err := repo.Init(); err != nil {
+		t.Fatalf("Init() error = %v", err)
+	}
+
 	rawStore, err := os.ReadFile(storePath)
 	if err != nil {
 		t.Fatalf("ReadFile(store) error = %v", err)
@@ -1901,6 +2132,8 @@ func TestRepositoryListMetadataOmitsHydratedSource(t *testing.T) {
 		t.Fatalf("Add() error = %v", err)
 	}
 
+	rebuildJSONMirrorForTest(t, storePath, indexPath)
+
 	metadataPath := filepath.Join(root, "store.db")
 	if err := os.Remove(metadataPath); err != nil && !os.IsNotExist(err) {
 		t.Fatalf("Remove(store.db) error = %v", err)
@@ -1951,6 +2184,8 @@ func TestRepositoryGetHydratesSourceFromSQLiteMetadata(t *testing.T) {
 		t.Fatalf("Add() error = %v", err)
 	}
 
+	rebuildJSONMirrorForTest(t, storePath, indexPath)
+
 	metadataPath := filepath.Join(root, "store.db")
 	if err := os.Remove(metadataPath); err != nil && !os.IsNotExist(err) {
 		t.Fatalf("Remove(store.db) error = %v", err)
@@ -1994,7 +2229,6 @@ func overwriteSnapshotWithEmptyEntries(t *testing.T, storePath string) {
 	})
 }
 
-
 func readSnapshotFile(t testing.TB, storePath string) Snapshot {
 	t.Helper()
 
@@ -2021,7 +2255,75 @@ func writeSnapshotFile(t testing.TB, storePath string, snapshot Snapshot) {
 	}
 }
 
-func TestRepositoryLoadsLegacyInlineSourceAndPersistsRefOnSave(t *testing.T) {
+type mirrorFileState struct {
+	data []byte
+}
+
+func snapshotMirrorFileState(t testing.TB, storePath string) mirrorFileState {
+	t.Helper()
+
+	data, err := os.ReadFile(storePath)
+	if err != nil {
+		t.Fatalf("ReadFile(store) error = %v", err)
+	}
+	return mirrorFileState{
+		data: data,
+	}
+}
+
+func mirrorFileStateChanged(storePath string, before mirrorFileState) error {
+	afterData, err := os.ReadFile(storePath)
+	if err != nil {
+		return err
+	}
+	if !bytes.Equal(afterData, before.data) {
+		return errors.New("mirror content changed")
+	}
+	return nil
+}
+
+func assertMirrorFileStateUnchanged(t testing.TB, storePath string, before mirrorFileState, mutation string) {
+	t.Helper()
+
+	if err := mirrorFileStateChanged(storePath, before); err != nil {
+		t.Fatalf("store.json changed during %s mutation: %v", mutation, err)
+	}
+}
+
+func poisonMirrorWithSentinelSnapshot(t testing.TB, storePath string) {
+	t.Helper()
+
+	writeSnapshotFile(t, storePath, Snapshot{
+		Version: currentVersion,
+		NextID:  777,
+		Entries: []Entry{{
+			ID:        404,
+			Depth:     9,
+			Title:     "Sentinel mirror drift",
+			Body:      "This mirror content must remain untouched by hot mutations.",
+			Source:    "sentinel source",
+			CreatedAt: time.Date(2020, 1, 2, 3, 4, 5, 0, time.UTC),
+			UpdatedAt: time.Date(2020, 1, 2, 3, 4, 5, 0, time.UTC),
+		}},
+	})
+}
+
+func TestAssertMirrorFileStateUnchangedDetectsChangedMirrorContent(t *testing.T) {
+	t.Parallel()
+
+	root := t.TempDir()
+	storePath := filepath.Join(root, "store.json")
+	writeSnapshotFile(t, storePath, Snapshot{Version: currentVersion, NextID: 1})
+
+	before := snapshotMirrorFileState(t, storePath)
+	poisonMirrorWithSentinelSnapshot(t, storePath)
+
+	if err := mirrorFileStateChanged(storePath, before); err == nil {
+		t.Fatal("mirrorFileStateChanged() error = nil, want rewrite detection for changed mirror content")
+	}
+}
+
+func TestRepositoryLoadsLegacyInlineSourceAndPersistsRefOnMirrorRebuild(t *testing.T) {
 	t.Parallel()
 
 	root := t.TempDir()
@@ -2066,6 +2368,15 @@ func TestRepositoryLoadsLegacyInlineSourceAndPersistsRefOnSave(t *testing.T) {
 
 	if _, err := repo.Add(AddEntry{Depth: 1, Title: "Fresh", Body: "fresh body"}); err != nil {
 		t.Fatalf("Add(fresh) error = %v", err)
+	}
+
+	if err := os.Remove(storePath); err != nil {
+		t.Fatalf("Remove(store) error = %v", err)
+	}
+
+	repo = NewRepository(storePath, filepath.Join(root, "vector"), fakeembed.Provider())
+	if err := repo.Init(); err != nil {
+		t.Fatalf("Init() error = %v", err)
 	}
 
 	rawStore, err := os.ReadFile(storePath)

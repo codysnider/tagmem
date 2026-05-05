@@ -6,6 +6,27 @@ import (
 	"io"
 )
 
+type CorpusDocumentPayload struct {
+	ID        string `json:"id"`
+	Content   string `json:"content"`
+	Mode      string `json:"mode,omitempty"`
+	Extract   string `json:"extract,omitempty"`
+	Depth     int    `json:"depth,omitempty"`
+	CreatedAt string `json:"created_at,omitempty"`
+	UpdatedAt string `json:"updated_at,omitempty"`
+}
+
+type EnsureCorpusPayload struct {
+	Key       string                  `json:"key"`
+	Documents []CorpusDocumentPayload `json:"documents"`
+}
+
+type SearchCorpusPayload struct {
+	Key   string `json:"key"`
+	Query string `json:"query"`
+	Limit int    `json:"limit,omitempty"`
+}
+
 type Request struct {
 	ID      string         `json:"id"`
 	Command string         `json:"command"`
@@ -51,4 +72,18 @@ func ReadResponse(r io.Reader) (Response, error) {
 	}
 
 	return response, nil
+}
+
+func DecodePayload(payload map[string]any, target any) error {
+	if payload == nil {
+		return nil
+	}
+	encoded, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("encode payload: %w", err)
+	}
+	if err := json.Unmarshal(encoded, target); err != nil {
+		return fmt.Errorf("decode payload: %w", err)
+	}
+	return nil
 }

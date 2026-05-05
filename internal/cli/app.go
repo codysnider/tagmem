@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/codysnider/tagmem/internal/daemon"
 	"github.com/codysnider/tagmem/internal/store"
 	"github.com/codysnider/tagmem/internal/vector"
 	"github.com/codysnider/tagmem/internal/xdg"
@@ -21,81 +23,273 @@ type App struct {
 }
 
 var resolveProviderFunc = vector.ProviderFromEnv
+var daemonCallFunc = daemon.Call
+
+const daemonCLIRequestTimeout = 10 * time.Second
 
 func New(stdout, stderr io.Writer) *App {
 	return &App{stdout: stdout, stderr: stderr}
 }
 
 func (a *App) Run(args []string) int {
+	profiler := newProfiler(a.stderr)
+	if len(args) > 0 {
+		profiler.setCommand(args[0])
+	}
+
+	exitCode := 0
+	defer func() {
+		profiler.print(exitCode)
+	}()
+
+	done := profiler.startPhase("resolve_paths")
 	paths, err := xdg.Resolve("tagmem")
+	done()
 	if err != nil {
 		fmt.Fprintf(a.stderr, "resolve paths: %v\n", err)
-		return 1
+		exitCode = 1
+		return exitCode
 	}
 
+	done = profiler.startPhase("ensure_storage")
 	if err := paths.Ensure(); err != nil {
+		done()
 		fmt.Fprintf(a.stderr, "prepare storage: %v\n", err)
-		return 1
+		exitCode = 1
+		return exitCode
 	}
-
-	provider, err := resolveProviderFunc(paths)
-	if err != nil {
-		fmt.Fprintf(a.stderr, "resolve embedding provider: %v\n", err)
-		return 1
-	}
-
-	indexPath := provider.IndexPath(paths.IndexDir)
-	repo := store.NewRepository(paths.StorePath, indexPath, provider)
+	done()
 
 	if len(args) == 0 {
 		a.printHelp()
-		return 0
+		return exitCode
 	}
 
 	command := args[0]
 	commandArgs := args[1:]
 
+	runCommand := func(fn func() int) int {
+		done := profiler.startPhase("command")
+		defer done()
+		return fn()
+	}
+
+	var provider vector.Provider
+	var repo *store.Repository
+	resolveStoreDependencies := func() bool {
+		if repo != nil {
+			return true
+		}
+
+		done := profiler.startPhase("resolve_provider")
+		providerValue, err := resolveProviderFunc(paths)
+		done()
+		if err != nil {
+			fmt.Fprintf(a.stderr, "resolve embedding provider: %v\n", err)
+			return false
+		}
+
+		provider = providerValue
+		repo = store.NewRepository(paths.StorePath, provider.IndexPath(paths.IndexDir), provider)
+		attachRepoProfiler(repo, profiler)
+		return true
+	}
+
 	switch command {
 	case "help", "--help", "-h":
-		a.printHelp()
-		return 0
+		exitCode = runCommand(func() int {
+			a.printHelp()
+			return 0
+		})
+		return exitCode
 	case "init":
-		return a.runInit(repo, paths, provider)
+		exitCode = runCommand(func() int {
+			if !resolveStoreDependencies() {
+				return 1
+			}
+			return a.runInit(repo, paths, provider)
+		})
+		return exitCode
 	case "ingest":
-		return a.runIngest(repo, provider, commandArgs)
+		exitCode = runCommand(func() int {
+			if !resolveStoreDependencies() {
+				return 1
+			}
+			return a.runIngest(repo, provider, commandArgs)
+		})
+		return exitCode
 	case "split":
-		return a.runSplit(commandArgs)
+		exitCode = runCommand(func() int { return a.runSplit(commandArgs) })
+		return exitCode
 	case "add":
-		return a.runAdd(repo, commandArgs)
+		exitCode = runCommand(func() int {
+			if ok := preflightAddArgs(commandArgs, a.stderr); !ok {
+				return 1
+			}
+			useDaemonCLI, daemonCLIError := selectDaemonCLIBackend(command, paths.SocketPath)
+			if daemonCLIError != nil {
+				fmt.Fprintf(a.stderr, "%v\n", daemonCLIError)
+				return 1
+			}
+			if useDaemonCLI {
+				return a.runAddViaDaemon(paths.SocketPath, commandArgs)
+			}
+			if !resolveStoreDependencies() {
+				return 1
+			}
+			return a.runAdd(repo, commandArgs, profiler)
+		})
+		return exitCode
 	case "list":
-		return a.runList(repo, commandArgs)
+		exitCode = runCommand(func() int {
+			if !resolveStoreDependencies() {
+				return 1
+			}
+			return a.runList(repo, commandArgs)
+		})
+		return exitCode
 	case "search":
-		return a.runSearch(repo, commandArgs)
+		exitCode = runCommand(func() int {
+			if ok := preflightSearchArgs(commandArgs, a.stderr); !ok {
+				return 1
+			}
+			useDaemonCLI, daemonCLIError := selectDaemonCLIBackend(command, paths.SocketPath)
+			if daemonCLIError != nil {
+				fmt.Fprintf(a.stderr, "%v\n", daemonCLIError)
+				return 1
+			}
+			if useDaemonCLI {
+				return a.runSearchViaDaemon(paths.SocketPath, commandArgs)
+			}
+			if !resolveStoreDependencies() {
+				return 1
+			}
+			return a.runSearch(repo, commandArgs, profiler)
+		})
+		return exitCode
 	case "context":
-		return a.runContext(repo, paths, commandArgs)
+		exitCode = runCommand(func() int {
+			if !resolveStoreDependencies() {
+				return 1
+			}
+			return a.runContext(repo, paths, commandArgs)
+		})
+		return exitCode
 	case "status":
-		return a.runStatus(repo)
+		exitCode = runCommand(func() int {
+			if !resolveStoreDependencies() {
+				return 1
+			}
+			return a.runStatus(repo)
+		})
+		return exitCode
 	case "show":
-		return a.runShow(repo, commandArgs)
+		exitCode = runCommand(func() int {
+			if !resolveStoreDependencies() {
+				return 1
+			}
+			return a.runShow(repo, commandArgs)
+		})
+		return exitCode
 	case "depths":
-		return a.runDepths(repo)
+		exitCode = runCommand(func() int {
+			if !resolveStoreDependencies() {
+				return 1
+			}
+			return a.runDepths(repo)
+		})
+		return exitCode
 	case "paths":
-		return a.runPaths(paths, provider)
+		exitCode = runCommand(func() int {
+			if !resolveStoreDependencies() {
+				return 1
+			}
+			return a.runPaths(paths, provider)
+		})
+		return exitCode
 	case "doctor":
-		return a.runDoctor(paths, provider)
+		exitCode = runCommand(func() int {
+			if !resolveStoreDependencies() {
+				return 1
+			}
+			return a.runDoctor(paths, provider)
+		})
+		return exitCode
 	case "serve":
-		return a.runServe(repo, paths, provider)
+		exitCode = runCommand(func() int {
+			if !resolveStoreDependencies() {
+				return 1
+			}
+			return a.runServe(repo, paths, provider)
+		})
+		return exitCode
 	case "repair":
-		return a.runRepair(repo)
+		exitCode = runCommand(func() int {
+			if !resolveStoreDependencies() {
+				return 1
+			}
+			return a.runRepair(repo)
+		})
+		return exitCode
 	case "mcp":
-		return a.runMCP(repo, paths, provider)
+		exitCode = runCommand(func() int {
+			if !resolveStoreDependencies() {
+				return 1
+			}
+			return a.runMCP(repo, paths, provider)
+		})
+		return exitCode
 	case "bench":
-		return a.runBench(commandArgs, provider)
+		exitCode = runCommand(func() int {
+			if !resolveStoreDependencies() {
+				return 1
+			}
+			return a.runBench(commandArgs, provider)
+		})
+		return exitCode
 	default:
 		fmt.Fprintf(a.stderr, "unknown command %q\n\n", command)
 		a.printHelp()
-		return 1
+		exitCode = 1
+		return exitCode
 	}
+}
+
+func daemonCLICommand(command string) bool {
+	switch command {
+	case "add", "search":
+		return true
+	default:
+		return false
+	}
+}
+
+func preflightAddArgs(args []string, stderr io.Writer) bool {
+	fs := flag.NewFlagSet("add", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	fs.Int("depth", 1, "entry depth")
+	fs.String("title", "", "entry title")
+	fs.String("body", "", "entry body")
+	fs.String("tags", "", "comma-separated tags")
+	fs.String("source", "", "verbatim source material")
+	fs.String("origin", "", "source provenance or path")
+	return fs.Parse(args) == nil
+}
+
+func preflightSearchArgs(args []string, stderr io.Writer) bool {
+	fs := flag.NewFlagSet("search", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	fs.Int("depth", -1, "filter to one depth")
+	fs.Int("limit", 5, "maximum entries to show")
+	fs.Bool("explain", false, "include computed support and conflict signals")
+	if err := fs.Parse(args); err != nil {
+		return false
+	}
+	if strings.TrimSpace(strings.Join(fs.Args(), " ")) == "" {
+		fmt.Fprintln(stderr, "usage: tagmem search [--depth N] [--limit N] [--explain] <query>")
+		return false
+	}
+	return true
 }
 
 func (a *App) runInit(repo *store.Repository, paths xdg.Paths, provider vector.Provider) int {
@@ -114,7 +308,7 @@ func (a *App) runInit(repo *store.Repository, paths xdg.Paths, provider vector.P
 	return 0
 }
 
-func (a *App) runAdd(repo *store.Repository, args []string) int {
+func (a *App) runAdd(repo *store.Repository, args []string, profiler *profiler) int {
 	fs := flag.NewFlagSet("add", flag.ContinueOnError)
 	fs.SetOutput(a.stderr)
 
@@ -129,12 +323,51 @@ func (a *App) runAdd(repo *store.Repository, args []string) int {
 		return 1
 	}
 
+	done := profiler.startPhase("repo_init")
 	if err := repo.Init(); err != nil {
+		done()
 		fmt.Fprintf(a.stderr, "initialize store: %v\n", err)
 		return 1
 	}
+	done()
 
+	done = profiler.startPhase("add_total")
 	entry, err := repo.Add(store.AddEntry{
+		Depth:     *depth,
+		Title:     *title,
+		Body:      *body,
+		Tags:      parseCSV(*tags),
+		Source:    *source,
+		Origin:    *origin,
+		CreatedAt: parseEnvTime("TAGMEM_IMPORT_CREATED_AT"),
+		UpdatedAt: parseEnvTime("TAGMEM_IMPORT_UPDATED_AT"),
+	})
+	done()
+	if err != nil {
+		fmt.Fprintf(a.stderr, "add entry: %v\n", err)
+		return 1
+	}
+
+	fmt.Fprintf(a.stdout, "added entry %d at depth %d\n", entry.ID, entry.Depth)
+	return 0
+}
+
+func (a *App) runAddViaDaemon(socketPath string, args []string) int {
+	fs := flag.NewFlagSet("add", flag.ContinueOnError)
+	fs.SetOutput(a.stderr)
+
+	depth := fs.Int("depth", 1, "entry depth")
+	title := fs.String("title", "", "entry title")
+	body := fs.String("body", "", "entry body")
+	tags := fs.String("tags", "", "comma-separated tags")
+	source := fs.String("source", "", "verbatim source material")
+	origin := fs.String("origin", "", "source provenance or path")
+
+	if err := fs.Parse(args); err != nil {
+		return 1
+	}
+
+	entry, err := addViaDaemon(socketPath, store.AddEntry{
 		Depth:     *depth,
 		Title:     *title,
 		Body:      *body,
@@ -172,8 +405,8 @@ func (a *App) runList(repo *store.Repository, args []string) int {
 	return 0
 }
 
-func (a *App) runSearch(repo *store.Repository, args []string) int {
-	results, explain, err := a.querySearch(repo, args)
+func (a *App) runSearch(repo *store.Repository, args []string, profiler *profiler) int {
+	results, explain, err := a.querySearch(repo, args, profiler)
 	if err != nil {
 		fmt.Fprintf(a.stderr, "%v\n", err)
 		return 1
@@ -189,6 +422,146 @@ func (a *App) runSearch(repo *store.Repository, args []string) int {
 	}
 
 	return 0
+}
+
+func (a *App) runSearchViaDaemon(socketPath string, args []string) int {
+	results, explain, err := searchViaDaemon(socketPath, args, a.stderr)
+	if err != nil {
+		fmt.Fprintf(a.stderr, "%v\n", err)
+		return 1
+	}
+
+	if len(results) == 0 {
+		fmt.Fprintln(a.stdout, "no matches")
+		return 0
+	}
+
+	for _, result := range results {
+		fmt.Fprintln(a.stdout, formatSearchResultLine(result, explain))
+	}
+
+	return 0
+}
+
+func selectDaemonCLIBackend(command, socketPath string) (bool, error) {
+	if !daemonCLICommand(command) {
+		return false, nil
+	}
+	if strings.TrimSpace(os.Getenv("TAGMEM_USE_DAEMON")) != "1" {
+		return false, nil
+	}
+	if !probeDaemonCLI(socketPath) {
+		return false, fmt.Errorf("daemon-backed CLI mode requires a reachable daemon at %s", socketPath)
+	}
+	return true, nil
+}
+
+func probeDaemonCLI(socketPath string) bool {
+	if strings.TrimSpace(os.Getenv("TAGMEM_USE_DAEMON")) != "1" {
+		return false
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	defer cancel()
+
+	response, err := daemon.Call(ctx, socketPath, daemon.Request{ID: "cli-probe", Command: "status"})
+	if err != nil {
+		return false
+	}
+
+	return response.Success
+}
+
+func addViaDaemon(socketPath string, entry store.AddEntry) (store.Entry, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), daemonCLIRequestTimeout)
+	defer cancel()
+
+	response, err := daemonCallFunc(ctx, socketPath, daemon.Request{
+		ID:      fmt.Sprintf("cli-add-%d", time.Now().UnixNano()),
+		Command: "add_entry",
+		Payload: map[string]any{
+			"depth":      entry.Depth,
+			"title":      entry.Title,
+			"body":       entry.Body,
+			"tags":       entry.Tags,
+			"source":     entry.Source,
+			"origin":     entry.Origin,
+			"created_at": formatOptionalTime(entry.CreatedAt),
+			"updated_at": formatOptionalTime(entry.UpdatedAt),
+		},
+	})
+	if err != nil {
+		return store.Entry{}, err
+	}
+	if !response.Success {
+		return store.Entry{}, errors.New(response.Error)
+	}
+
+	var payload struct {
+		Entry store.Entry `json:"entry"`
+	}
+	if err := daemon.DecodePayload(response.Payload, &payload); err != nil {
+		return store.Entry{}, err
+	}
+
+	return payload.Entry, nil
+}
+
+func formatOptionalTime(value *time.Time) string {
+	if value == nil {
+		return ""
+	}
+	return value.UTC().Format(time.RFC3339)
+}
+
+func searchViaDaemon(socketPath string, args []string, stderr io.Writer) ([]store.SearchResult, bool, error) {
+	fs := flag.NewFlagSet("search", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+
+	depth := fs.Int("depth", -1, "filter to one depth")
+	limit := fs.Int("limit", 5, "maximum entries to show")
+	explain := fs.Bool("explain", false, "include computed support and conflict signals")
+
+	if err := fs.Parse(args); err != nil {
+		return nil, false, err
+	}
+
+	query := strings.Join(fs.Args(), " ")
+	if strings.TrimSpace(query) == "" {
+		return nil, false, errors.New("usage: tagmem search [--depth N] [--limit N] [--explain] <query>")
+	}
+
+	payload := map[string]any{
+		"query": query,
+		"limit": *limit,
+	}
+	if *depth >= 0 {
+		payload["depth"] = *depth
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), daemonCLIRequestTimeout)
+	defer cancel()
+
+	response, err := daemonCallFunc(ctx, socketPath, daemon.Request{
+		ID:      fmt.Sprintf("cli-search-%d", time.Now().UnixNano()),
+		Command: "search",
+		Payload: payload,
+	})
+	if err != nil {
+		return nil, false, err
+	}
+	if !response.Success {
+		return nil, false, errors.New(response.Error)
+	}
+
+	var decoded struct {
+		Results []store.SearchResult `json:"results"`
+	}
+	if err := daemon.DecodePayload(response.Payload, &decoded); err != nil {
+		return nil, false, err
+	}
+
+	return decoded.Results, *explain, nil
 }
 
 func (a *App) runShow(repo *store.Repository, args []string) int {
@@ -313,7 +686,7 @@ func (a *App) queryEntries(repo *store.Repository, args []string, useSearch bool
 	return repo.List(query)
 }
 
-func (a *App) querySearch(repo *store.Repository, args []string) ([]store.SearchResult, bool, error) {
+func (a *App) querySearch(repo *store.Repository, args []string, profiler *profiler) ([]store.SearchResult, bool, error) {
 	fs := flag.NewFlagSet("search", flag.ContinueOnError)
 	fs.SetOutput(a.stderr)
 
@@ -325,9 +698,12 @@ func (a *App) querySearch(repo *store.Repository, args []string) ([]store.Search
 		return nil, false, err
 	}
 
+	done := profiler.startPhase("repo_init")
 	if err := repo.Init(); err != nil {
+		done()
 		return nil, false, fmt.Errorf("initialize store: %w", err)
 	}
+	done()
 
 	query := store.Query{Limit: *limit, Text: strings.Join(fs.Args(), " ")}
 	if *depth >= 0 {
@@ -337,11 +713,23 @@ func (a *App) querySearch(repo *store.Repository, args []string) ([]store.Search
 		return nil, false, errors.New("usage: tagmem search [--depth N] [--limit N] [--explain] <query>")
 	}
 
+	done = profiler.startPhase("search_total")
 	results, err := repo.SearchDetailed(query)
+	done()
 	if err != nil {
 		return nil, false, err
 	}
 	return results, *explain, nil
+}
+
+func attachRepoProfiler(repo *store.Repository, profiler *profiler) {
+	if !profiler.enabled {
+		return
+	}
+
+	repo.SetPhaseHook(func(name string, duration time.Duration) {
+		profiler.phases = append(profiler.phases, profilePhase{name: name, duration: duration})
+	})
 }
 
 func (a *App) printHelp() {

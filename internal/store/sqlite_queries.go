@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+const sqliteVariableBatchSize = 900
+
 type sqliteEntryRow struct {
 	ID        int
 	Depth     int
@@ -66,34 +68,47 @@ func loadTags(db *sql.DB, entryIDs []int) (map[int][]string, error) {
 		return tagsByEntryID, nil
 	}
 
-	placeholders := make([]string, 0, len(entryIDs))
-	args := make([]any, 0, len(entryIDs))
 	for _, entryID := range entryIDs {
-		placeholders = append(placeholders, "?")
-		args = append(args, entryID)
 		tagsByEntryID[entryID] = []string{}
 	}
 
-	query := fmt.Sprintf(
-		`SELECT entry_id, tag FROM entry_tags WHERE entry_id IN (%s) ORDER BY entry_id, tag`,
-		strings.Join(placeholders, ", "),
-	)
-	rows, err := db.Query(query, args...)
-	if err != nil {
-		return nil, fmt.Errorf("query entry tags: %w", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var entryID int
-		var tag string
-		if err := rows.Scan(&entryID, &tag); err != nil {
-			return nil, fmt.Errorf("scan entry tag: %w", err)
+	for start := 0; start < len(entryIDs); start += sqliteVariableBatchSize {
+		end := start + sqliteVariableBatchSize
+		if end > len(entryIDs) {
+			end = len(entryIDs)
 		}
-		tagsByEntryID[entryID] = append(tagsByEntryID[entryID], tag)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("iterate entry tags: %w", err)
+		batch := entryIDs[start:end]
+		placeholders := make([]string, 0, len(batch))
+		args := make([]any, 0, len(batch))
+		for _, entryID := range batch {
+			placeholders = append(placeholders, "?")
+			args = append(args, entryID)
+		}
+
+		query := fmt.Sprintf(
+			`SELECT entry_id, tag FROM entry_tags WHERE entry_id IN (%s) ORDER BY entry_id, tag`,
+			strings.Join(placeholders, ", "),
+		)
+		rows, err := db.Query(query, args...)
+		if err != nil {
+			return nil, fmt.Errorf("query entry tags: %w", err)
+		}
+		for rows.Next() {
+			var entryID int
+			var tag string
+			if err := rows.Scan(&entryID, &tag); err != nil {
+				rows.Close()
+				return nil, fmt.Errorf("scan entry tag: %w", err)
+			}
+			tagsByEntryID[entryID] = append(tagsByEntryID[entryID], tag)
+		}
+		if err := rows.Err(); err != nil {
+			rows.Close()
+			return nil, fmt.Errorf("iterate entry tags: %w", err)
+		}
+		if err := rows.Close(); err != nil {
+			return nil, fmt.Errorf("close entry tag rows: %w", err)
+		}
 	}
 
 	return tagsByEntryID, nil
@@ -206,6 +221,21 @@ func sqliteQueryEntries(db *sql.DB, query string, args ...any) ([]Entry, error) 
 	return entries, nil
 }
 
+func hydrateEntriesWithTags(db *sql.DB, entries []Entry) ([]Entry, error) {
+	entryIDs := make([]int, 0, len(entries))
+	for _, entry := range entries {
+		entryIDs = append(entryIDs, entry.ID)
+	}
+	tagsByEntryID, err := loadTags(db, entryIDs)
+	if err != nil {
+		return nil, err
+	}
+	for i := range entries {
+		entries[i].Tags = tagsByEntryID[entries[i].ID]
+	}
+	return entries, nil
+}
+
 func sqliteListEntries(db *sql.DB, q Query) ([]Entry, error) {
 	clauses, args := sqliteEntryFilter(q)
 
@@ -231,37 +261,51 @@ func sqliteListEntriesByIDs(db *sql.DB, ids []int) ([]Entry, error) {
 		return nil, nil
 	}
 
-	placeholders := make([]string, 0, len(ids))
-	args := make([]any, 0, len(ids))
-	for _, id := range ids {
-		placeholders = append(placeholders, "?")
-		args = append(args, id)
-	}
-
-	query := fmt.Sprintf(`
-		SELECT id, depth, title, body, source_ref, origin, created_at, updated_at
-		FROM entries
-		WHERE id IN (%s)
-	`, strings.Join(placeholders, ", "))
-
-	rows, err := db.Query(query, args...)
-	if err != nil {
-		return nil, fmt.Errorf("query sqlite entries by ids: %w", err)
-	}
-	defer rows.Close()
-
 	entriesByID := make(map[int]Entry, len(ids))
 	foundIDs := make([]int, 0, len(ids))
-	for rows.Next() {
-		entry, err := scanEntry(rows)
-		if err != nil {
-			return nil, fmt.Errorf("scan sqlite entry by ids: %w", err)
+	seenIDs := make(map[int]struct{}, len(ids))
+	for start := 0; start < len(ids); start += sqliteVariableBatchSize {
+		end := start + sqliteVariableBatchSize
+		if end > len(ids) {
+			end = len(ids)
 		}
-		entriesByID[entry.ID] = entry
-		foundIDs = append(foundIDs, entry.ID)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("iterate sqlite entries by ids: %w", err)
+		batch := ids[start:end]
+		placeholders := make([]string, 0, len(batch))
+		args := make([]any, 0, len(batch))
+		for _, id := range batch {
+			placeholders = append(placeholders, "?")
+			args = append(args, id)
+		}
+
+		query := fmt.Sprintf(`
+			SELECT id, depth, title, body, source_ref, origin, created_at, updated_at
+			FROM entries
+			WHERE id IN (%s)
+		`, strings.Join(placeholders, ", "))
+
+		rows, err := db.Query(query, args...)
+		if err != nil {
+			return nil, fmt.Errorf("query sqlite entries by ids: %w", err)
+		}
+		for rows.Next() {
+			entry, err := scanEntry(rows)
+			if err != nil {
+				rows.Close()
+				return nil, fmt.Errorf("scan sqlite entry by ids: %w", err)
+			}
+			entriesByID[entry.ID] = entry
+			if _, ok := seenIDs[entry.ID]; !ok {
+				seenIDs[entry.ID] = struct{}{}
+				foundIDs = append(foundIDs, entry.ID)
+			}
+		}
+		if err := rows.Err(); err != nil {
+			rows.Close()
+			return nil, fmt.Errorf("iterate sqlite entries by ids: %w", err)
+		}
+		if err := rows.Close(); err != nil {
+			return nil, fmt.Errorf("close sqlite entry rows: %w", err)
+		}
 	}
 
 	tagsByEntryID, err := loadTags(db, foundIDs)

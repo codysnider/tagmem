@@ -36,13 +36,39 @@ type ortRuntimeSpec struct {
 }
 
 type miniLMEmbedder struct {
-	modelDir  string
-	tokenizer *bertTokenizer
-	sessions  chan *ort.DynamicAdvancedSession
+	modelDir       string
+	tokenizer      *bertTokenizer
+	sessions       chan *ort.DynamicAdvancedSession
+	embeddingCache *embeddingCache
 }
 
 var ortInitOnce sync.Once
 var ortInitErr error
+
+func init() {
+	if miniLMEmbedBatchInternalFunc == nil {
+		miniLMEmbedBatchInternalFunc = func(e *miniLMEmbedder, texts []string, profiler embeddedProfiler) ([][]float32, error) {
+			return e.embedBatchInternal(texts, profiler)
+		}
+	}
+	if setMiniLMEmbedderCacheForTest == nil {
+		setMiniLMEmbedderCacheForTest = func(embedder *miniLMEmbedder, cache *embeddingCache) bool {
+			if embedder == nil {
+				return false
+			}
+			embedder.embeddingCache = cache
+			return true
+		}
+	}
+	if getMiniLMEmbedderCacheForTest == nil {
+		getMiniLMEmbedderCacheForTest = func(embedder *miniLMEmbedder) (*embeddingCache, bool) {
+			if embedder == nil || embedder.embeddingCache == nil {
+				return nil, false
+			}
+			return embedder.embeddingCache, true
+		}
+	}
+}
 
 func localBERTSupported() bool {
 	return runtime.GOARCH == "amd64" || runtime.GOARCH == "arm64"
@@ -132,25 +158,48 @@ func loadLocalBERTEmbedderWithRuntime(modelDir string, spec localModelSpec, useG
 		}
 		state.runtimeLibrary = runtimePath
 	}
-	return &miniLMEmbedder{modelDir: modelDir, tokenizer: vocab, sessions: sessions}, nil
+	return &miniLMEmbedder{
+		modelDir:       modelDir,
+		tokenizer:      vocab,
+		sessions:       sessions,
+		embeddingCache: newEmbeddingCache(1024),
+	}, nil
 }
 
 func (e *miniLMEmbedder) EmbedBatch(_ context.Context, texts []string) ([][]float32, error) {
 	if len(texts) == 0 {
 		return nil, nil
 	}
+	profiler := newEmbeddedProfiler(nil)
+	defer profiler.begin("embed_total")()
+	out := make([][]float32, len(texts))
+	missIndexesByText := make(map[string][]int)
+	misses := make([]string, 0, len(texts))
+	for i, text := range texts {
+		if vector, ok := e.embeddingCache.get(text); ok {
+			out[i] = vector
+			continue
+		}
+		if _, seen := missIndexesByText[text]; !seen {
+			misses = append(misses, text)
+		}
+		missIndexesByText[text] = append(missIndexesByText[text], i)
+	}
+	if len(misses) == 0 {
+		return out, nil
+	}
 	type indexedText struct {
 		index int
 		text  string
 	}
-	indexed := make([]indexedText, 0, len(texts))
-	for i, text := range texts {
+	indexed := make([]indexedText, 0, len(misses))
+	for i, text := range misses {
 		indexed = append(indexed, indexedText{index: i, text: text})
 	}
 	sort.Slice(indexed, func(i, j int) bool {
 		return len(indexed[i].text) < len(indexed[j].text)
 	})
-	out := make([][]float32, len(texts))
+	computed := make([][]float32, len(misses))
 	for start := 0; start < len(indexed); start += miniLMMicroBatchSize {
 		end := start + miniLMMicroBatchSize
 		if end > len(indexed) {
@@ -160,85 +209,151 @@ func (e *miniLMEmbedder) EmbedBatch(_ context.Context, texts []string) ([][]floa
 		for _, item := range indexed[start:end] {
 			batchTexts = append(batchTexts, item.text)
 		}
-		vectors, err := e.embedBatchInternal(batchTexts)
+		vectors, err := miniLMEmbedBatchInternalFunc(e, batchTexts, profiler)
 		if err != nil {
 			return nil, err
 		}
 		for i, item := range indexed[start:end] {
-			out[item.index] = vectors[i]
+			computed[item.index] = vectors[i]
+		}
+	}
+	for missIndex, text := range misses {
+		vector := computed[missIndex]
+		e.embeddingCache.put(text, vector)
+		for _, outputIndex := range missIndexesByText[text] {
+			out[outputIndex] = cloneEmbedding(vector)
 		}
 	}
 	return out, nil
 }
 
-func (e *miniLMEmbedder) embedBatchInternal(texts []string) ([][]float32, error) {
-	encodedIDs := make([][]int64, 0, len(texts))
-	encodedMasks := make([][]int64, 0, len(texts))
-	encodedTypes := make([][]int64, 0, len(texts))
-	maxLen := 0
-	for _, text := range texts {
-		ids, mask, typeIDs := e.tokenizer.Encode(text)
-		encodedIDs = append(encodedIDs, ids)
-		encodedMasks = append(encodedMasks, mask)
-		encodedTypes = append(encodedTypes, typeIDs)
-		if len(ids) > maxLen {
-			maxLen = len(ids)
-		}
-	}
-	batch := len(texts)
-	idsFlat := make([]int64, batch*maxLen)
-	maskFlat := make([]int64, batch*maxLen)
-	typeFlat := make([]int64, batch*maxLen)
-	for i := 0; i < batch; i++ {
-		for j := 0; j < maxLen; j++ {
-			base := i*maxLen + j
-			idsFlat[base] = int64(e.tokenizer.padID)
-			if j < len(encodedIDs[i]) {
-				idsFlat[base] = encodedIDs[i][j]
-				maskFlat[base] = encodedMasks[i][j]
-				typeFlat[base] = encodedTypes[i][j]
+type miniLMTokenizedBatch struct {
+	encodedIDs   [][]int64
+	encodedMasks [][]int64
+	encodedTypes [][]int64
+	maxLen       int
+	batchSize    int
+	defaultPadID int64
+}
+
+type miniLMTensorBatch struct {
+	shape         ort.Shape
+	inputIDs      *ort.Tensor[int64]
+	attentionMask *ort.Tensor[int64]
+	tokenTypeIDs  *ort.Tensor[int64]
+}
+
+type miniLMRunOutput struct {
+	data  []float32
+	shape ort.Shape
+}
+
+func (e *miniLMEmbedder) embedBatchInternal(texts []string, profiler embeddedProfiler) ([][]float32, error) {
+	return runEmbeddedBatchProfiled(texts, profiler, embeddedBatchProfileOps[miniLMTokenizedBatch, miniLMTensorBatch, *ort.DynamicAdvancedSession, miniLMRunOutput]{
+		Tokenize: func(texts []string) (miniLMTokenizedBatch, error) {
+			encodedIDs := make([][]int64, 0, len(texts))
+			encodedMasks := make([][]int64, 0, len(texts))
+			encodedTypes := make([][]int64, 0, len(texts))
+			maxLen := 0
+			for _, text := range texts {
+				ids, mask, typeIDs := e.tokenizer.Encode(text)
+				encodedIDs = append(encodedIDs, ids)
+				encodedMasks = append(encodedMasks, mask)
+				encodedTypes = append(encodedTypes, typeIDs)
+				if len(ids) > maxLen {
+					maxLen = len(ids)
+				}
 			}
-		}
-	}
-	shape := ort.NewShape(int64(batch), int64(maxLen))
-	inputIDs, err := ort.NewTensor(shape, idsFlat)
-	if err != nil {
-		return nil, err
-	}
-	defer inputIDs.Destroy()
-	attentionMask, err := ort.NewTensor(shape, maskFlat)
-	if err != nil {
-		return nil, err
-	}
-	defer attentionMask.Destroy()
-	tokenTypeIDs, err := ort.NewTensor(shape, typeFlat)
-	if err != nil {
-		return nil, err
-	}
-	defer tokenTypeIDs.Destroy()
-	outputs := []ort.Value{nil}
-	session := <-e.sessions
-	err = session.Run([]ort.Value{inputIDs, attentionMask, tokenTypeIDs}, outputs)
-	e.sessions <- session
-	if err != nil {
-		return nil, err
-	}
-	outputTensor, ok := outputs[0].(*ort.Tensor[float32])
-	if !ok || outputTensor == nil {
-		return nil, fmt.Errorf("unexpected model output type")
-	}
-	defer outputTensor.Destroy()
-	return meanPoolNormalizeBatch(outputTensor.GetData(), outputTensor.GetShape(), encodedMasks)
+			return miniLMTokenizedBatch{
+				encodedIDs:   encodedIDs,
+				encodedMasks: encodedMasks,
+				encodedTypes: encodedTypes,
+				maxLen:       maxLen,
+				batchSize:    len(texts),
+				defaultPadID: int64(e.tokenizer.padID),
+			}, nil
+		},
+		TensorPrepare: func(tokenized miniLMTokenizedBatch) (miniLMTensorBatch, error) {
+			idsFlat := make([]int64, tokenized.batchSize*tokenized.maxLen)
+			maskFlat := make([]int64, tokenized.batchSize*tokenized.maxLen)
+			typeFlat := make([]int64, tokenized.batchSize*tokenized.maxLen)
+			for i := 0; i < tokenized.batchSize; i++ {
+				for j := 0; j < tokenized.maxLen; j++ {
+					base := i*tokenized.maxLen + j
+					idsFlat[base] = tokenized.defaultPadID
+					if j < len(tokenized.encodedIDs[i]) {
+						idsFlat[base] = tokenized.encodedIDs[i][j]
+						maskFlat[base] = tokenized.encodedMasks[i][j]
+						typeFlat[base] = tokenized.encodedTypes[i][j]
+					}
+				}
+			}
+			shape := ort.NewShape(int64(tokenized.batchSize), int64(tokenized.maxLen))
+			inputIDs, err := ort.NewTensor(shape, idsFlat)
+			if err != nil {
+				return miniLMTensorBatch{}, err
+			}
+			attentionMask, err := ort.NewTensor(shape, maskFlat)
+			if err != nil {
+				inputIDs.Destroy()
+				return miniLMTensorBatch{}, err
+			}
+			tokenTypeIDs, err := ort.NewTensor(shape, typeFlat)
+			if err != nil {
+				inputIDs.Destroy()
+				attentionMask.Destroy()
+				return miniLMTensorBatch{}, err
+			}
+			return miniLMTensorBatch{
+				shape:         shape,
+				inputIDs:      inputIDs,
+				attentionMask: attentionMask,
+				tokenTypeIDs:  tokenTypeIDs,
+			}, nil
+		},
+		SessionCheckout: func() (*ort.DynamicAdvancedSession, error) {
+			return <-e.sessions, nil
+		},
+		ONNXRun: func(session *ort.DynamicAdvancedSession, tensors miniLMTensorBatch) (miniLMRunOutput, error) {
+			defer func() {
+				tensors.inputIDs.Destroy()
+				tensors.attentionMask.Destroy()
+				tensors.tokenTypeIDs.Destroy()
+				e.sessions <- session
+			}()
+			outputs := []ort.Value{nil}
+			if err := session.Run([]ort.Value{tensors.inputIDs, tensors.attentionMask, tensors.tokenTypeIDs}, outputs); err != nil {
+				return miniLMRunOutput{}, err
+			}
+			outputTensor, ok := outputs[0].(*ort.Tensor[float32])
+			if !ok || outputTensor == nil {
+				return miniLMRunOutput{}, fmt.Errorf("unexpected model output type")
+			}
+			defer outputTensor.Destroy()
+			data := append([]float32(nil), outputTensor.GetData()...)
+			shape := append(ort.Shape(nil), outputTensor.GetShape()...)
+			return miniLMRunOutput{data: data, shape: shape}, nil
+		},
+		PoolNormalize: func(output miniLMRunOutput, tokenized miniLMTokenizedBatch) ([][]float32, error) {
+			return meanPoolNormalizeBatch(output.data, output.shape, tokenized.encodedMasks)
+		},
+	})
 }
 
 func (e *miniLMEmbedder) Embed(text string) ([]float32, error) {
-	vectors, err := e.embedBatchInternal([]string{text})
+	if vector, ok := e.embeddingCache.get(text); ok {
+		return vector, nil
+	}
+	profiler := newEmbeddedProfiler(nil)
+	defer profiler.begin("embed_total")()
+	vectors, err := miniLMEmbedBatchInternalFunc(e, []string{text}, profiler)
 	if err != nil {
 		return nil, err
 	}
 	if len(vectors) != 1 {
 		return nil, fmt.Errorf("unexpected batch size %d", len(vectors))
 	}
+	e.embeddingCache.put(text, vectors[0])
 	return vectors[0], nil
 }
 

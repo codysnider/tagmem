@@ -172,7 +172,7 @@ func RunLoCoMoInterface(ctx context.Context, dataFile string, limit int, topK in
 			return LoCoMoResult{}, err
 		}
 		for _, qa := range qaPairs {
-			rankedIDs, err := corpus.Search(qa.Question, len(interfaceDocs))
+				rankedIDs, err := corpus.Search(qa.Question, len(interfaceDocs))
 			if err != nil {
 				_ = corpus.Close()
 				return LoCoMoResult{}, err

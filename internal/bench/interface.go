@@ -1,6 +1,7 @@
 package bench
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -53,12 +54,24 @@ type interfaceCorpusMeta struct {
 }
 
 type InterfaceCorpusBuilder struct {
-	provider        vector.Provider
-	mu              sync.RWMutex
-	cache           map[uint64][]store.AddEntry
-	corpusCacheRoot string
-	hits            atomic.Int64
-	misses          atomic.Int64
+	provider         vector.Provider
+	mu               sync.RWMutex
+	cache            map[uint64][]store.AddEntry
+	daemonCorpusKeys map[string]struct{}
+	daemonEnsures    map[string]chan struct{}
+	corpusCacheRoot  string
+	hits             atomic.Int64
+	misses           atomic.Int64
+}
+
+type InterfaceCorpusDaemon interface {
+	CorpusCacheKey() string
+	EnsureCorpus(ctx context.Context, key string, documents []InterfaceDocument) error
+	SearchCorpus(ctx context.Context, key, query string, limit int) ([]string, error)
+}
+
+var interfaceCorpusSearchDetailed = func(repo *store.Repository, q store.Query) ([]store.SearchResult, error) {
+	return repo.SearchDetailed(q)
 }
 
 func NewInterfaceCorpusBuilder(provider vector.Provider) *InterfaceCorpusBuilder {
@@ -66,7 +79,7 @@ func NewInterfaceCorpusBuilder(provider vector.Provider) *InterfaceCorpusBuilder
 }
 
 func NewInterfaceCorpusBuilderWithOptions(provider vector.Provider, options InterfaceCorpusBuilderOptions) *InterfaceCorpusBuilder {
-	return &InterfaceCorpusBuilder{provider: provider, cache: map[uint64][]store.AddEntry{}, corpusCacheRoot: strings.TrimSpace(options.CorpusCacheRoot)}
+	return &InterfaceCorpusBuilder{provider: provider, cache: map[uint64][]store.AddEntry{}, daemonCorpusKeys: map[string]struct{}{}, daemonEnsures: map[string]chan struct{}{}, corpusCacheRoot: strings.TrimSpace(options.CorpusCacheRoot)}
 }
 
 func newInterfaceCorpus(provider vector.Provider, documents []InterfaceDocument) (*InterfaceCorpus, error) {
@@ -162,11 +175,7 @@ func (c *InterfaceCorpus) Search(query string, limit int) ([]string, error) {
 	if c == nil || c.repo == nil {
 		return nil, nil
 	}
-	queryLimit := c.entryCount
-	if queryLimit < limit {
-		queryLimit = limit
-	}
-	results, err := c.repo.SearchDetailed(store.Query{Text: query, Limit: queryLimit})
+	results, err := interfaceCorpusSearchDetailed(c.repo, store.Query{Text: query, Limit: c.searchFetchLimit(limit)})
 	if err != nil {
 		return nil, fmt.Errorf("query benchmark repo: %w", err)
 	}
@@ -186,6 +195,9 @@ func (c *InterfaceCorpus) Search(query string, limit int) ([]string, error) {
 		}
 		seen[origin] = struct{}{}
 		ranked = append(ranked, origin)
+		if limit > 0 && len(ranked) >= limit {
+			break
+		}
 	}
 	return ranked, nil
 }
@@ -197,6 +209,32 @@ func rankInterfaceDocuments(provider vector.Provider, documents []InterfaceDocum
 	}
 	defer corpus.Close()
 	return corpus.Search(query, limit)
+}
+
+func (b *InterfaceCorpusBuilder) SearchWithDaemon(ctx context.Context, daemon InterfaceCorpusDaemon, documents []InterfaceDocument, query string, limit int) ([]string, error) {
+	if daemon == nil {
+		return nil, fmt.Errorf("daemon is required")
+	}
+	daemonKey := strings.TrimSpace(daemon.CorpusCacheKey())
+	if daemonKey == "" {
+		return nil, fmt.Errorf("daemon corpus cache key is required")
+	}
+	key := interfaceCorpusKey(documents)
+	cacheKey := interfaceDaemonCorpusCacheKey(daemonKey, key)
+	if err := b.ensureDaemonCorpus(ctx, daemon, cacheKey, key, documents); err != nil {
+		return nil, err
+	}
+	return daemon.SearchCorpus(ctx, key, query, limit)
+}
+
+func (c *InterfaceCorpus) searchFetchLimit(limit int) int {
+	if c == nil {
+		return limit
+	}
+	if c.entryCount > limit {
+		return c.entryCount
+	}
+	return limit
 }
 
 func (b *InterfaceCorpusBuilder) openCachedCorpus(documents []InterfaceDocument) (*InterfaceCorpus, bool, error) {
@@ -246,6 +284,56 @@ func (b *InterfaceCorpusBuilder) entriesForDocument(document InterfaceDocument) 
 
 func (b *InterfaceCorpusBuilder) corpusRoot(documents []InterfaceDocument) string {
 	return filepath.Join(b.corpusCacheRoot, b.provider.IndexKey, interfaceCorpusKey(documents))
+}
+
+func (b *InterfaceCorpusBuilder) hasDaemonCorpusKey(key string) bool {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+	_, ok := b.daemonCorpusKeys[key]
+	return ok
+}
+
+func (b *InterfaceCorpusBuilder) storeDaemonCorpusKey(key string) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	b.daemonCorpusKeys[key] = struct{}{}
+}
+
+func (b *InterfaceCorpusBuilder) ensureDaemonCorpus(ctx context.Context, daemon InterfaceCorpusDaemon, cacheKey, key string, documents []InterfaceDocument) error {
+	for {
+		b.mu.Lock()
+		if _, ok := b.daemonCorpusKeys[cacheKey]; ok {
+			b.mu.Unlock()
+			return nil
+		}
+		if wait, ok := b.daemonEnsures[cacheKey]; ok {
+			b.mu.Unlock()
+			select {
+			case <-wait:
+				continue
+			case <-ctx.Done():
+				return ctx.Err()
+			}
+		}
+		wait := make(chan struct{})
+		b.daemonEnsures[cacheKey] = wait
+		b.mu.Unlock()
+
+		err := daemon.EnsureCorpus(ctx, key, documents)
+
+		b.mu.Lock()
+		delete(b.daemonEnsures, cacheKey)
+		if err == nil {
+			b.daemonCorpusKeys[cacheKey] = struct{}{}
+		}
+		close(wait)
+		b.mu.Unlock()
+		return err
+	}
+}
+
+func interfaceDaemonCorpusCacheKey(daemonKey, corpusKey string) string {
+	return daemonKey + "\x00" + corpusKey
 }
 
 func benchmarkTempRoot() string {

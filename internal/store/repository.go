@@ -102,6 +102,7 @@ type Repository struct {
 	indexPath                string
 	sourceDir                string
 	provider                 vector.Provider
+	phaseHook                func(string, time.Duration)
 	now                      func() time.Time
 	indexEntriesImpl         func([]Entry) error
 	deleteIndexedEntriesImpl func(...int) error
@@ -136,6 +137,21 @@ func NewRepository(path, indexPath string, provider vector.Provider) *Repository
 	repo.deleteIndexedEntriesImpl = repo.deleteIndexedEntriesLocked
 	repo.loadSnapshotFromStoreFn = repo.loadSnapshotFromStoreLocked
 	return repo
+}
+
+func (r *Repository) SetPhaseHook(hook func(string, time.Duration)) {
+	r.phaseHook = hook
+}
+
+func (r *Repository) startPhase(name string) func() {
+	if r.phaseHook == nil {
+		return func() {}
+	}
+
+	started := time.Now()
+	return func() {
+		r.phaseHook(name, time.Since(started))
+	}
 }
 
 func (r *Repository) Init() error {
@@ -196,10 +212,6 @@ func (r *Repository) AddMany(requests []AddEntry) ([]Entry, error) {
 		if err != nil {
 			return err
 		}
-		writeMirror, err := r.shouldWriteJSONMirrorAfterMutationLocked()
-		if err != nil {
-			return err
-		}
 		now := r.now().UTC()
 		for _, req := range requests {
 			if req.Depth < 0 {
@@ -245,6 +257,7 @@ func (r *Repository) AddMany(requests []AddEntry) ([]Entry, error) {
 			entry.Source = fullSource
 			entries = append(entries, entry)
 		}
+		done := r.startPhase("sqlite_mutation")
 		if err := r.applyMetadataMutationLocked(snapshot.NextID, func(tx *sql.Tx) error {
 			for _, entry := range entries {
 				if err := sqliteUpsertEntry(tx, entry); err != nil {
@@ -256,17 +269,19 @@ func (r *Repository) AddMany(requests []AddEntry) ([]Entry, error) {
 			}
 			return nil
 		}); err != nil {
+			done()
 			return err
 		}
+		done()
 		r.cacheSnapshotLocked(snapshot)
+		done = r.startPhase("vector_mutation")
 		if err := r.indexEntriesImpl(entries); err != nil {
+			done()
 			return err
 		}
+		done()
 		if err := r.setIndexStateLocked("ready"); err != nil {
 			return err
-		}
-		if writeMirror {
-			return r.saveStoreLocked(snapshot)
 		}
 		return r.markJSONMirrorMissingLocked(snapshot.NextID)
 	})
@@ -304,10 +319,6 @@ func (r *Repository) Delete(id int) (bool, error) {
 		if err != nil {
 			return err
 		}
-		writeMirror, err := r.shouldWriteJSONMirrorAfterMutationLocked()
-		if err != nil {
-			return err
-		}
 		entries := make([]Entry, 0, len(snapshot.Entries))
 		for _, entry := range snapshot.Entries {
 			if entry.ID == id {
@@ -331,9 +342,6 @@ func (r *Repository) Delete(id int) (bool, error) {
 		}
 		if err := r.setIndexStateLocked("ready"); err != nil {
 			return err
-		}
-		if writeMirror {
-			return r.saveStoreLocked(snapshot)
 		}
 		return r.markJSONMirrorMissingLocked(snapshot.NextID)
 	})
@@ -359,10 +367,6 @@ func (r *Repository) Update(id int, req AddEntry) (Entry, bool, error) {
 			return fmt.Errorf("body is required")
 		}
 		snapshot, err := r.loadLocked()
-		if err != nil {
-			return err
-		}
-		writeMirror, err := r.shouldWriteJSONMirrorAfterMutationLocked()
 		if err != nil {
 			return err
 		}
@@ -409,9 +413,6 @@ func (r *Repository) Update(id int, req AddEntry) (Entry, bool, error) {
 		}
 		if err := r.setIndexStateLocked("ready"); err != nil {
 			return err
-		}
-		if writeMirror {
-			return r.saveStoreLocked(snapshot)
 		}
 		return r.markJSONMirrorMissingLocked(snapshot.NextID)
 	})
@@ -465,19 +466,27 @@ func (r *Repository) SearchDetailed(q Query) ([]SearchResult, error) {
 	text := strings.TrimSpace(q.Text)
 	queryKeywords := retrieval.ExtractKeywords(text)
 	if text == "" || len(queryKeywords) == 0 {
+		var entries []Entry
 		if err := r.withSharedLock(func() error {
 			if err := r.ensureSQLiteReadModelLocked(); err != nil {
 				return err
 			}
-			return r.ensureIndexStateReadyLocked()
+			if err := r.ensureIndexStateReadyLocked(); err != nil {
+				return err
+			}
+			var err error
+			entries, err = sqliteListEntries(r.metaDB, q)
+			return err
 		}); err != nil {
 			return nil, err
 		}
-		entries, err := r.List(q)
+		done := r.startPhase("source_hydration")
+		results, err := r.hydrateSearchResults(wrapSearchEntries(entries))
+		done()
 		if err != nil {
 			return nil, err
 		}
-		return wrapSearchEntries(entries), nil
+		return results, nil
 	}
 	var searchResults []SearchResult
 	err := r.withSharedLock(func() error {
@@ -513,11 +522,17 @@ func (r *Repository) SearchDetailed(q Query) ([]SearchResult, error) {
 			where = map[string]string{"depth": strconv.Itoa(*q.Depth)}
 		}
 
+		done := r.startPhase("query_embedding")
 		queryEmbedding, err := r.queryEmbedding(text)
+		done()
 		if err != nil {
 			return fmt.Errorf("embed query: %w", err)
 		}
+		queryFeatures := retrieval.ExtractClaimFeatures(text)
+		scored := make([]searchScoredResult, 0, candidateLimit)
+		done = r.startPhase("vector_query")
 		results, err := r.collection.QueryEmbedding(context.Background(), queryEmbedding, candidateLimit, where, nil)
+		done()
 		if err != nil {
 			return fmt.Errorf("query vector index: %w", err)
 		}
@@ -531,7 +546,9 @@ func (r *Repository) SearchDetailed(q Query) ([]SearchResult, error) {
 			candidateIDs = append(candidateIDs, id)
 		}
 
+		done = r.startPhase("sqlite_candidate_fetch")
 		candidateEntries, err := sqliteListEntriesByIDs(r.metaDB, candidateIDs)
+		done()
 		if err != nil {
 			return err
 		}
@@ -540,8 +557,7 @@ func (r *Repository) SearchDetailed(q Query) ([]SearchResult, error) {
 			entriesByID[entry.ID] = entry
 		}
 
-		queryFeatures := retrieval.ExtractClaimFeatures(text)
-		scored := make([]searchScoredResult, 0, len(results))
+		scored = scored[:0]
 		for _, result := range results {
 			id, err := strconv.Atoi(result.ID)
 			if err != nil {
@@ -551,28 +567,13 @@ func (r *Repository) SearchDetailed(q Query) ([]SearchResult, error) {
 			if !ok {
 				continue
 			}
+			if q.Depth != nil && entry.Depth != *q.Depth {
+				continue
+			}
 			if q.Tag != "" && !hasTag(entry.Tags, q.Tag) {
 				continue
 			}
-
-			overlap := retrieval.KeywordOverlap(queryKeywords, entrySearchText(entry))
-			fusedDistance := retrieval.FuseSimilarity(result.Similarity, overlap)
-			if q.Depth == nil {
-				fusedDistance *= depthPenalty(entry.Depth)
-			}
-
-			rawText := entry.Title + "\n\n" + entry.Body
-			features := retrieval.ExtractClaimFeatures(rawText)
-			fusedDistance *= claimDistancePenalty(queryFeatures, features, strings.ToLower(rawText))
-			scored = append(scored, searchScoredResult{
-				entry:        entry,
-				rawText:      strings.ToLower(rawText),
-				distance:     fusedDistance,
-				overlap:      overlap,
-				similarity:   result.Similarity,
-				updatedAtUTC: entry.UpdatedAt.UTC(),
-				features:     features,
-			})
+			scored = append(scored, scoreSearchCandidate(q, entry, result.Similarity, queryKeywords, queryFeatures))
 		}
 
 		if len(scored) == 0 {
@@ -580,7 +581,9 @@ func (r *Repository) SearchDetailed(q Query) ([]SearchResult, error) {
 			if err != nil {
 				return err
 			}
+			done = r.startPhase("source_hydration")
 			fallbackResults, err := r.hydrateSearchResults(wrapSearchEntries(fallbackEntries))
+			done()
 			if err != nil {
 				return err
 			}
@@ -588,6 +591,7 @@ func (r *Repository) SearchDetailed(q Query) ([]SearchResult, error) {
 			return nil
 		}
 
+		done = r.startPhase("rerank")
 		type supportInfo struct {
 			supportCount int
 			sourceKinds  int
@@ -645,6 +649,7 @@ func (r *Repository) SearchDetailed(q Query) ([]SearchResult, error) {
 		if len(filtered) == 0 {
 			filtered = scored[:1]
 		}
+		done()
 
 		searchResults = make([]SearchResult, 0, len(filtered))
 		for _, result := range filtered {
@@ -655,7 +660,9 @@ func (r *Repository) SearchDetailed(q Query) ([]SearchResult, error) {
 				ConflictCount: result.conflicts,
 			})
 		}
+		done = r.startPhase("source_hydration")
 		searchResults, err = r.hydrateSearchResults(searchResults)
+		done()
 		if err != nil {
 			return err
 		}
@@ -665,6 +672,27 @@ func (r *Repository) SearchDetailed(q Query) ([]SearchResult, error) {
 		return nil, err
 	}
 	return limitSearchResults(searchResults, q.Limit), nil
+}
+
+func scoreSearchCandidate(q Query, entry Entry, similarity float32, queryKeywords []string, queryFeatures retrieval.ClaimFeatures) searchScoredResult {
+	overlap := retrieval.KeywordOverlap(queryKeywords, entrySearchText(entry))
+	fusedDistance := retrieval.FuseSimilarity(similarity, overlap)
+	if q.Depth == nil {
+		fusedDistance *= depthPenalty(entry.Depth)
+	}
+
+	rawText := entry.Title + "\n\n" + entry.Body
+	features := retrieval.ExtractClaimFeatures(rawText)
+	fusedDistance *= claimDistancePenalty(queryFeatures, features, strings.ToLower(rawText))
+	return searchScoredResult{
+		entry:        entry,
+		rawText:      strings.ToLower(rawText),
+		distance:     fusedDistance,
+		overlap:      overlap,
+		similarity:   similarity,
+		updatedAtUTC: entry.UpdatedAt.UTC(),
+		features:     features,
+	}
 }
 
 func sourceKind(source string) string {
@@ -1436,15 +1464,6 @@ func (r *Repository) setMirrorStateLocked(metadataRevision, jsonMirrorRevision i
 		return fmt.Errorf("commit sqlite mirror state update: %w", err)
 	}
 	return nil
-}
-
-func (r *Repository) shouldWriteJSONMirrorAfterMutationLocked() (bool, error) {
-	if _, err := os.Stat(r.path); err == nil {
-		return true, nil
-	} else if !os.IsNotExist(err) {
-		return false, fmt.Errorf("stat store: %w", err)
-	}
-	return false, nil
 }
 
 func (r *Repository) markJSONMirrorMissingLocked(nextID int) error {

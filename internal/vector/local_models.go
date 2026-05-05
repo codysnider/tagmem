@@ -41,6 +41,9 @@ var localModelSpecs = map[string]localModelSpec{
 }
 
 var loadLocalBERTEmbedderFunc = loadLocalBERTEmbedder
+var miniLMEmbedBatchInternalFunc func(*miniLMEmbedder, []string, embeddedProfiler) ([][]float32, error)
+var setMiniLMEmbedderCacheForTest func(*miniLMEmbedder, *embeddingCache) bool
+var getMiniLMEmbedderCacheForTest func(*miniLMEmbedder) (*embeddingCache, bool)
 
 func EmbeddedProvider(paths xdg.Paths, modelName, accel string) (Provider, error) {
 	key := sanitizeLocalModel(modelName)

@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"sync"
 	"syscall"
 	"time"
 )
@@ -14,6 +15,7 @@ import (
 type Server struct {
 	socketPath string
 	backend    *Backend
+	handlers   sync.WaitGroup
 }
 
 func NewServer(socketPath string, backend *Backend) *Server {
@@ -31,6 +33,8 @@ func (s *Server) Run(ctx context.Context) error {
 	}
 	defer listener.Close()
 	defer os.Remove(s.socketPath)
+	defer s.backend.Close()
+	defer s.handlers.Wait()
 
 	go func() {
 		<-ctx.Done()
@@ -50,7 +54,11 @@ func (s *Server) Run(ctx context.Context) error {
 			return fmt.Errorf("accept daemon connection: %w", err)
 		}
 
-		go s.handleConnection(ctx, conn)
+		s.handlers.Add(1)
+		go func() {
+			defer s.handlers.Done()
+			s.handleConnection(ctx, conn)
+		}()
 	}
 }
 

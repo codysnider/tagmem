@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"slices"
 	"sync"
 	"syscall"
 	"testing"
@@ -343,6 +344,368 @@ func TestDaemonMultiClientConcurrentWritesSharedStore(t *testing.T) {
 	}
 }
 
+func TestDaemonEnsureCorpusCachesOnce(t *testing.T) {
+	_, paths, backend := newTestBackend(t)
+	server := NewServer(paths.SocketPath, backend)
+
+	serverCtx, cancelServer := context.WithCancel(context.Background())
+	defer cancelServer()
+
+	serverErr := make(chan error, 1)
+	go func() {
+		serverErr <- server.Run(serverCtx)
+	}()
+
+	waitForSocket(t, paths.SocketPath)
+
+	firstCtx, cancelFirst := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancelFirst()
+	firstResponse, err := Call(firstCtx, paths.SocketPath, Request{
+		ID:      "corpus-ensure-1",
+		Command: "ensure_corpus",
+		Payload: map[string]any{
+			"key": "shared-corpus",
+			"documents": []map[string]any{{
+				"id":      "session-alpha",
+				"content": "> User: where did we leave the blue backpack\nAssistant: we left the blue backpack in the hall closet",
+				"mode":    "conversations",
+				"extract": "exchange",
+				"depth":   1,
+			}},
+		},
+	})
+	if err != nil {
+		t.Fatalf("first ensure_corpus error = %v", err)
+	}
+	if !firstResponse.Success {
+		t.Fatalf("first ensure_corpus success = false, error = %q", firstResponse.Error)
+	}
+	if got := firstResponse.Payload["cache_status"]; got != "miss" {
+		t.Fatalf("first ensure_corpus cache_status = %#v, want %q", got, "miss")
+	}
+
+	secondCtx, cancelSecond := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancelSecond()
+	secondResponse, err := Call(secondCtx, paths.SocketPath, Request{
+		ID:      "corpus-ensure-2",
+		Command: "ensure_corpus",
+		Payload: map[string]any{
+			"key": "shared-corpus",
+			"documents": []map[string]any{{
+				"id":      "session-beta",
+				"content": "> User: where is the spare charger\nAssistant: the spare charger is in the desk drawer",
+				"mode":    "conversations",
+				"extract": "exchange",
+				"depth":   1,
+			}},
+		},
+	})
+	if err != nil {
+		t.Fatalf("second ensure_corpus error = %v", err)
+	}
+	if !secondResponse.Success {
+		t.Fatalf("second ensure_corpus success = false, error = %q", secondResponse.Error)
+	}
+	if got := secondResponse.Payload["cache_status"]; got != "hit" {
+		t.Fatalf("second ensure_corpus cache_status = %#v, want %q", got, "hit")
+	}
+
+	searchCtx, cancelSearch := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancelSearch()
+	searchResponse, err := Call(searchCtx, paths.SocketPath, Request{
+		ID:      "corpus-search-after-hit",
+		Command: "search_corpus",
+		Payload: map[string]any{
+			"key":   "shared-corpus",
+			"query": "blue backpack hall closet",
+			"limit": 1,
+		},
+	})
+	if err != nil {
+		t.Fatalf("search_corpus after cache hit error = %v", err)
+	}
+	if !searchResponse.Success {
+		t.Fatalf("search_corpus after cache hit success = false, error = %q", searchResponse.Error)
+	}
+	results, ok := searchResponse.Payload["origin_ids"].([]any)
+	if !ok {
+		t.Fatalf("searchResponse.Payload[origin_ids] type = %T, want array", searchResponse.Payload["origin_ids"])
+	}
+	if len(results) != 1 || results[0] != "session-alpha" {
+		t.Fatalf("searchResponse.Payload[origin_ids] = %#v, want [session-alpha]", results)
+	}
+
+	cancelServer()
+	if err := <-serverErr; err != nil && !errors.Is(err, context.Canceled) {
+		t.Fatalf("server.Run() error = %v", err)
+	}
+}
+
+func TestDaemonSearchCorpusReturnsResults(t *testing.T) {
+	_, paths, backend := newTestBackend(t)
+	server := NewServer(paths.SocketPath, backend)
+
+	serverCtx, cancelServer := context.WithCancel(context.Background())
+	defer cancelServer()
+
+	serverErr := make(chan error, 1)
+	go func() {
+		serverErr <- server.Run(serverCtx)
+	}()
+
+	waitForSocket(t, paths.SocketPath)
+
+	ensureCtx, cancelEnsure := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancelEnsure()
+	ensureResponse, err := Call(ensureCtx, paths.SocketPath, Request{
+		ID:      "corpus-build-searchable",
+		Command: "ensure_corpus",
+		Payload: map[string]any{
+			"key": "searchable-corpus",
+			"documents": []map[string]any{
+				{
+					"id":      "session-alpha",
+					"content": "> User: remind me about the lighthouse dinner reservation\nAssistant: the lighthouse dinner reservation is booked for Friday night",
+					"mode":    "conversations",
+					"extract": "exchange",
+					"depth":   1,
+				},
+				{
+					"id":      "session-beta",
+					"content": "> User: remind me about the garden tools\nAssistant: the garden tools are stored behind the shed",
+					"mode":    "conversations",
+					"extract": "exchange",
+					"depth":   1,
+				},
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("ensure_corpus error = %v", err)
+	}
+	if !ensureResponse.Success {
+		t.Fatalf("ensure_corpus success = false, error = %q", ensureResponse.Error)
+	}
+
+	searchCtx, cancelSearch := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancelSearch()
+	searchResponse, err := Call(searchCtx, paths.SocketPath, Request{
+		ID:      "corpus-search-results",
+		Command: "search_corpus",
+		Payload: map[string]any{
+			"key":   "searchable-corpus",
+			"query": "Friday lighthouse dinner reservation",
+			"limit": 2,
+		},
+	})
+	if err != nil {
+		t.Fatalf("search_corpus error = %v", err)
+	}
+	if !searchResponse.Success {
+		t.Fatalf("search_corpus success = false, error = %q", searchResponse.Error)
+	}
+	results, ok := searchResponse.Payload["origin_ids"].([]any)
+	if !ok {
+		t.Fatalf("searchResponse.Payload[origin_ids] type = %T, want array", searchResponse.Payload["origin_ids"])
+	}
+	if len(results) == 0 {
+		t.Fatal("searchResponse.Payload[origin_ids] = empty, want ranked results")
+	}
+	if results[0] != "session-alpha" {
+		t.Fatalf("searchResponse.Payload[origin_ids][0] = %#v, want %q", results[0], "session-alpha")
+	}
+
+	cancelServer()
+	if err := <-serverErr; err != nil && !errors.Is(err, context.Canceled) {
+		t.Fatalf("server.Run() error = %v", err)
+	}
+}
+
+func TestDaemonEnsureCorpusCleanupOnShutdown(t *testing.T) {
+	before := corpusTempDirs(t)
+
+	_, paths, backend := newTestBackend(t)
+	server := NewServer(paths.SocketPath, backend)
+
+	serverCtx, cancelServer := context.WithCancel(context.Background())
+	serverErr := make(chan error, 1)
+	go func() {
+		serverErr <- server.Run(serverCtx)
+	}()
+
+	waitForSocket(t, paths.SocketPath)
+
+	ensureCtx, cancelEnsure := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancelEnsure()
+	ensureResponse, err := Call(ensureCtx, paths.SocketPath, Request{
+		ID:      "corpus-cleanup-build",
+		Command: "ensure_corpus",
+		Payload: map[string]any{
+			"key": "cleanup-corpus",
+			"documents": []map[string]any{{
+				"id":      "session-cleanup",
+				"content": "> User: remind me about the travel adapter\nAssistant: the travel adapter is packed in the top drawer",
+				"mode":    "conversations",
+				"extract": "exchange",
+				"depth":   1,
+			}},
+		},
+	})
+	if err != nil {
+		t.Fatalf("ensure_corpus error = %v", err)
+	}
+	if !ensureResponse.Success {
+		t.Fatalf("ensure_corpus success = false, error = %q", ensureResponse.Error)
+	}
+
+	during := corpusTempDirs(t)
+	created := addedCorpusTempDirs(before, during)
+	if len(created) == 0 {
+		t.Fatal("ensure_corpus did not create a temp-backed corpus directory")
+	}
+
+	cancelServer()
+	if err := <-serverErr; err != nil && !errors.Is(err, context.Canceled) {
+		t.Fatalf("server.Run() error = %v", err)
+	}
+
+	after := corpusTempDirs(t)
+	for _, dir := range created {
+		if slices.Contains(after, dir) {
+			t.Fatalf("temp-backed corpus directory still exists after shutdown: %q", dir)
+		}
+	}
+}
+
+func TestDaemonShutdownWaitsForActiveCorpusSearch(t *testing.T) {
+	provider := fakeembed.Provider()
+	searchStarted := make(chan struct{}, 1)
+	allowSearch := make(chan struct{})
+	originalFunc := provider.Func
+	provider.Func = func(ctx context.Context, text string) ([]float32, error) {
+		if text == "blocked shutdown query" {
+			select {
+			case searchStarted <- struct{}{}:
+			default:
+			}
+			<-allowSearch
+		}
+		return originalFunc(ctx, text)
+	}
+
+	root := t.TempDir()
+	paths := xdg.Paths{
+		AppName:    "tagmem",
+		ConfigDir:  filepath.Join(root, "config"),
+		DataDir:    filepath.Join(root, "data"),
+		CacheDir:   filepath.Join(root, "cache"),
+		SocketPath: filepath.Join(root, "runtime", "tagmem.sock"),
+		IndexDir:   filepath.Join(root, "data", "vector"),
+		ModelDir:   filepath.Join(root, "data", "models"),
+		DiaryDir:   filepath.Join(root, "data", "diaries"),
+		StorePath:  filepath.Join(root, "data", "store.json"),
+		KGPath:     filepath.Join(root, "data", "knowledge.json"),
+	}
+	if err := paths.Ensure(); err != nil {
+		t.Fatalf("paths.Ensure() error = %v", err)
+	}
+	repo := store.NewRepository(paths.StorePath, provider.IndexPath(paths.IndexDir), provider)
+	if err := repo.Init(); err != nil {
+		t.Fatalf("repo.Init() error = %v", err)
+	}
+
+	backend := NewBackend(repo, kg.New(paths.KGPath), diary.New(paths.DiaryDir), paths, provider)
+	server := NewServer(paths.SocketPath, backend)
+
+	serverCtx, cancelServer := context.WithCancel(context.Background())
+	serverErr := make(chan error, 1)
+	go func() {
+		serverErr <- server.Run(serverCtx)
+	}()
+
+	waitForSocket(t, paths.SocketPath)
+
+	ensureCtx, cancelEnsure := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancelEnsure()
+	ensureResponse, err := Call(ensureCtx, paths.SocketPath, Request{
+		ID:      "corpus-active-shutdown-build",
+		Command: "ensure_corpus",
+		Payload: map[string]any{
+			"key": "active-shutdown-corpus",
+			"documents": []map[string]any{{
+				"id":      "session-active",
+				"content": "> User: remind me about the blue lantern\nAssistant: the blue lantern is stored beside the camping stove",
+				"mode":    "conversations",
+				"extract": "exchange",
+				"depth":   1,
+			}},
+		},
+	})
+	if err != nil {
+		t.Fatalf("ensure_corpus error = %v", err)
+	}
+	if !ensureResponse.Success {
+		t.Fatalf("ensure_corpus success = false, error = %q", ensureResponse.Error)
+	}
+
+	searchErr := make(chan error, 1)
+	searchResponse := make(chan Response, 1)
+	go func() {
+		searchCtx, cancelSearch := context.WithTimeout(context.Background(), 2*time.Second)
+		defer cancelSearch()
+		response, err := Call(searchCtx, paths.SocketPath, Request{
+			ID:      "corpus-active-shutdown-search",
+			Command: "search_corpus",
+			Payload: map[string]any{
+				"key":   "active-shutdown-corpus",
+				"query": "blocked shutdown query",
+				"limit": 1,
+			},
+		})
+		if err != nil {
+			searchErr <- err
+			return
+		}
+		searchResponse <- response
+	}()
+
+	select {
+	case <-searchStarted:
+	case <-time.After(2 * time.Second):
+		t.Fatal("search_corpus did not enter blocked query state")
+	}
+
+	cancelServer()
+
+	select {
+	case err := <-serverErr:
+		t.Fatalf("server.Run() returned before active search finished: %v", err)
+	case <-time.After(100 * time.Millisecond):
+	}
+
+	close(allowSearch)
+
+	select {
+	case err := <-searchErr:
+		t.Fatalf("search_corpus error = %v", err)
+	case response := <-searchResponse:
+		if !response.Success {
+			t.Fatalf("search_corpus success = false, error = %q", response.Error)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("search_corpus did not complete after allowing shutdown")
+	}
+
+	select {
+	case err := <-serverErr:
+		if err != nil && !errors.Is(err, context.Canceled) {
+			t.Fatalf("server.Run() error = %v", err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("server.Run() did not finish after active search completed")
+	}
+}
+
 func TestDaemonRequestCancellationPropagatesContext(t *testing.T) {
 	provider := fakeembed.Provider()
 	requestStarted := make(chan struct{}, 1)
@@ -474,4 +837,44 @@ func waitForSocket(t *testing.T, socketPath string) {
 	}
 
 	t.Fatalf("socket %q did not become ready", socketPath)
+}
+
+func corpusTempDirs(t *testing.T) []string {
+	t.Helper()
+
+	seen := make(map[string]struct{})
+	for _, root := range []string{"/dev/shm", os.TempDir()} {
+		if root == "" {
+			continue
+		}
+		matches, err := filepath.Glob(filepath.Join(root, "tagmem-bench-interface-*"))
+		if err != nil {
+			t.Fatalf("filepath.Glob(%q) error = %v", root, err)
+		}
+		for _, match := range matches {
+			seen[match] = struct{}{}
+		}
+	}
+
+	dirs := make([]string, 0, len(seen))
+	for dir := range seen {
+		dirs = append(dirs, dir)
+	}
+	slices.Sort(dirs)
+	return dirs
+}
+
+func addedCorpusTempDirs(before, after []string) []string {
+	seen := make(map[string]struct{}, len(before))
+	for _, dir := range before {
+		seen[dir] = struct{}{}
+	}
+	added := make([]string, 0)
+	for _, dir := range after {
+		if _, ok := seen[dir]; ok {
+			continue
+		}
+		added = append(added, dir)
+	}
+	return added
 }

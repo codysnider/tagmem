@@ -175,21 +175,45 @@ func rankCandidates(candidates []Candidate, content string, provider *vector.Pro
 		return
 	}
 	ctx := context.Background()
-	contentVec, err := provider.Func(ctx, content)
-	if err != nil {
-		return
-	}
-	labels := make([]string, 0, len(candidates))
+	texts := make([]string, 0, len(candidates)+1)
+	texts = append(texts, content)
 	for _, candidate := range candidates {
-		labels = append(labels, candidate.Label)
+		texts = append(texts, candidate.Label)
 	}
-	vectors, err := provider.Batch(ctx, labels)
+	vectors, err := provider.Batch(ctx, texts)
 	if err != nil {
 		return
+	}
+	contentVec, ok := batchedVector(vectors, 0)
+	if !ok {
+		if provider.Func == nil {
+			return
+		}
+		contentVec, err = provider.Func(ctx, content)
+		if err != nil {
+			return
+		}
 	}
 	for i := range candidates {
-		candidates[i].Score += cosine(contentVec, vectors[i]) * 4.0
+		labelVec, ok := batchedVector(vectors, i+1)
+		if !ok {
+			if provider.Func == nil {
+				continue
+			}
+			labelVec, err = provider.Func(ctx, candidates[i].Label)
+			if err != nil {
+				continue
+			}
+		}
+		candidates[i].Score += cosine(contentVec, labelVec) * 4.0
 	}
+}
+
+func batchedVector(vectors [][]float32, index int) ([]float32, bool) {
+	if index < 0 || index >= len(vectors) {
+		return nil, false
+	}
+	return vectors[index], true
 }
 
 func cosine(a, b []float32) float64 {

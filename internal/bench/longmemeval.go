@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net"
 	"os"
 	"regexp"
 	"runtime"
@@ -15,7 +16,10 @@ import (
 
 	"github.com/codysnider/tagmem/internal/retrieval"
 	"github.com/codysnider/tagmem/internal/vector"
+	"github.com/codysnider/tagmem/internal/xdg"
 )
+
+var longMemEvalDaemonRequestID atomic.Int64
 
 type LongMemEvalEntry struct {
 	Question           string   `json:"question"`
@@ -198,6 +202,7 @@ func RunLongMemEvalInterfaceWithOptions(ctx context.Context, dataFile string, li
 	started := time.Now()
 	items := make([]LongMemEvalItemResult, len(entries))
 	builder := NewInterfaceCorpusBuilderWithOptions(provider, InterfaceCorpusBuilderOptions{CorpusCacheRoot: strings.TrimSpace(options.CorpusCacheDir)})
+	corpusDaemon := resolveLongMemEvalInterfaceDaemon()
 	workerCount := 1
 	if runtime.NumCPU() >= 8 {
 		workerCount = 2
@@ -217,7 +222,7 @@ func RunLongMemEvalInterfaceWithOptions(ctx context.Context, dataFile string, li
 			defer wg.Done()
 			for index := range jobs {
 				entry := entries[index]
-				rankedIDs, err := rankLongMemEvalEntryInterface(builder, entry)
+				rankedIDs, err := rankLongMemEvalEntryInterfaceWithDaemon(ctx, builder, corpusDaemon, entry)
 				if err != nil {
 					results <- lmeInterfaceJobResult{index: index, err: err}
 					continue
@@ -270,22 +275,19 @@ func RunLongMemEvalInterfaceWithOptions(ctx context.Context, dataFile string, li
 }
 
 func rankLongMemEvalEntryInterface(builder *InterfaceCorpusBuilder, entry LongMemEvalEntry) ([]string, error) {
-	documents := make([]InterfaceDocument, 0, len(entry.HaystackSessions))
-	for i, session := range entry.HaystackSessions {
-		transcript := renderLongMemEvalSession(session)
-		if strings.TrimSpace(transcript) == "" {
-			continue
-		}
-		updatedAt := benchmarkTime(entry.HaystackDates[i])
-		documents = append(documents, InterfaceDocument{
-			ID:        entry.HaystackSessionIDs[i],
-			Content:   transcript,
-			Mode:      "conversations",
-			Extract:   "exchange",
-			Depth:     1,
-			CreatedAt: updatedAt,
-			UpdatedAt: updatedAt,
-		})
+	return rankLongMemEvalEntryInterfaceWithDaemon(context.Background(), builder, resolveLongMemEvalInterfaceDaemon(), entry)
+}
+
+func rankLongMemEvalEntryInterfaceWithDaemon(ctx context.Context, builder *InterfaceCorpusBuilder, corpusDaemon InterfaceCorpusDaemon, entry LongMemEvalEntry) ([]string, error) {
+	documents, err := longMemEvalInterfaceDocuments(entry)
+	if err != nil {
+		return nil, err
+	}
+	if len(documents) == 0 {
+		return nil, nil
+	}
+	if corpusDaemon != nil {
+		return builder.SearchWithDaemon(ctx, corpusDaemon, documents, entry.Question, len(documents))
 	}
 	corpus, err := builder.NewCorpus(documents)
 	if err != nil {
@@ -293,6 +295,172 @@ func rankLongMemEvalEntryInterface(builder *InterfaceCorpusBuilder, entry LongMe
 	}
 	defer corpus.Close()
 	return corpus.Search(entry.Question, len(documents))
+}
+
+func resolveLongMemEvalInterfaceDaemon() InterfaceCorpusDaemon {
+	paths, err := xdg.Resolve("tagmem")
+	if err != nil {
+		return nil
+	}
+	info, err := os.Stat(paths.SocketPath)
+	if err != nil || info.Mode()&os.ModeSocket == 0 {
+		return nil
+	}
+	conn, err := net.DialTimeout("unix", paths.SocketPath, 100*time.Millisecond)
+	if err != nil {
+		return nil
+	}
+	_ = conn.Close()
+	return &longMemEvalInterfaceDaemonClient{
+		socketPath: paths.SocketPath,
+		cacheKey:   fmt.Sprintf("%s:%d:%d", paths.SocketPath, info.ModTime().UnixNano(), info.Size()),
+	}
+}
+
+type longMemEvalInterfaceDaemonClient struct {
+	socketPath string
+	cacheKey   string
+}
+
+func (d *longMemEvalInterfaceDaemonClient) CorpusCacheKey() string {
+	if d == nil {
+		return ""
+	}
+	return d.cacheKey
+}
+
+func (d *longMemEvalInterfaceDaemonClient) EnsureCorpus(ctx context.Context, key string, documents []InterfaceDocument) error {
+	payload := map[string]any{"key": key, "documents": make([]map[string]any, 0, len(documents))}
+	documentPayloads := payload["documents"].([]map[string]any)
+	for _, document := range documents {
+		documentPayload := map[string]any{
+			"id":      document.ID,
+			"content": document.Content,
+			"mode":    string(document.Mode),
+			"extract": document.Extract,
+			"depth":   document.Depth,
+		}
+		if document.CreatedAt != nil {
+			documentPayload["created_at"] = document.CreatedAt.UTC().Format(time.RFC3339)
+		}
+		if document.UpdatedAt != nil {
+			documentPayload["updated_at"] = document.UpdatedAt.UTC().Format(time.RFC3339)
+		}
+		documentPayloads = append(documentPayloads, documentPayload)
+	}
+	payload["documents"] = documentPayloads
+	_, err := d.call(ctx, "ensure_corpus", payload)
+	return err
+}
+
+func (d *longMemEvalInterfaceDaemonClient) SearchCorpus(ctx context.Context, key, query string, limit int) ([]string, error) {
+	response, err := d.call(ctx, "search_corpus", map[string]any{"key": key, "query": query, "limit": limit})
+	if err != nil {
+		return nil, err
+	}
+	return stringSliceFromAny(response["origin_ids"]), nil
+}
+
+func (d *longMemEvalInterfaceDaemonClient) call(ctx context.Context, command string, payload map[string]any) (map[string]any, error) {
+	requestID := fmt.Sprintf("bench-%d", longMemEvalDaemonRequestID.Add(1))
+	var dialer net.Dialer
+	conn, err := dialer.DialContext(ctx, "unix", d.socketPath)
+	if err != nil {
+		return nil, fmt.Errorf("dial daemon socket: %w", err)
+	}
+	defer conn.Close()
+	if deadline, ok := ctx.Deadline(); ok {
+		if err := conn.SetDeadline(deadline); err != nil {
+			return nil, fmt.Errorf("set daemon connection deadline: %w", err)
+		}
+	}
+	if err := json.NewEncoder(conn).Encode(map[string]any{"id": requestID, "command": command, "payload": payload}); err != nil {
+		return nil, fmt.Errorf("encode daemon request: %w", err)
+	}
+	var response struct {
+		ID      string         `json:"id"`
+		Success bool           `json:"success"`
+		Payload map[string]any `json:"payload"`
+		Error   string         `json:"error"`
+	}
+	if err := json.NewDecoder(conn).Decode(&response); err != nil {
+		return nil, fmt.Errorf("decode daemon response: %w", err)
+	}
+	if response.ID != requestID {
+		return nil, fmt.Errorf("daemon response id mismatch: got %q want %q", response.ID, requestID)
+	}
+	if !response.Success {
+		if response.Error == "" {
+			response.Error = "daemon request failed"
+		}
+		return nil, fmt.Errorf("%s", response.Error)
+	}
+	return response.Payload, nil
+}
+
+func stringSliceFromAny(value any) []string {
+	items, ok := value.([]any)
+	if !ok {
+		return nil
+	}
+	stringsOut := make([]string, 0, len(items))
+	for _, item := range items {
+		text, ok := item.(string)
+		if ok && strings.TrimSpace(text) != "" {
+			stringsOut = append(stringsOut, text)
+		}
+	}
+	return stringsOut
+}
+
+func longMemEvalInterfaceDocuments(entry LongMemEvalEntry) ([]InterfaceDocument, error) {
+	seen := make(map[string]InterfaceDocument)
+	documents := make([]InterfaceDocument, 0)
+	for i, sessionID := range entry.HaystackSessionIDs {
+		sessionID = strings.TrimSpace(sessionID)
+		if sessionID == "" {
+			continue
+		}
+		if i >= len(entry.HaystackSessions) {
+			continue
+		}
+		transcript := renderLongMemEvalSession(entry.HaystackSessions[i])
+		if strings.TrimSpace(transcript) == "" {
+			continue
+		}
+		var updatedAt *time.Time
+		if i < len(entry.HaystackDates) {
+			updatedAt = benchmarkTime(entry.HaystackDates[i])
+		}
+		document := InterfaceDocument{
+			ID:        sessionID,
+			Content:   transcript,
+			Mode:      "conversations",
+			Extract:   "exchange",
+			Depth:     1,
+			CreatedAt: updatedAt,
+			UpdatedAt: updatedAt,
+		}
+		if existing, ok := seen[sessionID]; ok {
+			if !sameInterfaceDocument(existing, document) {
+				return nil, fmt.Errorf("conflicting haystack transcript for session %q", sessionID)
+			}
+			continue
+		}
+		seen[sessionID] = document
+		documents = append(documents, document)
+	}
+	return documents, nil
+}
+
+func sameInterfaceDocument(left, right InterfaceDocument) bool {
+	return left.ID == right.ID &&
+		left.Content == right.Content &&
+		left.Mode == right.Mode &&
+		left.Extract == right.Extract &&
+		left.Depth == right.Depth &&
+		timeKey(left.CreatedAt) == timeKey(right.CreatedAt) &&
+		timeKey(left.UpdatedAt) == timeKey(right.UpdatedAt)
 }
 
 func renderLongMemEvalSession(turns []Turn) string {

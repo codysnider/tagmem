@@ -5,8 +5,12 @@ import (
 	"fmt"
 	"math"
 	"strings"
+	"sync"
+	"time"
 
+	"github.com/codysnider/tagmem/internal/bench"
 	"github.com/codysnider/tagmem/internal/diary"
+	"github.com/codysnider/tagmem/internal/importer"
 	"github.com/codysnider/tagmem/internal/kg"
 	"github.com/codysnider/tagmem/internal/store"
 	"github.com/codysnider/tagmem/internal/taggraph"
@@ -20,10 +24,43 @@ type Backend struct {
 	diary    *diary.Store
 	paths    xdg.Paths
 	provider vector.Provider
+
+	corpusMu    sync.RWMutex
+	corpusCache map[string]corpusCacheEntry
+}
+
+type corpusCacheEntry struct {
+	corpus        *bench.InterfaceCorpus
+	documentCount int
 }
 
 func NewBackend(repo *store.Repository, kgStore *kg.Store, diaryStore *diary.Store, paths xdg.Paths, provider vector.Provider) *Backend {
-	return &Backend{repo: repo, kg: kgStore, diary: diaryStore, paths: paths, provider: provider}
+	return &Backend{repo: repo, kg: kgStore, diary: diaryStore, paths: paths, provider: provider, corpusCache: make(map[string]corpusCacheEntry)}
+}
+
+func (b *Backend) Close() error {
+	if b == nil {
+		return nil
+	}
+
+	b.corpusMu.Lock()
+	entries := make([]corpusCacheEntry, 0, len(b.corpusCache))
+	for key, entry := range b.corpusCache {
+		entries = append(entries, entry)
+		delete(b.corpusCache, key)
+	}
+	b.corpusMu.Unlock()
+
+	var firstErr error
+	for _, entry := range entries {
+		if entry.corpus == nil {
+			continue
+		}
+		if err := entry.corpus.Close(); err != nil && firstErr == nil {
+			firstErr = err
+		}
+	}
+	return firstErr
 }
 
 func (b *Backend) Handle(ctx context.Context, request Request) Response {
@@ -122,13 +159,23 @@ func (b *Backend) dispatch(ctx context.Context, command string, payload map[stri
 		if err != nil {
 			return nil, err
 		}
+		createdAt, err := optionalTime(payload, "created_at")
+		if err != nil {
+			return nil, err
+		}
+		updatedAt, err := optionalTime(payload, "updated_at")
+		if err != nil {
+			return nil, err
+		}
 		entry, err := b.repo.Add(store.AddEntry{
-			Depth:  depth,
-			Title:  title,
-			Body:   body,
-			Tags:   stringSlice(payload, "tags"),
-			Source: stringValue(payload, "source"),
-			Origin: stringValue(payload, "origin"),
+			Depth:     depth,
+			Title:     title,
+			Body:      body,
+			Tags:      stringSlice(payload, "tags"),
+			Source:    stringValue(payload, "source"),
+			Origin:    stringValue(payload, "origin"),
+			CreatedAt: createdAt,
+			UpdatedAt: updatedAt,
 		})
 		if err != nil {
 			return nil, err
@@ -238,6 +285,10 @@ func (b *Backend) dispatch(ctx context.Context, command string, payload map[stri
 		return map[string]any{"agent": stringValue(payload, "agent_name"), "entries": entries, "showing": len(entries)}, nil
 	case "doctor":
 		return map[string]any{"report": b.provider.Doctor(ctx)}, nil
+	case "ensure_corpus":
+		return b.ensureCorpus(payload)
+	case "search_corpus":
+		return b.searchCorpus(payload)
 	case "rebuild_index":
 		if err := b.repo.RebuildIndex(); err != nil {
 			return nil, err
@@ -246,6 +297,125 @@ func (b *Backend) dispatch(ctx context.Context, command string, payload map[stri
 	default:
 		return nil, fmt.Errorf("unknown daemon command %q", command)
 	}
+}
+
+func (b *Backend) ensureCorpus(payload map[string]any) (map[string]any, error) {
+	var request EnsureCorpusPayload
+	if err := DecodePayload(payload, &request); err != nil {
+		return nil, err
+	}
+	request.Key = strings.TrimSpace(request.Key)
+	if request.Key == "" {
+		return nil, fmt.Errorf("key is required")
+	}
+
+	b.corpusMu.RLock()
+	entry, ok := b.corpusCache[request.Key]
+	b.corpusMu.RUnlock()
+	if ok {
+		return map[string]any{
+			"key":            request.Key,
+			"cache_status":   "hit",
+			"document_count": entry.documentCount,
+		}, nil
+	}
+
+	documents := make([]bench.InterfaceDocument, 0, len(request.Documents))
+	for _, document := range request.Documents {
+		id := strings.TrimSpace(document.ID)
+		content := strings.TrimSpace(document.Content)
+		if id == "" || content == "" {
+			continue
+		}
+		mode := importer.Mode(strings.TrimSpace(document.Mode))
+		if mode == "" {
+			mode = importer.ModeConversations
+		}
+		depth := document.Depth
+		if depth <= 0 {
+			depth = 1
+		}
+		documents = append(documents, bench.InterfaceDocument{
+			ID:        id,
+			Content:   content,
+			Mode:      mode,
+			Extract:   strings.TrimSpace(document.Extract),
+			Depth:     depth,
+			CreatedAt: daemonCorpusTime(document.CreatedAt),
+			UpdatedAt: daemonCorpusTime(document.UpdatedAt),
+		})
+	}
+
+	corpus, err := bench.NewInterfaceCorpusBuilder(b.provider).NewCorpus(documents)
+	if err != nil {
+		return nil, fmt.Errorf("build corpus: %w", err)
+	}
+
+	b.corpusMu.Lock()
+	defer b.corpusMu.Unlock()
+	if entry, ok := b.corpusCache[request.Key]; ok {
+		_ = corpus.Close()
+		return map[string]any{
+			"key":            request.Key,
+			"cache_status":   "hit",
+			"document_count": entry.documentCount,
+		}, nil
+	}
+	b.corpusCache[request.Key] = corpusCacheEntry{corpus: corpus, documentCount: len(documents)}
+	return map[string]any{
+		"key":            request.Key,
+		"cache_status":   "miss",
+		"document_count": len(documents),
+	}, nil
+}
+
+func (b *Backend) searchCorpus(payload map[string]any) (map[string]any, error) {
+	var request SearchCorpusPayload
+	if err := DecodePayload(payload, &request); err != nil {
+		return nil, err
+	}
+	request.Key = strings.TrimSpace(request.Key)
+	request.Query = strings.TrimSpace(request.Query)
+	if request.Key == "" {
+		return nil, fmt.Errorf("key is required")
+	}
+	if request.Query == "" {
+		return nil, fmt.Errorf("query is required")
+	}
+	if request.Limit <= 0 {
+		request.Limit = 5
+	}
+
+	b.corpusMu.RLock()
+	entry, ok := b.corpusCache[request.Key]
+	b.corpusMu.RUnlock()
+	if !ok || entry.corpus == nil {
+		return nil, fmt.Errorf("corpus %q not found", request.Key)
+	}
+
+	originIDs, err := entry.corpus.Search(request.Query, request.Limit)
+	if err != nil {
+		return nil, fmt.Errorf("search corpus: %w", err)
+	}
+	return map[string]any{
+		"key":        request.Key,
+		"origin_ids": originIDs,
+	}, nil
+}
+
+func daemonCorpusTime(raw string) *time.Time {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return nil
+	}
+	for _, layout := range []string{time.RFC3339Nano, time.RFC3339, "2006-01-02"} {
+		parsed, err := time.Parse(layout, raw)
+		if err == nil {
+			parsed = parsed.UTC()
+			return &parsed
+		}
+	}
+	return nil
 }
 
 func queryFromPayload(payload map[string]any, defaultLimit int, requireText bool) (store.Query, error) {
@@ -401,6 +571,18 @@ func floatValue(payload map[string]any, key string) float64 {
 	default:
 		return 0
 	}
+}
+
+func optionalTime(payload map[string]any, key string) (*time.Time, error) {
+	value := stringValue(payload, key)
+	if value == "" {
+		return nil, nil
+	}
+	parsed, err := time.Parse(time.RFC3339, value)
+	if err != nil {
+		return nil, fmt.Errorf("%s must be RFC3339: %w", key, err)
+	}
+	return &parsed, nil
 }
 
 const maxGoInt = int(^uint(0) >> 1)
