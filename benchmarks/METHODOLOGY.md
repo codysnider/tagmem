@@ -51,6 +51,14 @@ TAGMEM_EMBED_MODEL=bge-small-en-v1.5 just bench-longmemeval
 TAGMEM_EMBED_MODEL=bge-base-en-v1.5 just bench-longmemeval
 ```
 
+To select a benchmark path explicitly:
+
+```bash
+TAGMEM_BENCH_PATH=component TAGMEM_EMBED_MODEL=bge-small-en-v1.5 just bench-longmemeval
+TAGMEM_BENCH_PATH=interface TAGMEM_EMBED_MODEL=bge-small-en-v1.5 just bench-longmemeval
+TAGMEM_BENCH_PATH=both TAGMEM_EMBED_MODEL=bge-small-en-v1.5 just bench-longmemeval
+```
+
 ### Release guardrail
 
 ```bash
@@ -58,6 +66,10 @@ just release-check
 ```
 
 This command runs focused Go tests and a guarded `LongMemEval` rerun for `bge-small-en-v1.5`, then compares the result against `benchmarks/guards/longmemeval-bge-small-en-v1.5.json` with a `0.01` tolerance on the tracked quality metrics.
+
+The release guardrail currently tracks the `component` path. The `interface` path is measured separately because it exercises the real repository and search pipeline and has different latency characteristics.
+
+If a reachable local daemon socket is present, the `interface` path may reuse daemon-backed hot corpus state. Without a daemon, it falls back to per-run local corpus construction.
 
 ## Dataset Sources
 

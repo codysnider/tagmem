@@ -29,6 +29,7 @@ For a detailed installation guide, see [`INSTALL.md`](INSTALL.md).
 - **Multilingual retrieval**: tested English and Russian queries over Russian documents, plus English and Chinese queries over Chinese documents ([details](MULTILINGUAL_RETRIEVAL.md))
 - **Structured facts and timelines**: a small knowledge graph supports exact current-state and historical queries ([details](KNOWLEDGE_GRAPH.md))
 - **Local-first**: runs locally with Docker using dedicated CPU and GPU images
+- **Shared local runtime**: an optional Unix-socket daemon can keep one hot local memory instance alive for multiple clients
 - **Clear organization**: tags are primary, depth is secondary
 - **Reproducible evaluation**: benchmark methodology and raw outputs are published in the repo ([report](benchmarks/REPORT.md))
 
@@ -109,6 +110,7 @@ Core commands:
 - `tagmem depths`
 - `tagmem paths`
 - `tagmem doctor`
+- `tagmem serve`
 - `tagmem repair`
 - `tagmem mcp`
 - `tagmem bench`
@@ -134,6 +136,13 @@ Run the MCP server over stdio:
 
 ```bash
 tagmem mcp
+```
+
+If a reachable local daemon socket already exists, `tagmem mcp` will use it automatically. To make daemon-backed MCP required instead of opportunistic, run the local daemon first and set `TAGMEM_MCP_USE_DAEMON=1`:
+
+```bash
+tagmem serve
+TAGMEM_MCP_USE_DAEMON=1 tagmem mcp
 ```
 
 Current MCP tools:
@@ -183,6 +192,8 @@ xychart-beta
 - MemPalace raw baseline: `Recall@5 0.966`
 
 The latest guarded rerun for `bge-small-en-v1.5` also recorded `Recall@10 0.996`, `NDCG@10 0.951`, and `Time 23.4s`.
+
+Those guarded numbers track the benchmark CLI's `component` path. The repository also supports an `interface` path that exercises the real repository and search flow (`TAGMEM_BENCH_PATH=interface` or `both`); that path is reported separately because its latency and recall differ from the direct harness path. When a reachable local daemon socket is present, the interface path may reuse the daemon's hot corpus state instead of rebuilding a local corpus for each run.
 
 ### FalseMemBench
 
@@ -256,7 +267,9 @@ export TAGMEM_OPENAI_API_KEY=
 
 ## Storage Layout
 
-- data: `~/.local/share/tagmem/store.json`
+- metadata store: `~/.local/share/tagmem/store.db`
+- rebuildable JSON mirror: `~/.local/share/tagmem/store.json` (not the live authority and may be absent between rebuilds)
+- source blobs: `~/.local/share/tagmem/sources/`
 - vector index: `~/.local/share/tagmem/vector/`
 - knowledge graph: `~/.local/share/tagmem/knowledge.json`
 - diaries: `~/.local/share/tagmem/diaries/`

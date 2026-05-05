@@ -28,6 +28,15 @@ This report is organized around two evidence classes:
 - **Measured by us**: results produced directly from the benchmark harnesses and raw artifacts in this repository
 - **Source-reported references**: external values we did not independently reproduce
 
+Benchmark path note:
+
+- `component` mode measures the direct retrieval harness over benchmark corpora
+- `interface` mode measures the real repository and search path over benchmark-loaded corpora
+
+The summary tables below currently reflect the `component` path. The `interface` path is used for realism checks and follow-up latency work and should not be conflated with the guarded harness snapshot.
+
+When a reachable local daemon socket is present, the `interface` path may also reuse daemon-backed hot corpus state instead of rebuilding a local corpus for each run.
+
 ## Measured By Us
 
 ### Cross-Benchmark Comparison

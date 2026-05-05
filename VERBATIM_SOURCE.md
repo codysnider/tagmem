@@ -43,7 +43,8 @@ just release-check
 ## Relevant Storage Contract
 
 - `body`: searchable chunk or memory body used for ranking and retrieval relevance
-- `source`: full verbatim source material returned with the selected memory
+- `source_ref`: stored reference to the full verbatim source blob
+- `source`: full verbatim source material hydrated on read for the selected memory
 - `origin`: provenance such as file path or manual source label
 
 That separation is why search can rank on compact memory text while still returning the original source material unchanged when a memory is selected.
